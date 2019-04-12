@@ -1,0 +1,38 @@
+{
+  "name": "object-import-service",
+  "version": "1.0.0",
+  "description": "service for creating waivio objects in STEEM blockchain",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Waiviogit/object-import-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "start": "node ./bin/service.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bluebird": "^3.5.3",
+    "body-parser": "^1.15.2",
+    "dsteem": "^0.8.7",
+    "event-stream": "^4.0.1",
+    "express": "^4.14.0",
+    "http-errors": "~1.6.2",
+    "lodash": "^4.17.5",
+    "mongoose": "^5.3.5",
+    "morgan": "~1.9.0",
+    "redis": "^2.8.0",
+    "rsmq": "^0.10.0",
+    "steem": "^0.7.4",
+    "util": "^0.11.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "faker": "^4.1.0",
+    "mocha": "^6.0.2",
+    "nodemon": "^1.11.0",
+    "sinon": "^7.3.1"
+  },
+  "homepage": "https://github.com/Waiviogit/object-import-service"
+}
