@@ -68,7 +68,7 @@ const addWobjectsToQueue = async ({wobjects = []} = {}) => {
                             permlink: field.permlink,
                             parentPermlink: wobject.author_permlink,
                             parentAuthor: existWobj ? existWobj.author : '',
-                            body: `New field "${field.name}" added to Waivio Object "${wobject.parentPermlink}"!`,
+                            body: `New field "${field.name}" added to Waivio Object "${wobject.author_permlink}"!`,
                             title: 'New field on wobject',
                             field: JSON.stringify({name: field.name, body: field.body, locale: 'en-US'})
                         };
