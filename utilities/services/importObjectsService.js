@@ -38,8 +38,8 @@ const addWobjectsToQueue = async ({wobjects = []} = {}) => {
                     body: `Waivio Object ${wobject.default_name} created!`,
                     objectName: wobject.default_name,
                     locale: 'en-US',
-                    isExtendingOpen: wobject.is_extending_open,
-                    isPostingOpen: wobject.is_posting_open,
+                    isExtendingOpen: wobject.is_extending_open || true,
+                    isPostingOpen: wobject.is_posting_open || true,
                     parentAuthor: existObjType ? existObjType.author : '',
                     parentPermlink: existObjType ? existObjType.permlink : ''
                 };

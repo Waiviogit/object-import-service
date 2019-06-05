@@ -6,7 +6,7 @@ const appData = {
 };
 
 const objectsBot = {
-    OBJECT_BOT_HOST_URL:  'http://waiviodev.com/objects-bot',
+    OBJECT_BOT_HOST_URL:  'https://waiviodev.com/objects-bot',
     CREATE_OBJECT_TYPE_ROUTE: '/create-object-type',
     CREATE_OBJECT_ROUTE: '/create-object',
     APPEND_OBJECT_ROUTE: '/append-object'
