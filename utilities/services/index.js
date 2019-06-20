@@ -1,4 +1,5 @@
 module.exports = {
     importObjectsService: require('./importObjectsService'),
-    importTagsService: require('./importTagsService')
+    importTagsService: require('./importTagsService'),
+    importObjectsFromFile: require('./importObjectsFromFile')
 };

@@ -1,7 +1,7 @@
 const axios = require('axios');
-const {OBJECT_BOT_HOST_URL, APPEND_OBJECT_ROUTE} = require('../../constants/appData').objectsBot;
+const {objectsBot} = require('../../config');
 const {appendObjectValidate} = require('./validators');
-const URL = OBJECT_BOT_HOST_URL + APPEND_OBJECT_ROUTE;
+const URL = objectsBot.OBJECT_BOT_HOST_URL + objectsBot.APPEND_OBJECT_ROUTE;
 
 const send = async (data) => {
     const {error, isValid} = await appendObjectValidate(data);

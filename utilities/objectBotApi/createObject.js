@@ -1,7 +1,7 @@
 const axios = require('axios');
-const {OBJECT_BOT_HOST_URL, CREATE_OBJECT_ROUTE} = require('../../constants/appData').objectsBot;
+const {objectsBot} = require('../../config');
 const {createObjectValidate} = require('./validators');
-const URL = OBJECT_BOT_HOST_URL + CREATE_OBJECT_ROUTE;
+const URL = objectsBot.OBJECT_BOT_HOST_URL + objectsBot.CREATE_OBJECT_ROUTE;
 
 const send = async (data) => {
     const {error} = await createObjectValidate(data);

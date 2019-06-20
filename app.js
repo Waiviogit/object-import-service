@@ -15,6 +15,13 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(function (err, req, res, next) {
+    if(!err.status){
+        err.status = 500;
+    }
+    res.status(err.status).json({message: err.message})
+});
+
 importObjectsService.runImportWobjectsQueue();
 
 module.exports = app;
