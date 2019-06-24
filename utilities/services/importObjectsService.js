@@ -5,6 +5,7 @@ const objectBotApi = require('../objectBotApi');
 const redisQueue = require('../redis/rsmq/redisQueue');
 const {ObjectType, Wobj} = require('../../models');
 const IMPORT_WOBJECTS_QNAME = 'import_wobjects';
+const _ = require('lodash');
 
 const addWobjectsToQueue = async ({wobjects = []} = {}) => {
     for (const wobject of wobjects) {           //check for ex in mongo
@@ -70,7 +71,7 @@ const addWobjectsToQueue = async ({wobjects = []} = {}) => {
                             parentAuthor: existWobj ? existWobj.author : '',
                             body: `New field "${field.name}" added to Waivio Object "${wobject.author_permlink}"!`,
                             title: 'New field on wobject',
-                            field: JSON.stringify({name: field.name, body: field.body, locale: 'en-US'})
+                            field: JSON.stringify({..._.omit(field, ['creator', 'permlink']), locale: 'en-US'})
                         };
                         await redisSetter.setImportWobjData(`append:${wobject.author_permlink}_${field.permlink}`, data);
                         const {error: sendMessError} = await redisQueue.sendMessage({
