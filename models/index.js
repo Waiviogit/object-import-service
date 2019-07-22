@@ -1,4 +1,4 @@
 module.exports = {
-    Wobj: require('./wObjectModel'),
-    ObjectType: require('./ObjectTypeModel')
+    Wobj: require( './wObjectModel' ),
+    ObjectType: require( './ObjectTypeModel' )
 };

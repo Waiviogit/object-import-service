@@ -1,63 +1,67 @@
-const createQueue = async ({client, qname = 'queue'}) => {
-    if (!client) {
-        return {error: {message: 'Client is required parameter'}}
+const createQueue = async ( { client, qname = 'queue' } ) => {
+    if ( !client ) {
+        return { error: { message: 'Client is required parameter' } };
     }
     try {
-        const res = await client.createQueueAsync({qname});
-        if (res === 1) {
-            return {result: true};
-        } else {
-            return {result: false}
+        const res = await client.createQueueAsync( { qname } );
+
+        if ( res === 1 ) {
+            return { result: true };
         }
-    } catch (e) {
-        if(e.message && e.message === 'Queue exists'){
-            return {result: true, message: e.message}
+        return { result: false };
+
+    } catch ( e ) {
+        if( e.message && e.message === 'Queue exists' ) {
+            return { result: true, message: e.message };
         }
-        return {error: e}
+        return { error: e };
     }
 };
 
-const sendMessage = async ({client, qname = 'queue', message}) => {
-    if (!client) {
-        return {error: {message: 'Client is required parameter'}}
+const sendMessage = async ( { client, qname = 'queue', message } ) => {
+    if ( !client ) {
+        return { error: { message: 'Client is required parameter' } };
     }
-    if (message) {
-        const res = await client.sendMessageAsync({qname, message});
-        if (res) {
-            return {resId: res}
+    if ( message ) {
+        const res = await client.sendMessageAsync( { qname, message } );
+
+        if ( res ) {
+            return { resId: res };
         }
     }
 };
 
-const receiveMessage = async ({client, qname = 'queue'}) => {
-    if (!client) {
-        return {error: {message: 'Client is required parameter'}}
+const receiveMessage = async ( { client, qname = 'queue' } ) => {
+    if ( !client ) {
+        return { error: { message: 'Client is required parameter' } };
     }
-    const resp = await client.receiveMessageAsync({qname});
-    if (resp && resp.id && resp.message) {
+    const resp = await client.receiveMessageAsync( { qname } );
+
+    if ( resp && resp.id && resp.message ) {
         try {
-            if (resp.message) {
-                return {message: resp.message, id: resp.id}
+            if ( resp.message ) {
+                return { message: resp.message, id: resp.id };
             }
-        } catch (error) {
-            return {error}
+        } catch ( error ) {
+            return { error };
         }
     } else {
-        return {error: {message: 'No messages'}}
+        return { error: { message: 'No messages' } };
     }
 };
 
-const deleteMessage = async ({client, qname = 'queue', id}) => {
-    if (!client) {
-        return {error: {message: 'Client is required parameter'}}
+const deleteMessage = async ( { client, qname = 'queue', id } ) => {
+    if ( !client ) {
+        return { error: { message: 'Client is required parameter' } };
     }
-    if (id) {
-        const resp = await client.deleteMessageAsync({qname, id});
-        if (resp === 1) {
-            return {result: true};
+    if ( id ) {
+        const resp = await client.deleteMessageAsync( { qname, id } );
+
+        if ( resp === 1 ) {
+            return { result: true };
         }
     } else {
-        return {result: false};
+        return { result: false };
     }
 };
 
