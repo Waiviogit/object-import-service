@@ -7,6 +7,7 @@ const redisQueue = require( '../redis/rsmq/redisQueue' );
 const { ObjectType, Wobj } = require( '../../models' );
 const IMPORT_WOBJECTS_QNAME = 'import_wobjects';
 const _ = require( 'lodash' );
+const REDIS_WOBJ_DATA_ADDITIONAL_FIELDS = 'restaurant_id,dateUpdated'.split( ',' );
 
 const addWobjectsToQueue = async ( { wobjects = [] } = {} ) => {
     for ( const wobject of wobjects ) { // check for ex in mongo
@@ -48,11 +49,14 @@ const addWobjectsToQueue = async ( { wobjects = [] } = {} ) => {
                     isExtendingOpen: wobject.is_extending_open || true,
                     isPostingOpen: wobject.is_posting_open || true,
                     parentAuthor: existObjType ? existObjType.author : '',
-                    parentPermlink: existObjType ? existObjType.permlink : '',
-                    restaurant_id: wobject.restaurant_id || null,
-                    dateUpdated: wobject.dateUpdated || null
+                    parentPermlink: existObjType ? existObjType.permlink : ''
                 };
 
+                for( const field of REDIS_WOBJ_DATA_ADDITIONAL_FIELDS ) {
+                    if( wobject[ field ] ) {
+                        data[ field ] = wobject[ field ];
+                    }
+                }
                 await redisSetter.setImportWobjData( `wobj:${wobject.author_permlink}`, data );
                 const { error: sendMessError } = await redisQueue.sendMessage( {
                     client: importRsmqClient,

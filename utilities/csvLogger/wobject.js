@@ -1,6 +1,7 @@
 const fs = require( 'fs' );
 const createCsvWriter = require( 'csv-writer' ).createObjectCsvWriter;
-const FILE_PATH = require( 'path' ).join( __dirname, '../../importLogs/wobjectLogs/out.csv' );
+const path = require( 'path' );
+const FILE_PATH = path.join( __dirname, '../../importLogs/wobjectLogs/out.csv' );
 const HEADERS = [
     { id: 'datetime', title: 'Date Import' },
     { id: 'author', title: 'Author' },

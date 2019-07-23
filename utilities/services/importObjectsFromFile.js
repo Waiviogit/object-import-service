@@ -4,8 +4,8 @@ const { uploadName, uploadPath } = require( '../../constants/appData' );
 const FILE_PATH = `../../${uploadPath + uploadName}`;
 
 const getWobjectsFromFile = ( path ) => {
-
-    const json = require( require( 'path' ).resolve( __dirname, path ) );
+    let json_data = fs.readFileSync( require( 'path' ).resolve( __dirname, path ) );
+    let json = JSON.parse( json_data );
 
     if ( Array.isArray( json ) ) {
         return { wobjects: json };
