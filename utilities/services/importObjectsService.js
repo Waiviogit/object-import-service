@@ -45,7 +45,7 @@ const addWobjectsToQueue = async ( { wobjects = [] } = {} ) => {
                     title: 'Waivio Object',
                     body: `Waivio Object ${wobject.default_name} created!`,
                     objectName: wobject.default_name,
-                    locale: 'en-US',
+                    locale: wobject.locale || 'en-US',
                     isExtendingOpen: wobject.is_extending_open || true,
                     isPostingOpen: wobject.is_posting_open || true,
                     parentAuthor: existObjType ? existObjType.author : '',
@@ -87,7 +87,7 @@ const addWobjectsToQueue = async ( { wobjects = [] } = {} ) => {
                             parentAuthor: existWobj ? existWobj.author : '',
                             body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
                             title: 'New field on wobject',
-                            field: JSON.stringify( { ..._.omit( field, [ 'creator', 'permlink' ] ), locale: 'en-US' } )
+                            field: JSON.stringify( { ..._.omit( field, [ 'creator', 'permlink' ] ), locale: field.locale || 'en-US' } )
                         };
 
                         await redisSetter.setImportWobjData( `append:${wobject.author_permlink}_${field.permlink}`, data );
