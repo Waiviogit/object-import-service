@@ -32,15 +32,7 @@ const addWobjectsToQueue = async ( { wobjects = [], immediately } = {} ) => {
                     console.error( sendMessError );
                 }
             } else if ( !redisExistObjectType && immediately ) {
-                const { error } = await createObjectType.send( { objectType: wobject.object_type } );
-
-                if ( error ) {
-                    console.error( error.message );
-                    await redisSetter.setImportWobjData(
-                        `immed:errored:wobj-type:${wobject.object_type}`,
-                        { objectType: wobject.object_type }
-                    );
-                }
+                createObjectType.send( { objectType: wobject.object_type } );
             }
         } // handle ObjectType
         const { wobject: existWobj } = await Wobj.getOne( { author_permlink: wobject.author_permlink } );
@@ -103,15 +95,7 @@ const addWobjectsToQueue = async ( { wobjects = [], immediately } = {} ) => {
 
                         if ( immediately ) {
                             data.field = JSON.parse( data.field );
-                            const { error } = await appendObject.send( data );
-
-                            if ( error ) {
-                                console.error( error.message );
-                                await redisSetter.setImportWobjData(
-                                    `immed:errored:append-wobj:${data.permlink}`,
-                                    data
-                                );
-                            }
+                            appendObject.send( data );
                         }else{
                             await redisSetter.setImportWobjData( `append:${wobject.author_permlink}_${field.permlink}`, data );
                             const { error: sendMessError } = await redisQueue.sendMessage( {
