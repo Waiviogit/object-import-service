@@ -58,10 +58,16 @@ const appendObjectValidate = async ( data ) => {
     return { isValid: true };
 };
 
-const validateApiKey = ( key ) => {
-    const { API_KEY } = process.env;
+const validateImmediatelyImport = ( req ) => {
+    if ( req.body.immediately ) {
+        if ( req.headers.API_KEY ) {
+            const { API_KEY } = process.env;
 
-    if ( API_KEY !== key ) {
+            if ( API_KEY !== req.headers.API_KEY ) {
+                return false;
+            }
+            return true;
+        }
         return false;
     }
     return true;
@@ -71,5 +77,5 @@ module.exports = {
     createObjectTypeValidate,
     createObjectValidate,
     appendObjectValidate,
-    validateApiKey
+    validateImmediatelyImport
 };
