@@ -58,8 +58,18 @@ const appendObjectValidate = async ( data ) => {
     return { isValid: true };
 };
 
+const validateApiKey = ( key ) => {
+    const { API_KEY } = process.env;
+
+    if ( API_KEY !== key ) {
+        return false;
+    }
+    return true;
+};
+
 module.exports = {
     createObjectTypeValidate,
     createObjectValidate,
-    appendObjectValidate
+    appendObjectValidate,
+    validateApiKey
 };

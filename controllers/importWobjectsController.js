@@ -1,10 +1,15 @@
 const { importObjectsService, importTagsService, importObjectsFromFile } = require( '../utilities/services' );
+const { validateApiKey } = require( '../utilities/objectBotApi/validators' );
 
 const importWobjects = async ( req, res, next ) => {
     const data = {
-        wobjects: req.body.wobjects || []
+        wobjects: req.body.wobjects || [],
+        immediately: req.body.immediately || false
     };
 
+    if ( !( data.immediately && req.headers.API_KEY && validateApiKey( req.headers.API_KEY ) ) ) {
+        return next( { error: { status: 422, message: 'Not valid data in immediately request' } } );
+    }
     await importObjectsService.addWobjectsToQueue( data );
     console.log( 'wobjects added to queue' );
     res.status( 200 ).json( { message: 'Wobjects added to queue of creating!' } );
