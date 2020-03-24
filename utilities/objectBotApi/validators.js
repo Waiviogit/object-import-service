@@ -60,10 +60,10 @@ const appendObjectValidate = async ( data ) => {
 
 const validateImmediatelyImport = ( req ) => {
     if ( req.body.immediately ) {
-        if ( req.headers.API_KEY ) {
+        if ( req.headers[ 'api-key' ] ) {
             const { API_KEY } = process.env;
 
-            if ( API_KEY !== req.headers.API_KEY ) {
+            if ( API_KEY !== req.headers[ 'api-key' ] ) {
                 return false;
             }
             return true;

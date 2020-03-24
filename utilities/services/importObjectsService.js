@@ -102,6 +102,7 @@ const addWobjectsToQueue = async ( { wobjects = [], immediately } = {} ) => {
                         };
 
                         if ( immediately ) {
+                            data.field = JSON.parse( data.field );
                             const { error } = await appendObject.send( data );
 
                             if ( error ) {
