@@ -1,4 +1,5 @@
 module.exports = {
     Wobj: require( './wObjectModel' ),
-    ObjectType: require( './ObjectTypeModel' )
+    ObjectType: require( './ObjectTypeModel' ),
+    DatafinityObject: require( './DatafinityObjectModel' )
 };

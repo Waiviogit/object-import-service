@@ -1,0 +1,76 @@
+const mongoose = require( 'mongoose' );
+const Schema = mongoose.Schema;
+
+const DatafinityObjectSchema = new Schema( {
+    user: { type: String, required: true },
+    object_type: { type: String, required: true },
+    asins: String,
+    brand: String,
+    categories: String,
+    colors: String,
+    count: String,
+    dateAdded: String,
+    dateUpdated: String,
+    descriptions: String,
+    dimension: String,
+    domains: String,
+    ean: String,
+    ean13: String,
+    ean8: String,
+    features: String,
+    flavors: String,
+    gtins: String,
+    imageURLs: String,
+    isbn: String,
+    keys: { type: [ String ], default: [] },
+    manufacturer: String,
+    manufacturerNumber: String,
+    merchants: String,
+    mostRecentPriceAmount: Number,
+    mostRecentPriceAvailability: String,
+    mostRecentPriceByDomain: String,
+    mostRecentPriceColor: String,
+    mostRecentPriceCondition: String,
+    mostRecentPriceCurrency: String,
+    mostRecentPriceDate: String,
+    mostRecentPriceDomain: String,
+    mostRecentPriceIsSale: String,
+    mostRecentPriceSize: String,
+    mostRecentPriceSourceURL: String,
+    name: String,
+    prices: String,
+    primaryCategories: String,
+    primaryImageURLs: String,
+    quantities: String,
+    reviews: String,
+    sdsURLs: String,
+    secondaryCategories: String,
+    sizes: String,
+    skus: String,
+    sourceURLs: String,
+    stockNum: String,
+    taxonomy: String,
+    taxonomyLevel1: String,
+    taxonomyLevel2: String,
+    taxonomyLevel3: String,
+    taxonomyLevel4: String,
+    taxonomyLevel5: String,
+    taxonomyLevel6: String,
+    taxonomyLevel7: String,
+    taxonomyLevel8: String,
+    taxonomyLevel9: String,
+    upc: String,
+    upca: String,
+    upce: String,
+    vin: String,
+    websiteIDs: String,
+    weight: String
+}, {
+    strict: false, timestamps: true, versionKey: false, toObject: {
+        virtuals: true
+    }
+} );
+
+const DatafinityObjectModel = mongoose.model( 'datafinity_object', DatafinityObjectSchema );
+
+module.exports = DatafinityObjectModel;

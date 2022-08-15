@@ -14,6 +14,7 @@ module.exports = {
     Mongoose: mongoose,
     models: {
         WObject: require( './schemas/wObjectSchema' ),
-        ObjectType: require( './schemas/ObjectTypeSchema' )
+        ObjectType: require( './schemas/ObjectTypeSchema' ),
+        DatafinityObject: require( './schemas/DatafinityObjectSchema' )
     }
 };
