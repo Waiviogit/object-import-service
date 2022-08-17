@@ -1,6 +1,6 @@
 const express = require( 'express' );
 const { importWobjectsController } = require( '../controllers' );
-const { upload, csvUpload } = require( '../validators/fileValidator' );
+const { upload, textOrJsonUpload } = require( '../validators/fileValidator' );
 
 const routes = express.Router();
 const objects = express.Router();
@@ -13,9 +13,9 @@ objects.route( '/import-tags' )
     .post( importWobjectsController.importTags );
 objects.route( '/import-wobjects-json' )
     .post( upload.single( 'wobjects' ), importWobjectsController.importWobjectsJson );
-objects.route( '/import-objects-csv' ).post(
-    csvUpload.single( 'file' ),
-    importWobjectsController.importDatafinityObjects
+objects.route( '/import-products' ).post(
+    textOrJsonUpload.single( 'file' ),
+    importWobjectsController.importObjectsFromTextOrJson
 );
 
 module.exports = routes;

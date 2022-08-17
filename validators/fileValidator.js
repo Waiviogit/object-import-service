@@ -19,10 +19,10 @@ const fileFilter = ( req, file, callback ) => {
     callback( null, true );
 };
 
-const csvFileFilter = ( reg, file, cb ) => {
+const textOrJsonFileFilter = ( reg, file, cb ) => {
     if ( !file ) return cb( new Error( 'Absent file' ), null );
 
-    const isFile = ALLOWED_FILES_FORMATS.some( ( item ) => item === file.mimetype );
+    const isFile = ALLOWED_FILES_FORMATS.find( ( item ) => item === file.mimetype );
 
     if ( !isFile ) return cb( new Error( 'Incorrect file format' ), null );
 
@@ -31,4 +31,4 @@ const csvFileFilter = ( reg, file, cb ) => {
 
 exports.upload = multer( { storage, fileFilter } );
 
-exports.csvUpload = multer( { fieldname: 'file', fileFilter: csvFileFilter } );
+exports.textOrJsonUpload = multer( { fieldname: 'file', fileFilter: textOrJsonFileFilter } );

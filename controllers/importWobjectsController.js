@@ -1,7 +1,8 @@
-const { importObjectsService, importTagsService, importObjectsFromFile, importObjectsFromCsv } = require( '../utilities/services' );
+const { importObjectsService, importTagsService, importObjectsFromFile, importDatafinityObjects } = require( '../utilities/services' );
 const { validateImmediatelyImport } = require( '../utilities/objectBotApi/validators' );
 const { FILE_MAX_SIZE } = require( '../constants/fileFormats' );
 const validators = require( 'controllers/validators' );
+const { authorise } = require( '../utilities/authorization/authorizeUser' );
 
 const importWobjects = async ( req, res, next ) => {
     const data = {
@@ -34,16 +35,23 @@ const importWobjectsJson = async ( req, res, next ) => {
     res.status( 200 ).json( { message: 'Wobjects added to queue of creating!' } );
 };
 
-const importDatafinityObjects = async ( req, res, next ) => {
+const importObjectsFromTextOrJson = async ( req, res, next ) => {
     if ( req.file.size > FILE_MAX_SIZE ) {
         return next( { error: { status: 422, message: 'Allowed file size must be less than 100 MB' } } );
     }
 
-    const value = validators.validate( { user: req.query.user, objectType: req.query.objectType },
-        validators.importWobjects.importDatafinityObjectsSchema, next );
+    const value = validators.validate(
+        { ...req.body },
+        validators.importWobjects.importDatafinityObjectsSchema,
+        next
+    );
+
     if ( !value ) return;
 
-    await importObjectsFromCsv.importObjects( { file: req.file, ...value } );
+    const { error: authError } = await authorise(value.user);
+    if ( authError ) return next( authError );
+
+    await importDatafinityObjects.importObjects( { file: req.file, ...value } );
     res.status( 200 ).json( { message: 'Objects added to queue of creating!' } );
 };
 
@@ -52,5 +60,5 @@ module.exports = {
     importWobjects,
     importTags,
     importWobjectsJson,
-    importDatafinityObjects
+    importObjectsFromTextOrJson
 };
