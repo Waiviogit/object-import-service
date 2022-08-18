@@ -31,4 +31,21 @@ const getField = async ( { author, permlink, author_permlink } = {} ) => {
     }
 };
 
-module.exports = { getOne, getField };
+const findSameFieldBody = async ( textMatch, regexMatch ) => {
+    try {
+        const [ result ] = await WObjectModel.aggregate( [
+            {
+                $match: { $text: { $search: textMatch } }
+            },
+            {
+                $match: { 'fields.body': { $regex: regexMatch } }
+            }
+        ] );
+
+        return { result };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { getOne, getField, findSameFieldBody };
