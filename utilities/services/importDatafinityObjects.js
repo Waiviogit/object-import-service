@@ -21,7 +21,11 @@ const importObjects = async ({ file, user, objectType, authority }) => {
                 return;
             }
 
+
             if (products.length) {
+                fs.unlink(path, (deleteError) => {
+                    if (deleteError) console.log('Error while deleting a file');
+                });
                 await saveObjects( {
                     products: JSON.parse( products ),
                     user,
@@ -29,9 +33,6 @@ const importObjects = async ({ file, user, objectType, authority }) => {
                     authority
                 } );
             }
-            fs.unlink(path, (deleteError) => {
-                if (deleteError) console.log('Error while deleting a file');
-            });
         });
     } );
 };

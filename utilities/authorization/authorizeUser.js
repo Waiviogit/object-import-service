@@ -1,16 +1,9 @@
-const { getNamespace } = require('cls-hooked');
 const sc2 = require('sc2-sdk');
 
-exports.authorise = async (username) => {
-    const session = getNamespace('request-session');
-    const accessToken = session.get('access-token');
+exports.authorise = async (username, accessToken) => {
     let isValidToken;
     isValidToken = await authoriseUser(accessToken, username);
-    if (isValidToken) {
-        session.set('authorised_user', username);
-
-        return { isValid: true };
-    }
+    if (isValidToken) return { isValid: true };
 
     return { error: { status: 401, message: 'Token not valid!' } };
 };

@@ -48,7 +48,9 @@ const importObjectsFromTextOrJson = async ( req, res, next ) => {
 
     if ( !value ) return;
 
-    const { error: authError } = await authorise(value.user);
+    const accessToken = req.headers[ 'access-token' ];
+    const { error: authError } = await authorise( value.user, accessToken );
+
     if ( authError ) return next( authError );
 
     await importDatafinityObjects.importObjects( { file: req.file, ...value } );
