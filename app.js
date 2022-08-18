@@ -21,6 +21,7 @@ app.use( ( err, req, res, next ) => {
     }
     res.status( err.status ).json( { message: err.message } );
 } );
+
 importObjectsService.runImportWobjectsQueue();
 
 module.exports = app;
