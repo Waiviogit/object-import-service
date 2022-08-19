@@ -14,18 +14,9 @@ exports.HIVE_ENGINE_NODES = [
     'https://ha.herpc.dtools.dev' // New Jersey
 ];
 
-const PRODUCTION_REQUEST_NODES = [
+exports.NODE_URLS = [
     'https://anyx.io',
     'https://hive-api.arcange.eu',
     'https://api.hive.blog',
     'https://api.openhive.network'
 ];
-
-const STAGING_REQUEST_NODES = [
-    'https://api.openhive.network',
-    'https://rpc.esteem.app',
-    'https://hive-api.arcange.eu',
-    'https://rpc.ausbit.dev'
-];
-
-exports.NODE_URLS = process.env.NODE_ENV === 'production' ? PRODUCTION_REQUEST_NODES : STAGING_REQUEST_NODES;

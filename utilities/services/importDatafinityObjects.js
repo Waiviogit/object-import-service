@@ -6,6 +6,7 @@ const BigNumber = require( 'bignumber.js' );
 const engineOperations = require( '../hiveEngine/hiveEngineOperations' );
 const { getAccount } = require( '../hiveApi/userUtil' );
 const { VOTE_EVALUATION } = require( '../../constants/requestsConstants' );
+const { checkVotePower } = require( '../helpers/checkVotePower' );
 
 const importObjects = async ({ file, user, objectType, authority }) => {
     const { result, error } = await validateUser(user);
@@ -79,19 +80,13 @@ const getWobjectsByKeys = async (keys) => {
 };
 
 const validateUser = async ( user ) => {
-    const { engineVotePrice } = await engineOperations.calculateHiveEngineVote( {
-        symbol: VOTE_EVALUATION.TOKEN_SYMBOL,
-        account: user,
-        poolId: VOTE_EVALUATION.POOL_ID,
-        dieselPoolId: VOTE_EVALUATION.DIESEL_POOL_ID,
-        weight: VOTE_EVALUATION.WEIGHT * 100
-    } );
-    if (new BigNumber(engineVotePrice).lt(0.01)) return { error: { status: '409', message: 'Not enough vote power' } };
+    const abilityToVote = await checkVotePower(user);
+    if (!abilityToVote) return { error: { status: '409', message: 'Not enough vote power' } };
 
     const { account, error } = await getAccount(user);
     if (error) return { error };
 
-    const postingAuthorities = account.posting.account_auths.find((el) => el[0] === 'bla');
+    const postingAuthorities = account.posting.account_auths.find((el) => el[0] === process.env.BOT_ACCOUNT);
     if (!postingAuthorities) return { error: { status: '409', message: 'Posting authorities not delegated' } };
 
 
