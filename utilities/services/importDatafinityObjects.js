@@ -2,9 +2,15 @@ const fs = require( 'fs' );
 const moment = require( 'moment' );
 const { DatafinityObject, Wobj } = require( '../../models' );
 const _ = require( 'lodash' );
+const BigNumber = require( 'bignumber.js' );
+const engineOperations = require( '../hiveEngine/hiveEngineOperations' );
+const { getAccount } = require( '../hiveApi/userUtil' );
+const { VOTE_EVALUATION } = require( '../../constants/requestsConstants' );
 
 const importObjects = async ({ file, user, objectType, authority }) => {
-    await validateUser(user);
+    const { result, error } = await validateUser(user);
+    if (error) return { error };
+
     const path = `${moment().valueOf()}.json`;
     fs.writeFile(path, file.buffer, async(err) => {
         if (err) {
@@ -14,8 +20,8 @@ const importObjects = async ({ file, user, objectType, authority }) => {
 
         }
 
-        fs.readFile(path, 'utf8', async (error, products ) => {
-            if (error) {
+        fs.readFile(path, 'utf8', async (readError, products ) => {
+            if (readError) {
                 console.log('Error while reading a file');
 
                 return;
@@ -35,6 +41,8 @@ const importObjects = async ({ file, user, objectType, authority }) => {
             }
         });
     } );
+
+    return { result };
 };
 
 const saveObjects = async ({ products, user, objectType, authority }) => {
@@ -70,8 +78,24 @@ const getWobjectsByKeys = async (keys) => {
     }
 };
 
-const validateUser = async (user) => {
+const validateUser = async ( user ) => {
+    const { engineVotePrice } = await engineOperations.calculateHiveEngineVote( {
+        symbol: VOTE_EVALUATION.TOKEN_SYMBOL,
+        account: user,
+        poolId: VOTE_EVALUATION.POOL_ID,
+        dieselPoolId: VOTE_EVALUATION.DIESEL_POOL_ID,
+        weight: VOTE_EVALUATION.WEIGHT * 100
+    } );
+    if (new BigNumber(engineVotePrice).lt(0.01)) return { error: { status: '409', message: 'Not enough vote power' } };
 
+    const { account, error } = await getAccount(user);
+    if (error) return { error };
+
+    const postingAuthorities = account.posting.account_auths.find((el) => el[0] === 'bla');
+    if (!postingAuthorities) return { error: { status: '409', message: 'Posting authorities not delegated' } };
+
+
+    return { result: true };
 };
 
 module.exports = { importObjects };
