@@ -2,10 +2,7 @@ const fs = require( 'fs' );
 const moment = require( 'moment' );
 const { DatafinityObject, Wobj } = require( '../../models' );
 const _ = require( 'lodash' );
-const BigNumber = require( 'bignumber.js' );
-const engineOperations = require( '../hiveEngine/hiveEngineOperations' );
 const { getAccount } = require( '../hiveApi/userUtil' );
-const { VOTE_EVALUATION } = require( '../../constants/requestsConstants' );
 const { checkVotePower } = require( '../helpers/checkVotePower' );
 
 const importObjects = async ({ file, user, objectType, authority }) => {
