@@ -6,8 +6,10 @@ bluebird.promisifyAll( redis.RedisClient.prototype );
 bluebird.promisifyAll( redis.Multi.prototype );
 const importWobjectsDataClient = redis.createClient( process.env.REDISCLOUD_URL );
 const importWobjectsQueueClient = redis.createClient( process.env.REDISCLOUD_URL );
+const lastBlockCLient = redis.createClient( process.env.REDISCLOUD_URL );
 
 importWobjectsDataClient.select( config.redis.importWobjData );
 importWobjectsQueueClient.select( config.redis.importQueue );
+lastBlockCLient.select( config.redis.lastBlock );
 
-module.exports = { importWobjectsDataClient, importWobjectsQueueClient };
+module.exports = { importWobjectsDataClient, importWobjectsQueueClient, lastBlockCLient };

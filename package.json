@@ -12,10 +12,13 @@
     "start": "node ./bin/service.js"
   },
   "dependencies": {
+    "@hiveio/dhive": "^1.2.3",
     "axios": "^0.18.0",
+    "bignumber.js": "^9.1.0",
     "bluebird": "^3.5.3",
     "body-parser": "^1.15.2",
     "csv-writer": "^1.5.0",
+    "dotenv": "^16.0.1",
     "dsteem": "^0.8.7",
     "eslint": "^6.1.0",
     "event-stream": "^4.0.1",

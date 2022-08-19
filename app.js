@@ -2,7 +2,12 @@ const express = require( 'express' );
 const logger = require( 'morgan' );
 const { routes } = require( './routes' );
 const { importObjectsService } = require( './utilities/services' );
+const dotenv = require( 'dotenv' );
+
+dotenv.config();
+
 const app = express();
+
 
 app.use( logger( 'dev' ) );
 app.use( express.json() );
