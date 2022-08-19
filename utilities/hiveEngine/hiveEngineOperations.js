@@ -4,7 +4,7 @@ const commentContract = require( '../hiveEngineApi/commentsContract' );
 const marketPools = require( '../hiveEngineApi/marketPoolsContract' );
 const tokensContract = require( '../hiveEngineApi/tokensContract' );
 const _ = require( 'lodash' );
-const { HIVE_ENGINE_NODES } = require( '../../constants/requestsConstants' );
+const { HIVE_ENGINE_NODES, VOTE_EVALUATION } = require( '../../constants/requestsConstants' );
 
 exports.calculateHiveEngineVote = async ({
     symbol, account, poolId, weight, dieselPoolId,
@@ -31,9 +31,9 @@ exports.calculateHiveEngineVote = async ({
     const { quotePrice } = dieselPools[0];
 
     const finalRshares = parseFloat(stake) + parseFloat(delegationsIn);
-    const power = (votingPower * weight) / 10000;
+    const power = (votingPower * weight) / VOTE_EVALUATION.WEIGHT;
 
-    const rshares = (power * finalRshares) / 10000;
+    const rshares = (power * finalRshares) / VOTE_EVALUATION.WEIGHT;
     // we calculate price in hbd cent for usd multiply quotePrice hiveCurrency.usdCurrency
     const price = parseFloat(quotePrice) * parseFloat(hiveCurrency.price);
 
@@ -50,15 +50,15 @@ exports.calculateMana = (votingPower) => {
         lastVoteTimestamp: votingPower.lastVoteTimestamp,
     };
 
-    result.votingPower += ((timestamp - result.lastVoteTimestamp) * 10000)
-        / (5 * 24 * 3600 * 1000);
+    result.votingPower += ((timestamp - result.lastVoteTimestamp) * VOTE_EVALUATION.WEIGHT)
+        / (VOTE_EVALUATION.REGENERATION_DAYS * 24 * 3600 * 1000);
     result.votingPower = Math.floor(result.votingPower);
-    result.votingPower = Math.min(result.votingPower, 10000);
+    result.votingPower = Math.min(result.votingPower, VOTE_EVALUATION.WEIGHT);
 
-    result.downvotingPower += ((timestamp - result.lastVoteTimestamp) * 10000)
-        / (5 * 24 * 3600 * 1000);
+    result.downvotingPower += ((timestamp - result.lastVoteTimestamp) * VOTE_EVALUATION.WEIGHT)
+        / (VOTE_EVALUATION.REGENERATION_DAYS * 24 * 3600 * 1000);
     result.downvotingPower = Math.floor(result.downvotingPower);
-    result.downvotingPower = Math.min(result.downvotingPower, 10000);
+    result.downvotingPower = Math.min(result.downvotingPower, VOTE_EVALUATION.WEIGHT);
 
     return result;
 };
