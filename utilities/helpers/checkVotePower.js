@@ -10,7 +10,7 @@ exports.checkVotePower = async (user) => {
         dieselPoolId: VOTE_EVALUATION.DIESEL_POOL_ID,
         weight: VOTE_EVALUATION.WEIGHT
     } );
-    if (new BigNumber(engineVotePrice).lt(0.01)) return false;
+    if (new BigNumber(engineVotePrice).lt(0.001)) return false;
 
     return true;
 };

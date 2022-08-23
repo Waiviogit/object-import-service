@@ -49,7 +49,22 @@ exports.ARRAY_PROPERTIES = [
     'websiteIDs'
 ];
 
-exports.AUTHORITY_FIELD_OPTIONS = [
-    'administrative',
-    'ownership'
-];
+exports.AUTHORITY_FIELD_OPTIONS = {
+    ADMINISTRATIVE: 'administrative',
+    OWNERSHIP: 'ownership'
+};
+
+exports.REQUIRED_BOOK_FIELDS_NAMES = {
+    NAME: 'name',
+    TAG_GATEGORY: 'tagCategory',
+    PHOTOS: 'photos',
+    RATING: 'rating',
+    PRODUCT_ID: 'productId',
+    AUTHORS: 'authors',
+    AGE_RANGE: 'ageRange',
+    OPTIONS: 'options',
+    PUBLICATION_DATE: 'publicationDate',
+    DIMENSIONS: 'dimensions',
+    WEIGHT: 'weight',
+    LANGUAGE: 'language'
+};
