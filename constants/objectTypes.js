@@ -54,11 +54,8 @@ exports.AUTHORITY_FIELD_OPTIONS = {
     OWNERSHIP: 'ownership'
 };
 
-exports.REQUIRED_BOOK_FIELDS_NAMES = {
-    NAME: 'name',
+exports.BOOK_FIELDS = {
     TAG_GATEGORY: 'tagCategory',
-    PHOTOS: 'photos',
-    RATING: 'rating',
     PRODUCT_ID: 'productId',
     AUTHORS: 'authors',
     AGE_RANGE: 'ageRange',
@@ -66,5 +63,7 @@ exports.REQUIRED_BOOK_FIELDS_NAMES = {
     PUBLICATION_DATE: 'publicationDate',
     DIMENSIONS: 'dimensions',
     WEIGHT: 'weight',
-    LANGUAGE: 'language'
+    LANGUAGE: 'language',
+    PRINT_LENGTH: 'printLength',
+    PUBLISHER: 'publisher'
 };

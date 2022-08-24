@@ -48,4 +48,12 @@ const findSameFieldBody = async ( textMatch, regexMatch ) => {
     }
 };
 
-module.exports = { getOne, getField, findSameFieldBody };
+const findOneByNameAndObjectType = async ( name, objectType ) => {
+    try {
+        return { wobject: await WObjectModel.findOne( { object_type: objectType, name: { $regex: name } } ).lean() };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { getOne, getField, findSameFieldBody, findOneByNameAndObjectType };

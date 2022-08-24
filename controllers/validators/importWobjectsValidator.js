@@ -3,6 +3,6 @@ const { OBJECT_TYPES, AUTHORITY_FIELD_OPTIONS } = require( '../../constants/obje
 
 exports.importDatafinityObjectsSchema = Joi.object().keys( {
     user: Joi.string().required(),
-    objectType: Joi.string().valid( ...Object.keys( OBJECT_TYPES ) ).default( OBJECT_TYPES.BOOK ),
-    authority: Joi.string().valid( ...Object.keys( AUTHORITY_FIELD_OPTIONS ) )
+    objectType: Joi.string().valid( ...Object.values( OBJECT_TYPES ) ).default( OBJECT_TYPES.BOOK ),
+    authority: Joi.string().valid( ...Object.values( AUTHORITY_FIELD_OPTIONS ) )
 } );
