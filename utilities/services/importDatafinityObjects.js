@@ -10,7 +10,7 @@ const detectLanguage = require( 'utilities/helpers/detectLanguage' );
 const { prepareFieldsForImport } = require( '../helpers/formBookFields' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
-    const { result, error } = await validateUser(user);
+    const { result, error } = await validateUser(user, authority);
     if (error) return { error };
     let funcError;
 
@@ -121,8 +121,8 @@ const getWobjectsByKeys = async ( keys ) => {
     }
 };
 
-const validateUser = async ( user ) => {
-    const abilityToVote = await checkVotePower( user );
+const validateUser = async ( user, authority ) => {
+    const abilityToVote = await checkVotePower( user, authority );
 
     if ( !abilityToVote ) {
         return { error: { status: '409', message: 'Not enough vote power' } };
