@@ -2,8 +2,7 @@ const { BOOK_FIELDS } = require( '../../constants/objectTypes' );
 const _ = require( 'lodash' );
 const moment = require( 'moment' );
 const detectLanguage = require( './detectLanguage' );
-const permlinkGenerator = require( './permlinkGenerator' );
-const { Wobj } = require( '../../models' );
+const { permlinkGenerator } = require( './permlinkGenerator' );
 
 exports.prepareFieldsForImport = async ( obj ) => {
     const fields = [];
@@ -29,20 +28,6 @@ exports.prepareFieldsForImport = async ( obj ) => {
                     body: ageRange.value,
                     objectName: obj.name
                 } ) );
-            }
-        }
-        if ( field === BOOK_FIELDS.AUTHORS ) {
-            const authors = obj.features.find( ( el ) => el.key.toLowerCase() === 'author' );
-
-            if ( authors ) {
-                for ( const author of authors.value ) {
-                    fields.push( await addAuthorOrPublisherField( {
-                        name: author,
-                        obj,
-                        objectType: 'person',
-                        fieldName: BOOK_FIELDS.AUTHORS
-                    } ) );
-                }
             }
         }
         if ( field === BOOK_FIELDS.DIMENSIONS ) {
@@ -118,20 +103,9 @@ exports.prepareFieldsForImport = async ( obj ) => {
                 } ) );
             }
         }
-        if ( field === BOOK_FIELDS.PUBLISHER ) {
-            const publisher = _.get( obj, 'brand' );
 
-            if ( publisher ) {
-                fields.push( addAuthorOrPublisherField( {
-                    fieldName: BOOK_FIELDS.PUBLISHER,
-                    obj,
-                    name: publisher,
-                    objectType: 'business'
-                } ) );
-            }
-        }
         if ( field === BOOK_FIELDS.OPTIONS ) {
-            //
+            // format
         }
         if ( field === BOOK_FIELDS.PRODUCT_ID ) {
             //
@@ -151,17 +125,4 @@ const formField = ( { fieldName, objectName, user, body } ) => {
         name: fieldName,
         body
     };
-};
-
-const addAuthorOrPublisherField = async ( { name, obj, objectType, fieldName } ) => {
-    const { wobject, error } = await Wobj.findOneByNameAndObjectType( name, objectType );
-    // что делать если паблишера или автора нет???
-    //  if (!wobject || error) return;
-
-    return formField( {
-        fieldName,
-        objectName: obj.name,
-        body: JSON.stringify( { name, author_permlink: 'wobject.author_permlink' } ),
-        user: obj.user
-    } );
 };

@@ -1,0 +1,1 @@
+exports.WHITE_LIST = [];

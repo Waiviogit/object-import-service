@@ -1,7 +1,5 @@
 exports.OBJECT_TYPES = {
-    BOOK: 'book',
-    PRODUCT: 'product',
-    SERVICE: 'service'
+    BOOK: 'book'
 };
 
 exports.DATAFINITY_IDS = 'keys';
@@ -57,7 +55,6 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 exports.BOOK_FIELDS = {
     TAG_GATEGORY: 'tagCategory',
     PRODUCT_ID: 'productId',
-    AUTHORS: 'authors',
     AGE_RANGE: 'ageRange',
     OPTIONS: 'options',
     PUBLICATION_DATE: 'publicationDate',
@@ -65,5 +62,11 @@ exports.BOOK_FIELDS = {
     WEIGHT: 'weight',
     LANGUAGE: 'language',
     PRINT_LENGTH: 'printLength',
+    AUTHORS: 'authors',
     PUBLISHER: 'publisher'
+};
+
+exports.OBJECTS_FROM_FIELDS = {
+    BUSINESS: 'business',
+    PERSON: 'person'
 };

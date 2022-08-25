@@ -5,12 +5,14 @@ const { DatafinityObject, Wobj } = require( '../../models' );
 const _ = require( 'lodash' );
 const { getAccount } = require( '../hiveApi/userUtil' );
 const { checkVotePower } = require( '../helpers/checkVotePower' );
-const permlinkGenerator = require( 'utilities/helpers/permlinkGenerator' );
 const detectLanguage = require( 'utilities/helpers/detectLanguage' );
 const { prepareFieldsForImport } = require( '../helpers/formBookFields' );
+const { generateUniquePermlink } = require( '../helpers/permlinkGenerator' );
+const { formPersonOrBusinessObject } = require( '../helpers/formPersonOrBusinessObject' );
+const { addWobjectsToQueue } = require( './importObjectsService' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
-    const { result, error } = await validateUser(user, authority);
+    const { result, error } = await validateUser( user );
     if (error) return { error };
     let funcError;
 
@@ -81,12 +83,26 @@ const saveObjects = async ( { products, user, objectType, authority } ) => {
 
 const startObjectImport = async ( user, count ) => {
     for ( let i = 0; i < count; i++ ) {
+        const { result, error: validationError } = await validateUser( user );
+        if ( validationError ) {
+            // поставить сабскрайбера, пример есть на старых кампаниях!
+        }
         const { datafinityObject, error } = await DatafinityObject.getOne( { user } );
 
         if ( error ) {
             console.error( error.message );
 
             return;
+        }
+
+        const objectToCreate = await formPersonOrBusinessObject( datafinityObject );
+
+        if ( objectToCreate ) {
+            i--;
+            console.log('objectToCreate', [objectToCreate]);
+            await addWobjectsToQueue( { wobjects: [ objectToCreate ] } );
+            continue;
+            // передать на импорт, поставить сабскрайбера
         }
 
         const objectExists = await checkIfWobjectsExist( datafinityObject );
@@ -121,8 +137,8 @@ const getWobjectsByKeys = async ( keys ) => {
     }
 };
 
-const validateUser = async ( user, authority ) => {
-    const abilityToVote = await checkVotePower( user, authority );
+const validateUser = async ( user ) => {
+    const abilityToVote = await checkVotePower( user );
 
     if ( !abilityToVote ) {
         return { error: { status: '409', message: 'Not enough vote power' } };
@@ -131,10 +147,10 @@ const validateUser = async ( user, authority ) => {
     const { account, error } = await getAccount( user );
 
     if ( error ) {
-        return { dbError: error };
+        return { error };
     }
 
-    const postingAuthorities = account.posting.account_auths.find( ( el ) => el[ 0 ] === process.env.BOT_ACCOUNT );
+    const postingAuthorities = account.posting.account_auths.find( ( el ) => el[ 0 ] === process.env.FIELD_VOTES_BOT );
 
     if ( !postingAuthorities ) {
         return { error: { status: '409', message: 'Posting authorities not delegated' } };
@@ -145,23 +161,7 @@ const validateUser = async ( user, authority ) => {
 };
 
 const prepareObjectForImport = async ( datafinityObject ) => {
-    let permlink;
-    let wobj;
-
-    do {
-        permlink = permlinkGenerator( datafinityObject.name );
-        const { wobject, dbError } = await Wobj.getOne( { author_permlink: permlink } );
-
-        if ( dbError ) {
-            return { dbError };
-        }
-
-        if ( !wobject ) {
-            break;
-        }
-
-        wobj = wobject;
-    } while ( permlink === wobj.author_permlink );
+    const permlink = generateUniquePermlink( datafinityObject.name );
 
     const data = {
         object_type: datafinityObject.object_type,
