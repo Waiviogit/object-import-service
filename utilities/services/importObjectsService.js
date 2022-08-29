@@ -1,6 +1,6 @@
 const { importRsmqClient } = require( '../redis/rsmq' ); // redis queue client
 const { redisGetter, redisSetter } = require( '../redis' ); // redis getter and setter for manage wobj data
-const { importWobjectsDataClient, importWobjectsQueueClient } = require( '../redis' ).redis; // client for redis db with wobj data
+const { importWobjectsDataClient } = require( '../redis' ).redis; // client for redis db with wobj data
 const objectBotApi = require( '../objectBotApi' );
 const wobjectLogs = require( '../csvLogger/wobject' );
 const redisQueue = require( '../redis/rsmq/redisQueue' );
@@ -38,79 +38,11 @@ const addWobjectsToQueue = async ( { wobjects = [], immediately } = {} ) => {
         const { wobject: existWobj } = await Wobj.getOne( { author_permlink: wobject.author_permlink } );
 
         if ( !existWobj ) {
-            const redisExistWobject = await redisGetter.getHashAll( `wobj:${wobject.author_permlink}` );
-
-            if ( !redisExistWobject ) {
-                const data = {
-                    objectType: wobject.object_type,
-                    permlink: wobject.author_permlink,
-                    author: wobject.creator,
-                    title: 'Waivio Object',
-                    body: `Waivio Object ${wobject.default_name} created!`,
-                    objectName: wobject.default_name,
-                    locale: wobject.locale || 'en-US',
-                    isExtendingOpen: wobject.is_extending_open || true,
-                    isPostingOpen: wobject.is_posting_open || true,
-                    parentAuthor: existObjType ? existObjType.author : '',
-                    parentPermlink: existObjType ? existObjType.permlink : ''
-                };
-
-                for( const field of REDIS_WOBJ_DATA_ADDITIONAL_FIELDS ) {
-                    if( wobject[ field ] ) {
-                        data[ field ] = wobject[ field ];
-                    }
-                }
-                await redisSetter.setImportWobjData( `wobj:${wobject.author_permlink}`, data );
-                const { error: sendMessError } = await redisQueue.sendMessage( {
-                    client: importRsmqClient,
-                    qname: IMPORT_WOBJECTS_QNAME,
-                    message: `wobj:${wobject.author_permlink}`
-                } );
-
-                if ( sendMessError ) {
-                    console.error( sendMessError );
-                }
-            }
+            await addWobject( { wobject, existObjType } );
         } // handle Wobject
         if ( wobject.fields && Array.isArray( wobject.fields ) ) {
             for ( const field of wobject.fields ) {
-                const { field: existField } = await Wobj.getField( {
-                    permlink: field.permlink,
-                    author_permlink: wobject.author_permlink
-                } );
-
-                if ( !existField ) {
-                    const redisExistField = await redisGetter.getHashAll( `append:${wobject.author_permlink}_${field.permlink}` );
-
-                    if ( !redisExistField ) {
-                        const data = {
-                            author: field.creator,
-                            permlink: field.permlink,
-                            parentPermlink: wobject.author_permlink,
-                            parentAuthor: existWobj ? existWobj.author : '',
-                            body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
-                            title: 'New field on wobject',
-                            field: JSON.stringify( { ..._.omit( field, [ 'creator', 'permlink' ] ), locale: field.locale || 'en-US' } )
-                        };
-
-                        if ( immediately ) {
-                            data.field = JSON.parse( data.field );
-                            appendObject.send( data );
-                        }else{
-                            await redisSetter.setImportWobjData( `append:${wobject.author_permlink}_${field.permlink}`, data );
-                            const { error: sendMessError } = await redisQueue.sendMessage( {
-                                client: importRsmqClient,
-                                qname: IMPORT_WOBJECTS_QNAME,
-                                message: `append:${wobject.author_permlink}_${field.permlink}`
-                            } );
-
-                            if ( sendMessError ) {
-                                console.error( sendMessError );
-                            }
-                        }
-
-                    }
-                }
+                await addField( { field, wobject, immediately } );
             }
         }
 
@@ -264,7 +196,87 @@ const messageCreateAppendWobj = async ( { redisData } ) => {
     }
 };
 
+const addWobject = async ( { wobject, existObjType, addData = true }) => {
+    const redisExistWobject = await redisGetter.getHashAll( `wobj:${wobject.author_permlink}` );
+
+    if ( !redisExistWobject ) {
+        const data = {
+            objectType: wobject.object_type,
+            permlink: wobject.author_permlink,
+            author: wobject.creator,
+            title: 'Waivio Object',
+            body: `Waivio Object ${wobject.default_name} created!`,
+            objectName: wobject.default_name,
+            locale: wobject.locale || 'en-US',
+            isExtendingOpen: wobject.is_extending_open || true,
+            isPostingOpen: wobject.is_posting_open || true,
+            parentAuthor: existObjType ? existObjType.author : '',
+            parentPermlink: existObjType ? existObjType.permlink : ''
+        };
+
+        if ( addData ) {
+            for ( const field of REDIS_WOBJ_DATA_ADDITIONAL_FIELDS ) {
+                if ( wobject[ field ] ) {
+                    data[ field ] = wobject[ field ];
+                }
+            }
+        }
+        await redisSetter.setImportWobjData( `wobj:${wobject.author_permlink}`, data );
+        const { error: sendMessError } = await redisQueue.sendMessage( {
+            client: importRsmqClient,
+            qname: IMPORT_WOBJECTS_QNAME,
+            message: `wobj:${wobject.author_permlink}`
+        } );
+
+        if ( sendMessError ) {
+            console.error( sendMessError );
+        }
+    }
+};
+
+const addField = async ( { field, wobject, immediately } ) => {
+    const { field: existField } = await Wobj.getField( {
+        permlink: field.permlink,
+        author_permlink: wobject.author_permlink
+    } );
+
+    if ( !existField ) {
+        const redisExistField = await redisGetter.getHashAll( `append:${wobject.author_permlink}_${field.permlink}` );
+
+        if ( !redisExistField ) {
+            const data = {
+                author: field.creator,
+                permlink: field.permlink,
+                parentPermlink: wobject.author_permlink,
+                parentAuthor: existWobj ? existWobj.author : '',
+                body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
+                title: 'New field on wobject',
+                field: JSON.stringify( { ..._.omit( field, [ 'creator', 'permlink' ] ), locale: field.locale || 'en-US' } )
+            };
+
+            if ( immediately ) {
+                data.field = JSON.parse( data.field );
+                appendObject.send( data );
+            }else{
+                await redisSetter.setImportWobjData( `append:${wobject.author_permlink}_${field.permlink}`, data );
+                const { error: sendMessError } = await redisQueue.sendMessage( {
+                    client: importRsmqClient,
+                    qname: IMPORT_WOBJECTS_QNAME,
+                    message: `append:${wobject.author_permlink}_${field.permlink}`
+                } );
+
+                if ( sendMessError ) {
+                    console.error( sendMessError );
+                }
+            }
+
+        }
+    }
+};
+
 module.exports = {
     addWobjectsToQueue,
-    runImportWobjectsQueue
+    runImportWobjectsQueue,
+    addWobject,
+    addField
 };

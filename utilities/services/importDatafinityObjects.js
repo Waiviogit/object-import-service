@@ -1,7 +1,7 @@
 const fs = require( 'fs' );
 const EventEmitter = require( 'events' );
 const moment = require( 'moment' );
-const { DatafinityObject, Wobj } = require( '../../models' );
+const { DatafinityObject, Wobj, ObjectType } = require( '../../models' );
 const _ = require( 'lodash' );
 const { getAccount } = require( '../hiveApi/userUtil' );
 const { checkVotePower } = require( '../helpers/checkVotePower' );
@@ -9,11 +9,14 @@ const detectLanguage = require( 'utilities/helpers/detectLanguage' );
 const { prepareFieldsForImport } = require( '../helpers/formBookFields' );
 const { generateUniquePermlink } = require( '../helpers/permlinkGenerator' );
 const { formPersonOrBusinessObject } = require( '../helpers/formPersonOrBusinessObject' );
-const { addWobjectsToQueue } = require( './importObjectsService' );
+const { addWobject, addField } = require( './importObjectsService' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
     const { result, error } = await validateUser( user );
-    if (error) return { error };
+
+    if ( error ) {
+        return { error };
+    }
     let funcError;
 
     try {
@@ -77,17 +80,22 @@ const saveObjects = async ( { products, user, objectType, authority } ) => {
 
     const myEE = new EventEmitter();
 
-    myEE.once( 'import', async () => startObjectImport( user, count ) );
+    myEE.once( 'import', async () => startObjectImport( user ) );
     myEE.emit( 'import' );
 };
 
-const startObjectImport = async ( user, count ) => {
-    for ( let i = 0; i < count; i++ ) {
+const startObjectImport = async ( user ) => {
+    let objectToCreate;
+
+    do {
         const { result, error: validationError } = await validateUser( user );
+
         if ( validationError ) {
-            // поставить сабскрайбера, пример есть на старых кампаниях!
+            // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
         }
         const { datafinityObject, error } = await DatafinityObject.getOne( { user } );
+
+        objectToCreate = datafinityObject;
 
         if ( error ) {
             console.error( error.message );
@@ -98,27 +106,11 @@ const startObjectImport = async ( user, count ) => {
         const objectExists = await checkIfWobjectsExist( datafinityObject );
 
         if ( !objectExists ) {
-            const { wobject, authorCreated, publisherCreated } = await formPersonOrBusinessObject( datafinityObject );
-
-            if ( wobject ) {
-                await addWobjectsToQueue( { wobjects: [ wobject ] } );
-                await DatafinityObject.updateOne( {
-                    user,
-                    ...authorCreated && { authorCreated: true },
-                    ...publisherCreated && { publisherCreated: true }
-                } );
-                i--;
-
-                continue;
-            }
-
-
-            await prepareObjectForImport( datafinityObject );
+            await processNewObject( datafinityObject );
+        } else {
+            await processField( datafinityObject );
         }
-
-
-        i++;
-    }
+    } while ( objectToCreate );
 };
 
 const checkIfWobjectsExist = async ( datafinityObject ) => {
@@ -138,7 +130,7 @@ const getWobjectsByKeys = async ( keys ) => {
             console.log( dbError );
         }
 
-        return !!result;
+        return result;
     }
 };
 
@@ -168,7 +160,7 @@ const validateUser = async ( user ) => {
 const prepareObjectForImport = async ( datafinityObject ) => {
     const permlink = generateUniquePermlink( datafinityObject.name );
 
-    const data = {
+    return {
         object_type: datafinityObject.object_type,
         author_permlink: permlink,
         author: process.env.FIELD_VOTES_BOT,
@@ -179,6 +171,59 @@ const prepareObjectForImport = async ( datafinityObject ) => {
         is_posting_open: true,
         fields: await prepareFieldsForImport( datafinityObject )
     };
+};
+
+const updateDatafinityObject = async ( obj, datafinityObject ) => {
+    if ( obj.fields.length ) {
+        await DatafinityObject.updateOne( { _id: datafinityObject._id }, { fields: obj.fields } );
+    } else {
+        await DatafinityObject.removeOne( datafinityObject._id );
+    }
+};
+
+const processNewObject = async ( datafinityObject ) => {
+    const { wobject, authorCreated, publisherCreated } = await formPersonOrBusinessObject( datafinityObject );
+
+    if ( wobject ) {
+        const { objectType, error: dbError } = await ObjectType.getOne( { name: wobject.object_type } );
+
+        if ( dbError ) {
+            console.error( error.message );
+
+            return;
+        }
+        await addWobject( { wobject, existObjType: objectType, addData: false } );
+        await DatafinityObject.updateOne(
+            { _id: datafinityObject._id },
+            { ...authorCreated && { authorCreated: true },
+                ...publisherCreated && { publisherCreated: true } } );
+
+        return;
+    }
+
+
+    const obj = await prepareObjectForImport( datafinityObject );
+    const { objectType: objType, error: dbErr } = await ObjectType.getOne( { name: obj.object_type } );
+
+    if ( dbErr ) {
+        console.error( dbErr.message );
+
+        return;
+    }
+
+    await addWobject( { wobject: obj, existObjType: objType, addData: false } );
+    await updateDatafinityObject( obj, datafinityObject );
+};
+
+const processField = async ( datafinityObject ) => {
+    const wobject = await getWobjectsByKeys( datafinityObject.keys );
+
+    if ( !wobject ) {
+        return;
+    }
+
+    await addField( { field: datafinityObject.fields[ 0 ], wobject, immediately: false } );
+    await DatafinityObject.updateOne( { _id: datafinityObject._id }, { $pop: { fields: -1 } } );
 };
 
 module.exports = { importObjects };

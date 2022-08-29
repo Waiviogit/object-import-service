@@ -24,9 +24,9 @@ const getOne = async ( { user } ) => {
     }
 };
 
-const updateOne = async ( filter ) => {
+const updateOne = async ( filter, update ) => {
     try {
-        const result = await DatafinityObject.updateOne( filter );
+        const result = await DatafinityObject.updateOne( filter, update );
 
         return { result };
     } catch ( error ) {
@@ -34,4 +34,12 @@ const updateOne = async ( filter ) => {
     }
 };
 
-module.exports = { insertMany, getOne, updateOne };
+const removeOne = async ( id ) => {
+    try {
+        await DatafinityObject.remove( { _id: id } );
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { insertMany, getOne, updateOne, removeOne };
