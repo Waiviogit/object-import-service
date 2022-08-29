@@ -1,11 +1,11 @@
 const { DatafinityObject } = require( '../database' ).models;
 
-const insertMany = async (docs) => {
+const insertMany = async ( docs ) => {
     try {
         const result = await DatafinityObject.insertMany( docs );
 
         return { count: result.length };
-    } catch (error) {
+    } catch ( error ) {
         return { error };
     }
 };
@@ -19,9 +19,19 @@ const getOne = async ( { user } ) => {
         }
 
         return { datafinityObject };
-    } catch ( e ) {
-        return { error: e };
+    } catch ( error ) {
+        return { error };
     }
 };
 
-module.exports = { insertMany, getOne };
+const updateOne = async ( filter ) => {
+    try {
+        const result = await DatafinityObject.updateOne( filter );
+
+        return { result };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { insertMany, getOne, updateOne };

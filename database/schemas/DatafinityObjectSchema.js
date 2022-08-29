@@ -133,7 +133,9 @@ const DatafinityObjectSchema = new Schema( {
     upce: String,
     vin: String,
     websiteIDs: { type: [ String ], default: [] },
-    weight: String
+    weight: String,
+    authorCreated: { type: Boolean, default: false },
+    publisherCreated: { type: Boolean, default: false }
 }, {
     strict: false, timestamps: true, versionKey: false, toObject: {
         virtuals: true

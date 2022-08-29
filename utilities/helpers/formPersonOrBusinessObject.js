@@ -8,7 +8,7 @@ exports.formPersonOrBusinessObject = async ( obj ) => {
     const publisher = _.get( obj, 'brand' );
     let wobject;
 
-    if ( publisher ) {
+    if ( !obj.publisherCreated && publisher ) {
         wobject = await formObject( {
             obj,
             name: publisher,
@@ -16,23 +16,25 @@ exports.formPersonOrBusinessObject = async ( obj ) => {
         } ) ;
     }
     if ( wobject ) {
-        return wobject;
+        return { wobject, publisherCreated: true };
     }
 
-    const authors = getAuthors( obj );
+    if ( !obj.authorCreated ) {
+        const authors = getAuthors( obj );
 
-    for ( const author of authors ) {
-        wobject = await formObject( {
-            name: author,
-            obj,
-            objectType: OBJECTS_FROM_FIELDS.PERSON
-        } );
-        if ( wobject ) {
-            return wobject;
+        for ( const author of authors ) {
+            wobject = await formObject( {
+                name: author,
+                obj,
+                objectType: OBJECTS_FROM_FIELDS.PERSON
+            } );
+            if ( wobject ) {
+                return !author === authors[ authors.length - 1 ] ? { wobject } : { wobject, authorCreated: true };
+            }
         }
     }
 
-    return wobject;
+    return { wobject };
 };
 
 const formObject = async ( { name, obj, objectType } ) => {

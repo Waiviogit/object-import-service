@@ -95,22 +95,27 @@ const startObjectImport = async ( user, count ) => {
             return;
         }
 
-        const objectToCreate = await formPersonOrBusinessObject( datafinityObject );
-
-        if ( objectToCreate ) {
-            i--;
-            console.log('objectToCreate', [objectToCreate]);
-            await addWobjectsToQueue( { wobjects: [ objectToCreate ] } );
-            continue;
-            // передать на импорт, поставить сабскрайбера
-        }
-
         const objectExists = await checkIfWobjectsExist( datafinityObject );
-        // перед этим проверить есть ли сила или после? на филды еще посчитать!
 
         if ( !objectExists ) {
+            const { wobject, authorCreated, publisherCreated } = await formPersonOrBusinessObject( datafinityObject );
+
+            if ( wobject ) {
+                await addWobjectsToQueue( { wobjects: [ wobject ] } );
+                await DatafinityObject.updateOne( {
+                    user,
+                    ...authorCreated && { authorCreated: true },
+                    ...publisherCreated && { publisherCreated: true }
+                } );
+                i--;
+
+                continue;
+            }
+
+
             await prepareObjectForImport( datafinityObject );
         }
+
 
         i++;
     }
