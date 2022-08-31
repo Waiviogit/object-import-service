@@ -10,9 +10,11 @@ const { prepareFieldsForImport } = require( '../helpers/formBookFields' );
 const { generateUniquePermlink } = require( '../helpers/permlinkGenerator' );
 const { formPersonOrBusinessObject } = require( '../helpers/formPersonOrBusinessObject' );
 const { addWobject, addField } = require( './importObjectsService' );
+const { VOTE_COST } = require( '../../constants/voteAbility' );
+const { DATAFINITY_KEY } = require( '../../constants/objectTypes' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
-    const { result, error } = await validateUser( user );
+    const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
 
     if ( error ) {
         return { error };
@@ -88,7 +90,7 @@ const startObjectImport = async ( user ) => {
     let objectToCreate;
 
     do {
-        const { result, error: validationError } = await validateUser( user );
+       const { result, error: validationError } = await validateUser( user, VOTE_COST.USUAL );
 
         if ( validationError ) {
             // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
@@ -103,27 +105,27 @@ const startObjectImport = async ( user ) => {
             return;
         }
 
-        const objectExists = await checkIfWobjectsExist( datafinityObject );
+        const wobject = await checkIfWobjectsExist( datafinityObject );
 
-        if ( !objectExists ) {
+        if ( !wobject ) {
             await processNewObject( datafinityObject );
         } else {
-            await processField( datafinityObject );
+            await processField( datafinityObject, wobject );
         }
     } while ( objectToCreate );
 };
 
 const checkIfWobjectsExist = async ( datafinityObject ) => {
-    const product = _.omit( datafinityObject, 'id' );
-    const obj = await getWobjectsByKeys( product.keys );
-
-    return !!obj;
+    return getWobjectsByKeys( datafinityObject.keys );
 };
 
 const getWobjectsByKeys = async ( keys ) => {
     for ( const key of keys ) {
         const textMatch = `\"${key}\"`;
-        const regexMatch = `"productId":"${key}",""productIdType":"datafinityKey"`;
+        const regexMatch = JSON.stringify( {
+            productId: key,
+            productIdType: DATAFINITY_KEY
+        } );
         const { result, error: dbError } = await Wobj.findSameFieldBody( textMatch, regexMatch );
 
         if ( dbError ) {
@@ -163,7 +165,6 @@ const prepareObjectForImport = async ( datafinityObject ) => {
     return {
         object_type: datafinityObject.object_type,
         author_permlink: permlink,
-        author: process.env.FIELD_VOTES_BOT,
         creator: datafinityObject.user,
         default_name: datafinityObject.name,
         locale: detectLanguage( datafinityObject.name ),
@@ -215,14 +216,8 @@ const processNewObject = async ( datafinityObject ) => {
     await updateDatafinityObject( obj, datafinityObject );
 };
 
-const processField = async ( datafinityObject ) => {
-    const wobject = await getWobjectsByKeys( datafinityObject.keys );
-
-    if ( !wobject ) {
-        return;
-    }
-
-    await addField( { field: datafinityObject.fields[ 0 ], wobject, immediately: false } );
+const processField = async ( datafinityObject, wobject ) => {
+    await addField( { field: datafinityObject.fields[ 0 ], wobject } );
     await DatafinityObject.updateOne( { _id: datafinityObject._id }, { $pop: { fields: -1 } } );
 };
 

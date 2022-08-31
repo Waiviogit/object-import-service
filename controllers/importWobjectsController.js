@@ -55,7 +55,9 @@ const importObjectsFromTextOrJson = async ( req, res, next ) => {
 
     const { result, error } = await importDatafinityObjects.importObjects( { file: req.file, ...value } );
 
-    if ( error ) return next ( error );
+    if ( error ) {
+        return next( error );
+    }
 
     res.status( 200 ).json( { message: 'Objects added to queue of creating!' } );
 };

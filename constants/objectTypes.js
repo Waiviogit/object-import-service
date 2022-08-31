@@ -3,6 +3,7 @@ exports.OBJECT_TYPES = {
 };
 
 exports.DATAFINITY_IDS = 'keys';
+exports.DATAFINITY_KEY = 'datafinityKey';
 
 exports.OBJECT_IDS = [
     'asins',
@@ -11,40 +12,10 @@ exports.OBJECT_IDS = [
     'ean8',
     'gtins',
     'isbn',
-    'keys',
     'upc',
     'upca',
     'upce',
     'vin'
-];
-
-exports.ARRAY_PROPERTIES = [
-    'categories',
-    'colors',
-    'domains',
-    'ean',
-    'flavors',
-    'gtins',
-    'imageURLs',
-    'keys',
-    'primaryCategories',
-    'primaryImageURLs',
-    'sdsURLs',
-    'secondaryCategories',
-    'sizes',
-    'sourceURLs',
-    'taxonomy',
-    'taxonomyLevel1',
-    'taxonomyLevel2',
-    'taxonomyLevel3',
-    'taxonomyLevel4',
-    'taxonomyLevel5',
-    'taxonomyLevel6',
-    'taxonomyLevel7',
-    'taxonomyLevel8',
-    'taxonomyLevel9',
-    'upc',
-    'websiteIDs'
 ];
 
 exports.AUTHORITY_FIELD_OPTIONS = {
@@ -53,7 +24,7 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 };
 
 exports.BOOK_FIELDS = {
-    TAG_GATEGORY: 'tagCategory',
+    TAG: 'tag',
     PRODUCT_ID: 'productId',
     AGE_RANGE: 'ageRange',
     OPTIONS: 'options',
@@ -70,3 +41,28 @@ exports.OBJECTS_FROM_FIELDS = {
     BUSINESS: 'business',
     PERSON: 'person'
 };
+
+exports.WEIGHT_UNITS = [
+    't',
+    'kg',
+    'gm',
+    'mg',
+    'mcg',
+    'st',
+    'lb',
+    'oz'
+];
+
+exports.DIMENSION_UNITS = [
+    'km',
+    'm',
+    'cm',
+    'mm',
+    'μm',
+    'mi',
+    'yd',
+    'ft',
+    'in',
+    'nmi'
+];
+

@@ -1,1 +1,0 @@
-exports.WHITE_LIST = [];

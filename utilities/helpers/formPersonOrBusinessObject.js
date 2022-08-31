@@ -20,7 +20,7 @@ exports.formPersonOrBusinessObject = async ( obj ) => {
     }
 
     if ( !obj.authorCreated ) {
-        const authors = getAuthors( obj );
+        const authors = this.getAuthors( obj );
 
         for ( const author of authors ) {
             wobject = await formObject( {
@@ -47,7 +47,6 @@ const formObject = async ( { name, obj, objectType } ) => {
     return {
         object_type: objectType,
         author_permlink: await generateUniquePermlink( name ),
-        author: process.env.FIELD_VOTES_BOT,
         creator: obj.user,
         default_name: name,
         locale: detectLanguage( name ),
@@ -56,7 +55,7 @@ const formObject = async ( { name, obj, objectType } ) => {
     };
 };
 
-const getAuthors = ( obj ) => {
+exports.getAuthors = ( obj ) => {
     const authors = obj.features.find( ( el ) => el.key.toLowerCase().includes( 'author' ) );
 
     if ( authors ) {

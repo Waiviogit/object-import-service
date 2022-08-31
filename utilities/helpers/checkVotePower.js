@@ -1,9 +1,9 @@
 const engineOperations = require( '../hiveEngine/hiveEngineOperations' );
 const { VOTE_EVALUATION } = require( '../../constants/requestsConstants' );
 const BigNumber = require( 'bignumber.js' );
-const { WHITE_LIST } = require( '../../constants/whiteList' );
+const { WHITE_LIST, VOTE_COST } = require( '../../constants/voteAbility' );
 
-exports.checkVotePower = async (user) => {
+exports.checkVotePower = async (user, cost) => {
     const { engineVotePrice } = await engineOperations.calculateHiveEngineVote( {
         symbol: VOTE_EVALUATION.TOKEN_SYMBOL,
         account: user,
@@ -12,6 +12,6 @@ exports.checkVotePower = async (user) => {
         weight: VOTE_EVALUATION.WEIGHT
     } );
 
-    return WHITE_LIST.includes(user) ? !new BigNumber(engineVotePrice).lt(0.0001)
-        : !new BigNumber(engineVotePrice).lt(0.001);
+    return WHITE_LIST.includes(user) ? !new BigNumber(engineVotePrice).lt(VOTE_COST.FOR_WHITE_LIST)
+        : !new BigNumber(engineVotePrice).lt(cost);
 };
