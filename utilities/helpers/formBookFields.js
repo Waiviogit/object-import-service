@@ -1,3 +1,5 @@
+const axios = require( 'axios' );
+const FormData = require( 'form-data' ) ;
 const { BOOK_FIELDS, OBJECTS_FROM_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS } = require( '../../constants/objectTypes' );
 const _ = require( 'lodash' );
 const moment = require( 'moment' );
@@ -65,12 +67,12 @@ const dimensions = ( obj ) => {
         return formField( {
             fieldName: BOOK_FIELDS.DIMENSIONS,
             objectName: obj.name,
-            body: {
+            body: JSON.stringify( {
                 value1: parseFloat( value1 ),
                 value2: parseFloat( value2 ),
                 value3: parseFloat( value3 ),
-                unit: DIMENSION_UNITS.find( ( el ) => el.includes( value3.trim().split( ' ' )[ 1 ] ) )
-            },
+                unit: DIMENSION_UNITS.find( ( el ) => el.includes( value3.trim().split( ' ' )[ 1 ] ) ) || 'in'
+            } ),
             user: obj.user
         } );
     }
@@ -105,6 +107,7 @@ const publicationDate = ( obj ) => {
     }
 };
 
+// тэги иначе добавлять!!!
 const tag = ( obj ) => {
     const fields = [];
 
@@ -132,8 +135,8 @@ const weight = ( obj ) => {
         return formField( {
             fieldName: BOOK_FIELDS.WEIGHT,
             body: JSON.stringify( {
-                value: value.trim(),
-                unit: WEIGHT_UNITS.find( ( el ) => el.includes( singUnit ) )
+                value: parseFloat( value ),
+                unit: WEIGHT_UNITS.find( ( el ) => el.includes( singUnit ) ) || 'lb'
             } ),
             user: obj.user,
             objectName: obj.name
@@ -156,69 +159,75 @@ const printLength = ( obj ) => {
 
 const authors = async ( obj ) => {
     const objAuthors = getAuthors( obj );
-    const fields = [];
+    const body = [];
 
     for ( const author of objAuthors ) {
         const field = await formFieldByExistingObject( {
-            obj,
             name: author,
-            fieldName: BOOK_FIELDS.AUTHORS,
             objectType: OBJECTS_FROM_FIELDS.PERSON
         } );
 
         if ( field ) {
-            fields.push( field );
+            body.push( field );
         }
     }
 
-    if ( fields.length ) {
-        return fields;
+    if ( body.length ) {
+        return formField( {
+            fieldName: BOOK_FIELDS.AUTHORS,
+            body: JSON.stringify( body ),
+            user: obj.user,
+            objectName: obj.name
+        } );
     }
 };
 
-const formFieldByExistingObject = async ( { obj, name, objectType, fieldName } ) => {
+const formFieldByExistingObject = async ( { name, objectType } ) => {
     const { wobject, error } = await Wobj.findOneByNameAndObjectType( name, objectType );
 
     if ( !wobject || error ) {
         return;
     }
 
-    return formField( {
-        fieldName,
-        body: JSON.stringify( {
-            name,
-            authorPermlink: wobject.author_permlink
-        } ),
-        user: obj.user,
-        objectName: obj.name
-    } );
+    return {
+        name,
+        authorPermlink: wobject.author_permlink
+    };
 };
 
 const publisher = async ( obj ) => {
     const objPublisher = _.get( obj, 'brand' );
 
     if ( objPublisher ) {
-        return formFieldByExistingObject( {
-            obj,
+        const body = await formFieldByExistingObject( {
             name: objPublisher,
-            objectType: OBJECTS_FROM_FIELDS.BUSINESS,
-            fieldName: BOOK_FIELDS.PUBLISHER
+            objectType: OBJECTS_FROM_FIELDS.BUSINESS
         } );
+
+        if ( body ) {
+            return formField( {
+                fieldName: BOOK_FIELDS.PUBLISHER,
+                objectName: obj.name,
+                user: obj.user,
+                body: JSON.stringify( body )
+            } );
+        }
     }
 };
 
 const options = ( obj ) => {
     const formats = obj.features.find( ( el ) => el.key.toLowerCase().includes( 'format' ) );
+    const uniqFormats = _.uniq( formats.value );
     const fields = [];
 
-    for ( let count = 0; count < formats.value.length; count++ ) {
+    for ( let count = 0; count < uniqFormats.length; count++ ) {
         fields.push( formField( {
             fieldName: BOOK_FIELDS.OPTIONS,
             objectName: obj.name,
             user: obj.user,
             body: JSON.stringify( {
                 category: 'format',
-                value: formats.value[ count ],
+                value: uniqFormats[ count ],
                 position: count,
                 image: obj.imageURLs[ count ]
             } )
@@ -266,6 +275,41 @@ const productId = ( obj ) => {
     }
 };
 
+const avatar = async ( obj ) => {
+    for ( const image of obj.imageURLs ) {
+        try {
+            const response = await axios.get( image );
+
+            if ( response.status !== 200 ) {
+                continue;
+            }
+            const bodyFormData =  new FormData();
+            bodyFormData.append('imageUrl', image);
+            try {
+                console.log('here');
+                console.log('image', image);
+                const resp =  await axios.post(
+                    `https://waiviodev.com/api/image`,
+                    bodyFormData,
+                    {headers: bodyFormData.getHeaders()}
+                )
+                console.log('resp', resp);
+            } catch (error) {
+                console.log('error', error);
+            }
+
+            return formField( {
+                fieldName: BOOK_FIELDS.AVATAR,
+                objectName: obj.name,
+                user: obj.user,
+                body: ''
+            } );
+        } catch ( error ) {
+            console.error( error.message );
+        }
+    }
+};
+
 const fieldsHandle = {
     ageRange,
     dimensions,
@@ -277,5 +321,6 @@ const fieldsHandle = {
     authors,
     publisher,
     options,
-    productId
+    productId,
+    avatar
 };

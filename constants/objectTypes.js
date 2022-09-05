@@ -34,7 +34,8 @@ exports.BOOK_FIELDS = {
     LANGUAGE: 'language',
     PRINT_LENGTH: 'printLength',
     AUTHORS: 'authors',
-    PUBLISHER: 'publisher'
+    PUBLISHER: 'publisher',
+    AVATAR: 'avatar'
 };
 
 exports.OBJECTS_FROM_FIELDS = {

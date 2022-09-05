@@ -23,6 +23,7 @@
     "eslint": "^6.1.0",
     "event-stream": "^4.0.1",
     "express": "^4.14.0",
+    "form-data": "^4.0.0",
     "franc-min": "4.1.0",
     "http-errors": "~1.6.2",
     "joi": "^17.6.0",

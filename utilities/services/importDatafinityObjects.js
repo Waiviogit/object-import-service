@@ -14,11 +14,11 @@ const { VOTE_COST } = require( '../../constants/voteAbility' );
 const { DATAFINITY_KEY } = require( '../../constants/objectTypes' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
-    const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
-
-    if ( error ) {
-        return { error };
-    }
+    // const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
+    //
+    // if ( error ) {
+    //     return { error };
+    // }
     let funcError;
 
     try {
@@ -90,11 +90,11 @@ const startObjectImport = async ( user ) => {
     let objectToCreate;
 
     do {
-       const { result, error: validationError } = await validateUser( user, VOTE_COST.USUAL );
-
-        if ( validationError ) {
-            // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
-        }
+       // const { result, error: validationError } = await validateUser( user, VOTE_COST.USUAL );
+       //
+       //  if ( validationError ) {
+       //      // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
+       //  }
         const { datafinityObject, error } = await DatafinityObject.getOne( { user } );
 
         objectToCreate = datafinityObject;
