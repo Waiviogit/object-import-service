@@ -8,6 +8,10 @@ exports.formPersonOrBusinessObject = async ( obj ) => {
     const publisher = _.get( obj, 'brand' );
     let wobject;
 
+    if ( !publisher ) {
+        return { publisherCreated: true };
+    }
+
     if ( !obj.publisherCreated && publisher ) {
         wobject = await formObject( {
             obj,
@@ -21,6 +25,10 @@ exports.formPersonOrBusinessObject = async ( obj ) => {
 
     if ( !obj.authorCreated ) {
         const authors = this.getAuthors( obj );
+
+        if ( !authors.length ) {
+            return { authorCreated: true };
+        }
 
         for ( const author of authors ) {
             wobject = await formObject( {

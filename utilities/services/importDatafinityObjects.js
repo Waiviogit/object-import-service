@@ -185,6 +185,13 @@ const updateDatafinityObject = async ( obj, datafinityObject ) => {
 const processNewObject = async ( datafinityObject ) => {
     const { wobject, authorCreated, publisherCreated } = await formPersonOrBusinessObject( datafinityObject );
 
+    await DatafinityObject.updateOne(
+        { _id: datafinityObject._id },
+        { ...authorCreated && { authorCreated: true },
+            ...publisherCreated && { publisherCreated: true } }
+    );
+
+
     if ( wobject ) {
         const { objectType, error: dbError } = await ObjectType.getOne( { name: wobject.object_type } );
 
@@ -193,11 +200,8 @@ const processNewObject = async ( datafinityObject ) => {
 
             return;
         }
+
         await addWobject( { wobject, existObjType: objectType, addData: false } );
-        await DatafinityObject.updateOne(
-            { _id: datafinityObject._id },
-            { ...authorCreated && { authorCreated: true },
-                ...publisherCreated && { publisherCreated: true } } );
 
         return;
     }
