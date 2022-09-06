@@ -1,5 +1,5 @@
+const FormData = require( 'form-data' );
 const axios = require( 'axios' );
-const FormData = require( 'form-data' ) ;
 const { BOOK_FIELDS, OBJECTS_FROM_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS } = require( '../../constants/objectTypes' );
 const _ = require( 'lodash' );
 const moment = require( 'moment' );
@@ -33,14 +33,15 @@ exports.prepareFieldsForImport = async ( obj ) => {
     return fields;
 };
 
-const formField = ( { fieldName, objectName, user, body } ) => {
+const formField = ( { fieldName, objectName, user, body, categoryItem = false, id } ) => {
     return {
         weight: 1,
         locale: detectLanguage( objectName ),
         creator: user,
         permlink: permlinkGenerator( user ),
         name: fieldName,
-        body
+        body,
+        ...categoryItem && { id, tagCategory: 'Tags' },
     };
 };
 
@@ -104,24 +105,6 @@ const publicationDate = ( obj ) => {
             user: obj.user,
             objectName: obj.name
         } );
-    }
-};
-
-// тэги иначе добавлять!!!
-const tag = ( obj ) => {
-    const fields = [];
-
-    for ( const category of obj.categories ) {
-        fields.push( formField( {
-            fieldName: BOOK_FIELDS.TAG,
-            body: category,
-            user: obj.user,
-            objectName: obj.name
-        } ) );
-    }
-
-    if ( fields.length ) {
-        return fields;
     }
 };
 
@@ -283,26 +266,23 @@ const avatar = async ( obj ) => {
             if ( response.status !== 200 ) {
                 continue;
             }
-            const bodyFormData =  new FormData();
-            bodyFormData.append('imageUrl', image);
-            try {
-                console.log('here');
-                console.log('image', image);
-                const resp =  await axios.post(
-                    `https://waiviodev.com/api/image`,
-                    bodyFormData,
-                    {headers: bodyFormData.getHeaders()}
-                )
-                console.log('resp', resp);
-            } catch (error) {
-                console.log('error', error);
-            }
+
+            const bodyFormData = new FormData();
+
+            bodyFormData.append( 'imageUrl', image );
+            const resp = await axios.post(
+                process.env.SAVE_IMAGE_URL,
+                bodyFormData,
+                {
+                    headers: bodyFormData.getHeaders()
+                }
+            );
 
             return formField( {
                 fieldName: BOOK_FIELDS.AVATAR,
                 objectName: obj.name,
                 user: obj.user,
-                body: ''
+                body: resp.data.image
             } );
         } catch ( error ) {
             console.error( error.message );
@@ -310,12 +290,34 @@ const avatar = async ( obj ) => {
     }
 };
 
+exports.addTags = async ( obj, tagCategoryId ) => {
+    const fields = [];
+
+    for ( const category of obj.categories ) {
+        const { wobject, error } = await Wobj.findOneByNameAndObjectType( category, 'hashtag' );
+
+        if ( error || !wobject ) {
+            continue;
+        }
+
+        fields.push( formField( {
+            fieldName: BOOK_FIELDS.CATEGORY_ITEM,
+            body: category,
+            user: obj.user,
+            objectName: obj.name,
+            categoryItem: true,
+            id: tagCategoryId
+        } ) );
+    }
+
+    return fields;
+};
+
 const fieldsHandle = {
     ageRange,
     dimensions,
     language,
     publicationDate,
-    tag,
     weight,
     printLength,
     authors,

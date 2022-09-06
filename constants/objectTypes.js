@@ -24,7 +24,8 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 };
 
 exports.BOOK_FIELDS = {
-    TAG: 'tag',
+    TAG_CATEGORY: 'tagCategory',
+    CATEGORY_ITEM: 'categoryItem',
     PRODUCT_ID: 'productId',
     AGE_RANGE: 'ageRange',
     OPTIONS: 'options',

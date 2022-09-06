@@ -6,19 +6,19 @@ const _ = require( 'lodash' );
 const { getAccount } = require( '../hiveApi/userUtil' );
 const { checkVotePower } = require( '../helpers/checkVotePower' );
 const detectLanguage = require( 'utilities/helpers/detectLanguage' );
-const { prepareFieldsForImport } = require( '../helpers/formBookFields' );
+const { prepareFieldsForImport, addTags } = require( '../helpers/formBookFields' );
 const { generateUniquePermlink } = require( '../helpers/permlinkGenerator' );
 const { formPersonOrBusinessObject } = require( '../helpers/formPersonOrBusinessObject' );
 const { addWobject, addField } = require( './importObjectsService' );
 const { VOTE_COST } = require( '../../constants/voteAbility' );
-const { DATAFINITY_KEY } = require( '../../constants/objectTypes' );
+const { DATAFINITY_KEY, BOOK_FIELDS } = require( '../../constants/objectTypes' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
-    // const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
-    //
-    // if ( error ) {
-    //     return { error };
-    // }
+    const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
+
+    if ( error ) {
+        return { error };
+    }
     let funcError;
 
     try {
@@ -90,11 +90,11 @@ const startObjectImport = async ( user ) => {
     let objectToCreate;
 
     do {
-       // const { result, error: validationError } = await validateUser( user, VOTE_COST.USUAL );
-       //
-       //  if ( validationError ) {
-       //      // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
-       //  }
+        const { result, error: validationError } = await validateUser( user, VOTE_COST.USUAL );
+
+        if ( validationError ) {
+            // поставить сабскрайбера, пример есть на старых кампаниях! ттл и прерывание цикла
+        }
         const { datafinityObject, error } = await DatafinityObject.getOne( { user } );
 
         objectToCreate = datafinityObject;
@@ -217,8 +217,26 @@ const processNewObject = async ( datafinityObject ) => {
 };
 
 const processField = async ( datafinityObject, wobject ) => {
+    await addTagsIfNeeded( datafinityObject, wobject );
     await addField( { field: datafinityObject.fields[ 0 ], wobject } );
     await DatafinityObject.updateOne( { _id: datafinityObject._id }, { $pop: { fields: -1 } } );
+};
+
+const addTagsIfNeeded = async ( datafinityObject, wobject ) => {
+    const tagCategory = wobject.fields.find( ( field ) => field.name === BOOK_FIELDS.TAG_CATEGORY );
+    const categoryItems = wobject.fields.filter( ( field ) => field.name === BOOK_FIELDS.CATEGORY_ITEM && field.id === tagCategory.id );
+    const categoryItemsToSave = datafinityObject.fields.filter( ( field ) => field.name === BOOK_FIELDS.CATEGORY_ITEM );
+
+    if ( !categoryItems.length && !categoryItemsToSave.length ) {
+        const fields = await addTags( datafinityObject, tagCategory.id );
+
+        if ( fields.length ) {
+            await DatafinityObject.updateOne(
+                { _id: datafinityObject._id },
+                { $addToSet: { fields: { $each: fields } } }
+            );
+        }
+    }
 };
 
 module.exports = { importObjects };
