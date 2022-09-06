@@ -11,7 +11,7 @@ const { generateUniquePermlink } = require( '../helpers/permlinkGenerator' );
 const { formPersonOrBusinessObject } = require( '../helpers/formPersonOrBusinessObject' );
 const { addWobject, addField } = require( './importObjectsService' );
 const { VOTE_COST } = require( '../../constants/voteAbility' );
-const { DATAFINITY_KEY, BOOK_FIELDS } = require( '../../constants/objectTypes' );
+const { DATAFINITY_KEY, FIELDS_FOR_TAGS } = require( '../../constants/objectTypes' );
 
 const importObjects = async ( { file, user, objectType, authority } ) => {
     const { result, error } = await validateUser( user, VOTE_COST.INITIAL );
@@ -227,9 +227,9 @@ const processField = async ( datafinityObject, wobject ) => {
 };
 
 const addTagsIfNeeded = async ( datafinityObject, wobject ) => {
-    const tagCategory = wobject.fields.find( ( field ) => field.name === BOOK_FIELDS.TAG_CATEGORY );
-    const categoryItems = wobject.fields.filter( ( field ) => field.name === BOOK_FIELDS.CATEGORY_ITEM && field.id === tagCategory.id );
-    const categoryItemsToSave = datafinityObject.fields.filter( ( field ) => field.name === BOOK_FIELDS.CATEGORY_ITEM );
+    const tagCategory = wobject.fields.find( ( field ) => field.name === FIELDS_FOR_TAGS.TAG_CATEGORY );
+    const categoryItems = wobject.fields.filter( ( field ) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM && field.id === tagCategory.id );
+    const categoryItemsToSave = datafinityObject.fields.filter( ( field ) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM );
 
     if ( !categoryItems.length && !categoryItemsToSave.length ) {
         const fields = await addTags( datafinityObject, tagCategory.id );

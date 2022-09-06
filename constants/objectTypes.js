@@ -7,12 +7,9 @@ exports.DATAFINITY_KEY = 'datafinityKey';
 
 exports.OBJECT_IDS = [
     'asins',
-    'ean',
     'ean13',
     'ean8',
-    'gtins',
     'isbn',
-    'upc',
     'upca',
     'upce',
     'vin'
@@ -24,8 +21,6 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 };
 
 exports.BOOK_FIELDS = {
-    TAG_CATEGORY: 'tagCategory',
-    CATEGORY_ITEM: 'categoryItem',
     PRODUCT_ID: 'productId',
     AGE_RANGE: 'ageRange',
     OPTIONS: 'options',
@@ -37,6 +32,11 @@ exports.BOOK_FIELDS = {
     AUTHORS: 'authors',
     PUBLISHER: 'publisher',
     AVATAR: 'avatar'
+};
+
+exports.FIELDS_FOR_TAGS = {
+    TAG_CATEGORY: 'tagCategory',
+    CATEGORY_ITEM: 'categoryItem'
 };
 
 exports.OBJECTS_FROM_FIELDS = {

@@ -1,6 +1,6 @@
 const FormData = require( 'form-data' );
 const axios = require( 'axios' );
-const { BOOK_FIELDS, OBJECTS_FROM_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS } = require( '../../constants/objectTypes' );
+const { BOOK_FIELDS, OBJECTS_FROM_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS, FIELDS_FOR_TAGS } = require( '../../constants/objectTypes' );
 const _ = require( 'lodash' );
 const moment = require( 'moment' );
 const detectLanguage = require( './detectLanguage' );
@@ -63,16 +63,19 @@ const dimensions = ( obj ) => {
     const dimension = _.get( obj, 'dimension' );
 
     if ( dimension ) {
-        const [ value1, value2, value3 ] = dimension.split( 'x' );
+        const [ value1, value2, value3 ] = dimension.split( 'x' ).map( ( el ) => parseFloat( el ) );
+        const length = Math.max( value1, value2, value3 );
+        const depth = Math.min( value1, value2, value3 );
+        const width = [ value1, value2, value3 ].find( ( el ) => el !== length && el !== depth );
 
         return formField( {
             fieldName: BOOK_FIELDS.DIMENSIONS,
             objectName: obj.name,
             body: JSON.stringify( {
-                value1: parseFloat( value1 ),
-                value2: parseFloat( value2 ),
-                value3: parseFloat( value3 ),
-                unit: DIMENSION_UNITS.find( ( el ) => el.includes( value3.trim().split( ' ' )[ 1 ] ) ) || 'in'
+                length,
+                depth,
+                width,
+                unit: DIMENSION_UNITS.find( ( el ) => el.includes( dimension.split( 'x' )[ 2 ].trim().split( ' ' )[ 1 ] ) ) || 'in'
             } ),
             user: obj.user
         } );
@@ -301,7 +304,7 @@ exports.addTags = async ( obj, tagCategoryId ) => {
         }
 
         fields.push( formField( {
-            fieldName: BOOK_FIELDS.CATEGORY_ITEM,
+            fieldName: FIELDS_FOR_TAGS.CATEGORY_ITEM,
             body: category,
             user: obj.user,
             objectName: obj.name,
