@@ -1,12 +1,11 @@
 const FormData = require( 'form-data' );
 const axios = require( 'axios' );
-const { BOOK_FIELDS, OBJECTS_FROM_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS, FIELDS_FOR_TAGS } = require( '../../constants/objectTypes' );
+const { BOOK_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS, FIELDS_FOR_TAGS } = require( '../../constants/objectTypes' );
 const _ = require( 'lodash' );
 const moment = require( 'moment' );
-const detectLanguage = require( './detectLanguage' );
-const { permlinkGenerator } = require( './permlinkGenerator' );
-const { getAuthors } = require( './formPersonOrBusinessObject' );
-const { Wobj } = require( '../../models' );
+const { Wobj, DatafinityObject } = require( '../../models' );
+const { puppeteerBrowser } = require( '../puppeteer/browser' );
+const { formField } = require( './formFieldHelper' );
 
 exports.prepareFieldsForImport = async ( obj ) => {
     const fields = [];
@@ -31,18 +30,6 @@ exports.prepareFieldsForImport = async ( obj ) => {
     }
 
     return fields;
-};
-
-const formField = ( { fieldName, objectName, user, body, categoryItem = false, id } ) => {
-    return {
-        weight: 1,
-        locale: detectLanguage( objectName ),
-        creator: user,
-        permlink: permlinkGenerator( user ),
-        name: fieldName,
-        body,
-        ...categoryItem && { id, tagCategory: 'Tags' },
-    };
 };
 
 const ageRange = ( obj ) => {
@@ -111,7 +98,7 @@ const publicationDate = ( obj ) => {
     }
 };
 
-const weight = ( obj ) => {
+const productWeight = ( obj ) => {
     const objWeight = _.get( obj, BOOK_FIELDS.WEIGHT );
 
     if ( objWeight ) {
@@ -143,40 +130,38 @@ const printLength = ( obj ) => {
     }
 };
 
-const authors = async ( obj ) => {
-    const objAuthors = getAuthors( obj );
-    const body = [];
+authors = async ( obj ) => {
+    const fields = [];
 
-    for ( const author of objAuthors ) {
-        const field = await formFieldByExistingObject( {
-            name: author,
-            objectType: OBJECTS_FROM_FIELDS.PERSON
-        } );
+    if ( !obj.person_permlinks.length ) {
+        return fields;
+    }
+
+    for ( const author of obj.person_permlinks ) {
+        const field = await formFieldByExistingObject( author );
 
         if ( field ) {
-            body.push( field );
+            fields.push( formField( {
+                fieldName: BOOK_FIELDS.AUTHORS,
+                body: JSON.stringify( field ),
+                user: obj.user,
+                objectName: obj.name
+            } ) );
         }
     }
 
-    if ( body.length ) {
-        return formField( {
-            fieldName: BOOK_FIELDS.AUTHORS,
-            body: JSON.stringify( body ),
-            user: obj.user,
-            objectName: obj.name
-        } );
-    }
+    return fields;
 };
 
-const formFieldByExistingObject = async ( { name, objectType } ) => {
-    const { wobject, error } = await Wobj.findOneByNameAndObjectType( name, objectType );
+const formFieldByExistingObject = async ( author_permlink ) => {
+    const { wobject, error } = await Wobj.getOne( { author_permlink } );
 
     if ( !wobject || error ) {
         return;
     }
 
     return {
-        name,
+        name: wobject.name,
         authorPermlink: wobject.author_permlink
     };
 };
@@ -185,43 +170,47 @@ const publisher = async ( obj ) => {
     const objPublisher = _.get( obj, 'brand' );
 
     if ( objPublisher ) {
-        const body = await formFieldByExistingObject( {
-            name: objPublisher,
-            objectType: OBJECTS_FROM_FIELDS.BUSINESS
+        return formField( {
+            fieldName: BOOK_FIELDS.PUBLISHER,
+            objectName: obj.name,
+            user: obj.user,
+            body: JSON.stringify( { name: objPublisher } )
         } );
-
-        if ( body ) {
-            return formField( {
-                fieldName: BOOK_FIELDS.PUBLISHER,
-                objectName: obj.name,
-                user: obj.user,
-                body: JSON.stringify( body )
-            } );
-        }
     }
 };
 
-const options = ( obj ) => {
+const options = async ( obj ) => {
     const formats = obj.features.find( ( el ) => el.key.toLowerCase().includes( 'format' ) );
-    const uniqFormats = _.uniq( formats.value );
-    const fields = [];
 
-    for ( let count = 0; count < uniqFormats.length; count++ ) {
-        fields.push( formField( {
-            fieldName: BOOK_FIELDS.OPTIONS,
-            objectName: obj.name,
-            user: obj.user,
-            body: JSON.stringify( {
-                category: 'format',
-                value: uniqFormats[ count ],
-                position: count,
-                image: obj.imageURLs[ count ]
-            } )
-        } ) );
+    if ( !formats ) {
+        const url = obj.prices.find( ( el ) => el.sourceURLs[ 0 ].includes( 'amazon.com' ) );
+
+        if ( !url ) {
+            return;
+        }
+
+        const page = await puppeteerBrowser.goToObjectPage( url.sourceURLs[ 0 ] );
+        const scrapedFormats = await puppeteerBrowser.getFormats( page );
+
+        await puppeteerBrowser.close();
+        if ( !scrapedFormats.length ) {
+            return;
+        }
+
+        const formatsAmazon = formFormats( scrapedFormats, obj );
+
+        if ( !formatsAmazon.length ) {
+            return;
+        }
+
+        return formatsAmazon;
     }
 
-    if ( fields.length ) {
-        return fields;
+    const uniqFormats = _.uniq( formats.value );
+    const formatsDatafinity = formFormats( uniqFormats, obj );
+
+    if ( formatsDatafinity.length ) {
+        return formatsDatafinity;
     }
 };
 
@@ -240,7 +229,8 @@ const productId = ( obj ) => {
         } ) );
     }
 
-    const ids = Object.entries( obj ).filter( ( el ) => OBJECT_IDS.some( ( id ) => el.includes( id ) ) );
+    const ids = Object.entries( obj ).filter( ( el ) => Object.values( OBJECT_IDS ).some( ( id ) =>
+        el.includes( id ) ) );
 
     for ( const id of ids ) {
         if ( id[ 1 ].length ) {
@@ -293,7 +283,7 @@ const avatar = async ( obj ) => {
     }
 };
 
-exports.addTags = async ( obj, tagCategoryId ) => {
+const addTags = async ( obj, tagCategoryId ) => {
     const fields = [];
 
     for ( const category of obj.categories ) {
@@ -316,12 +306,49 @@ exports.addTags = async ( obj, tagCategoryId ) => {
     return fields;
 };
 
+const formFormats = ( uniqFormats, obj ) => {
+    const fields = [];
+
+    for ( let count = 0; count < uniqFormats.length; count++ ) {
+        fields.push( formField( {
+            fieldName: BOOK_FIELDS.OPTIONS,
+            objectName: obj.name,
+            user: obj.user,
+            body: JSON.stringify( {
+                category: 'format',
+                value: uniqFormats[ count ],
+                position: count,
+                image: obj.imageURLs[ count ]
+            } )
+        } ) );
+    }
+
+    return fields;
+};
+
+exports.addTagsIfNeeded = async ( datafinityObject, wobject ) => {
+    const tagCategory = wobject.fields.find( ( field ) => field.name === FIELDS_FOR_TAGS.TAG_CATEGORY );
+    const categoryItems = wobject.fields.filter( ( field ) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM && field.id === tagCategory.id );
+    const categoryItemsToSave = datafinityObject.fields.filter( ( field ) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM );
+
+    if ( !categoryItems.length && !categoryItemsToSave.length ) {
+        const fields = await addTags( datafinityObject, tagCategory.id );
+
+        if ( fields.length ) {
+            await DatafinityObject.updateOne(
+                { _id: datafinityObject._id },
+                { $addToSet: { fields: { $each: fields } } }
+            );
+        }
+    }
+};
+
 const fieldsHandle = {
     ageRange,
     dimensions,
     language,
     publicationDate,
-    weight,
+    productWeight,
     printLength,
     authors,
     publisher,

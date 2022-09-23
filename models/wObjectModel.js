@@ -56,4 +56,16 @@ const findOneByNameAndObjectType = async ( name, objectType ) => {
     }
 };
 
-module.exports = { getOne, getField, findSameFieldBody, findOneByNameAndObjectType };
+const findOneByProductId = async ( asin, objectType ) => {
+    try {
+        return { wobject: await WObjectModel.findOne( {
+            object_type: objectType,
+            'fields.name': 'productId',
+            'fields.body': { $regex: asin }
+        } ).lean() };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { getOne, getField, findSameFieldBody, findOneByNameAndObjectType, findOneByProductId };

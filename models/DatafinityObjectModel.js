@@ -10,13 +10,9 @@ const insertMany = async ( docs ) => {
     }
 };
 
-const getOne = async ( { user } ) => {
+const getOne = async ( filter ) => {
     try {
-        const datafinityObject = await DatafinityObject.findOne( { user } ).lean();
-
-        if ( !datafinityObject ) {
-            throw { status: 404, message: 'Datafinity Object not found!' };
-        }
+        const datafinityObject = await DatafinityObject.findOne( filter ).lean();
 
         return { datafinityObject };
     } catch ( error ) {
@@ -42,4 +38,24 @@ const removeOne = async ( id ) => {
     }
 };
 
-module.exports = { insertMany, getOne, updateOne, removeOne };
+const create = async ( docs ) => {
+    try {
+        const result = await DatafinityObject.create( docs );
+
+        return { result };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+const findOneAndModify = async ( filter, update ) => {
+    try {
+        const result = await DatafinityObject.findOneAndUpdate( filter, update );
+
+        return { result };
+    } catch ( error ) {
+        return { error };
+    }
+};
+
+module.exports = { insertMany, getOne, updateOne, removeOne, create, findOneAndModify };

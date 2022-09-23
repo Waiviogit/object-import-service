@@ -3,6 +3,7 @@ const logger = require( 'morgan' );
 const { routes } = require( './routes' );
 const { importObjectsService } = require( './utilities/services' );
 const dotenv = require( 'dotenv' );
+const client = require( 'utilities/redis/subscriber/subscriber' );
 
 dotenv.config();
 

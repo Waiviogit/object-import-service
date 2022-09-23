@@ -5,15 +5,15 @@ exports.OBJECT_TYPES = {
 exports.DATAFINITY_IDS = 'keys';
 exports.DATAFINITY_KEY = 'datafinityKey';
 
-exports.OBJECT_IDS = [
-    'asins',
-    'ean13',
-    'ean8',
-    'isbn',
-    'upca',
-    'upce',
-    'vin'
-];
+exports.OBJECT_IDS = {
+    ASINS: 'asins',
+    EAN13: 'ean13',
+    EAN8: 'ean8',
+    ISBN: 'isbn',
+    UPCA: 'upca',
+    UPCE: 'upce',
+    VIN: 'vin'
+};
 
 exports.AUTHORITY_FIELD_OPTIONS = {
     ADMINISTRATIVE: 'administrative',
@@ -26,7 +26,7 @@ exports.BOOK_FIELDS = {
     OPTIONS: 'options',
     PUBLICATION_DATE: 'publicationDate',
     DIMENSIONS: 'dimensions',
-    WEIGHT: 'weight',
+    WEIGHT: 'productWeight',
     LANGUAGE: 'language',
     PRINT_LENGTH: 'printLength',
     AUTHORS: 'authors',

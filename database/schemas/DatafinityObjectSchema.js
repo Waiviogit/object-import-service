@@ -4,6 +4,8 @@ const Schema = mongoose.Schema;
 const DatafinityObjectSchema = new Schema( {
     user: { type: String, required: true },
     object_type: { type: String, required: true },
+    author_permlink: String,
+    person_permlinks: { type: [ String ], default: [] },
     authority: String,
     asins: String,
     brand: String,
@@ -134,8 +136,6 @@ const DatafinityObjectSchema = new Schema( {
     vin: String,
     websiteIDs: { type: [ String ], default: [] },
     weight: String,
-    authorCreated: { type: Boolean, default: false },
-    publisherCreated: { type: Boolean, default: false }
 }, {
     strict: false, timestamps: true, versionKey: false, toObject: {
         virtuals: true
