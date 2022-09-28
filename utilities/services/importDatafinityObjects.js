@@ -16,11 +16,11 @@ const { addWobject, addField } = require('./importObjectsService');
 const importObjects = async ({
   file, user, objectType, authority,
 }) => {
-  // const { result, error } = await validateUser(user, VOTE_COST.INITIAL);
-  //
-  // if (error) {
-  //   return { error };
-  // }
+  const { result, error } = await validateUser(user, VOTE_COST.INITIAL);
+
+  if (error) {
+    return { error };
+  }
   let funcError;
 
   try {
@@ -111,11 +111,11 @@ const startObjectImport = async (user, authorPermlink = null) => {
     objToCreate = book;
   }
 
-  // const { result, error: validationError } = await validateUser(user, VOTE_COST.USUAL);
-  //
-  // if (validationError) {
-  //   // поставить ттл, посчитать через сколько
-  // }
+  const { result, error: validationError } = await validateUser(user, VOTE_COST.USUAL);
+
+  if (validationError) {
+    // поставить ттл, посчитать через сколько
+  }
 
   const processObject = !objToCreate.author_permlink || objToCreate.object_type === OBJECTS_FROM_FIELDS.PERSON;
 

@@ -10,7 +10,7 @@ class Browser {
         height: 1080,
       },
       ignoreDefaultArgs: ['--disable-extensions'],
-      headless: false,
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080'],
     };
     this.browser = undefined;
