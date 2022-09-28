@@ -20,7 +20,6 @@
     "csv-writer": "^1.5.0",
     "dotenv": "^16.0.1",
     "dsteem": "^0.8.7",
-    "eslint": "^6.1.0",
     "event-stream": "^4.0.1",
     "express": "^4.14.0",
     "form-data": "^4.0.0",
@@ -41,6 +40,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^6.1.0",
     "faker": "^4.1.0",
     "mocha": "^6.0.2",
     "nodemon": "^1.11.0",

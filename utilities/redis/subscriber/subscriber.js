@@ -1,17 +1,18 @@
-const redis = require( 'redis' );
-const config = require( '../../../config' );
-const { startObjectImport } = require( '../../services/importDatafinityObjects' );
-const subscriber = redis.createClient( { db: config.redis.lastBlock } );
+const redis = require('redis');
+const config = require('../../../config');
+const { startObjectImport } = require('../../services/importDatafinityObjects');
 
-subscriber.on( 'message', async ( channel, message ) => {
-    try {
-        const { user, author_permlink } = JSON.parse( message );
+const subscriber = redis.createClient({ db: config.redis.lastBlock });
 
-        await startObjectImport( user, author_permlink );
-    } catch ( error ) {
-        console.error( error.message );
-    }
-} );
-subscriber.subscribe( 'datafinityObject' );
+subscriber.on('message', async (channel, message) => {
+  try {
+    const { user, author_permlink } = JSON.parse(message);
+
+    await startObjectImport(user, author_permlink);
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+subscriber.subscribe('datafinityObject');
 
 module.exports = { subscriber };

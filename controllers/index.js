@@ -1,3 +1,3 @@
 module.exports = {
-    importWobjectsController: require( './importWobjectsController' )
+  importWobjectsController: require('./importWobjectsController'),
 };
