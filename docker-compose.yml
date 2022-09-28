@@ -6,6 +6,8 @@ services:
     build: .
     env_file:
       - .env
+    ports:
+      - ${PORT}:${PORT}
     command: npm run start
     restart: always
     network_mode: host
