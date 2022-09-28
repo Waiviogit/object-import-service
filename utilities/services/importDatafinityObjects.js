@@ -269,4 +269,25 @@ const emitStart = (user, authorPermlink = null) => {
   myEE.emit('import');
 };
 
+const checkIfWobjectExists = async (datafinityObject) => {
+  if (!datafinityObject.keys) return;
+
+  return await getWobjectByKeys(datafinityObject.keys);
+}
+
+const getWobjectByKeys = async (keys) => {
+  for (const key of keys) {
+    const textMatch = `\"${key}\"`;
+    const regexMatch = JSON.stringify({ productId: key, productIdType: DATAFINITY_KEY });
+    const { result, error } = await Wobj.findSameFieldBody(textMatch, regexMatch);
+    if ( error ) {
+      console.error( error.message );
+
+      return;
+    }
+
+    return result;
+  }
+};
+
 module.exports = { importObjects, startObjectImport };
