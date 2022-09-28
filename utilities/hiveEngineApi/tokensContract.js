@@ -1,10 +1,10 @@
-const { engineProxy } = require( './hiveEngineApi' );
+const { engineProxy } = require('./hiveEngineApi');
 
 exports.getTokenBalances = async ({ query, hostUrl }) => engineProxy({
-    params: {
-        contract: 'tokens',
-        table: 'balances',
-        query,
-    },
-    hostUrl,
+  params: {
+    contract: 'tokens',
+    table: 'balances',
+    query,
+  },
+  hostUrl,
 });
