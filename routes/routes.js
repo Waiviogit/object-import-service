@@ -13,9 +13,13 @@ objects.route('/import-tags')
   .post(importWobjectsController.importTags);
 objects.route('/import-wobjects-json')
   .post(upload.single('wobjects'), importWobjectsController.importWobjectsJson);
+
 objects.route('/import-products').post(
   textOrJsonUpload.single('file'),
   importWobjectsController.importObjectsFromTextOrJson,
 );
+//pause
+// delete
+//statistic
 
 module.exports = routes;

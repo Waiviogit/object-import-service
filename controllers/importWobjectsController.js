@@ -5,6 +5,7 @@ const {
 const { validateImmediatelyImport } = require('../utilities/objectBotApi/validators');
 const { FILE_MAX_SIZE } = require('../constants/fileFormats');
 const { authorise } = require('../utilities/authorization/authorizeUser');
+const { importAccountValidator } = require('../validators/accountValidator');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -41,7 +42,7 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
   if (req.file.size > FILE_MAX_SIZE) {
     return next({ error: { status: 422, message: 'Allowed file size must be less than 100 MB' } });
   }
-
+  /// how req body if form data
   const value = validators.validate(
     { ...req.body },
     validators.importWobjects.importDatafinityObjectsSchema,
@@ -50,10 +51,15 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (!value) return;
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  // const accessToken = req.headers['access-token'];
+  // const { error: authError } = await authorise(value.user, accessToken);
 
-  if (authError) return next(authError);
+  // if (authError) return next(authError);
+
+  const { result: validAcc, error: accError } = await importAccountValidator(value.user);
+  if (!validAcc) {
+    return next(accError);
+  }
 
   const { result, error } = await importDatafinityObjects.importObjects({ file: req.file, ...value });
 

@@ -6,6 +6,7 @@
   "parserOptions": {
     "ecmaVersion": 2018
   },
+  "extends": ["airbnb-base" ],
   "rules": {
     "import/no-unresolved": 0,
     "one-var": 0,

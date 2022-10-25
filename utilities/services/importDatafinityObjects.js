@@ -16,11 +16,6 @@ const { addWobject, addField } = require('./importObjectsService');
 const importObjects = async ({
   file, user, objectType, authority,
 }) => {
-  const { result, error } = await validateUser(user, VOTE_COST.INITIAL);
-
-  if (error) {
-    return { error };
-  }
   let funcError;
 
   try {
@@ -46,6 +41,7 @@ const importObjects = async ({
               console.log('Error while deleting a file');
             }
           });
+          console.log()
           await saveObjects({
             products: JSON.parse(products),
             user,
