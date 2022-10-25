@@ -57,15 +57,10 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
   // if (authError) return next(authError);
 
   const { result: validAcc, error: accError } = await importAccountValidator(value.user);
-  if (!validAcc) {
-    return next(accError);
-  }
+  if (!validAcc) return next(accError);
 
   const { result, error } = await importDatafinityObjects.importObjects({ file: req.file, ...value });
-
-  if (error) {
-    return next(error);
-  }
+  if (error) return next(error);
 
   res.status(200).json({ message: 'Objects added to queue of creating!' });
 };
