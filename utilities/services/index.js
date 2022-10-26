@@ -3,4 +3,5 @@ module.exports = {
   importTagsService: require('./importTagsService'),
   importObjectsFromFile: require('./importObjectsFromFile'),
   importDatafinityObjects: require('./importDatafinityObjects'),
+  importManage: require('./importManage'),
 };

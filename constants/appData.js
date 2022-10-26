@@ -12,6 +12,7 @@ const IMPORT_STATUS = {
   ACTIVE: 'active',
   ON_HOLD: 'onHold',
   FINISHED: 'finished',
+  DELETED: 'deleted',
 };
 
 module.exports = {

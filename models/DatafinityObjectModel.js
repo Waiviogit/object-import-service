@@ -58,6 +58,24 @@ const findOneAndModify = async (filter, update) => {
   }
 };
 
+const distinct = async ({ field, filter, options }) => {
+  try {
+    const result = await DatafinityObject.distinct(field, filter, options);
+    return { result: result.length };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const deleteMany = async ({ filter, options }) => {
+  try {
+    const result = await DatafinityObject.deleteMany(filter, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
-  insertMany, getOne, updateOne, removeOne, create, findOneAndModify,
+  insertMany, getOne, updateOne, removeOne, create, findOneAndModify, distinct, deleteMany,
 };

@@ -47,7 +47,7 @@ const findOneAndDelete = async ({ filter, options }) => {
 
 const findOneAndUpdate = async ({ filter, update, options }) => {
   try {
-    const result = await ImportStatus.findOneAndUpdate(filter, update, options);
+    const result = await ImportStatus.findOneAndUpdate(filter, update, options).lean();
     return { result };
   } catch (error) {
     return { error };

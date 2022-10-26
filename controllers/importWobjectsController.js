@@ -1,6 +1,6 @@
 const validators = require('controllers/validators');
 const {
-  importObjectsService, importTagsService, importObjectsFromFile, importDatafinityObjects,
+  importObjectsService, importTagsService, importObjectsFromFile, importDatafinityObjects, importManage,
 } = require('../utilities/services');
 const { validateImmediatelyImport } = require('../utilities/objectBotApi/validators');
 const { FILE_MAX_SIZE } = require('../constants/fileFormats');
@@ -43,7 +43,7 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
     return next({ error: { status: 422, message: 'Allowed file size must be less than 100 MB' } });
   }
   const value = validators.validate(
-    { ...req.body },
+    req.body,
     validators.importWobjects.importDatafinityObjectsSchema,
     next,
   );
@@ -65,9 +65,58 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
   res.status(200).json({ message: `${result} objects added to queue of creating!` });
 };
 
+const getImportStatistic = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.importStatisticsSchema,
+    next,
+  );
+  if (!value) return;
+  const { result, error } = await importManage.getStatistic(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
+const changeImportStatus = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.importStatusSchema,
+    next,
+  );
+
+  const accessToken = req.headers['access-token'];
+  const { error: authError } = await authorise(value.user, accessToken);
+  if (authError) return next(authError);
+
+  if (!value) return;
+  const { result, error } = await importManage.changeStatus(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
+const deleteImport = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.deleteImportSchema,
+    next,
+  );
+
+  const accessToken = req.headers['access-token'];
+  const { error: authError } = await authorise(value.user, accessToken);
+  if (authError) return next(authError);
+
+  if (!value) return;
+  const { result, error } = await importManage.deleteImport(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
 module.exports = {
   importWobjects,
   importTags,
   importWobjectsJson,
   importObjectsFromTextOrJson,
+  getImportStatistic,
+  changeImportStatus,
+  deleteImport,
 };
