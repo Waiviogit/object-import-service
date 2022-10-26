@@ -20,7 +20,7 @@ objects.route('/import-products')
     importWobjectsController.importObjectsFromTextOrJson,
   )
   .get(importWobjectsController.getImportStatistic)
-  .put(importWobjectsController.changeImportStatus)
+  .put(importWobjectsController.changeImportDetails)
   .delete(importWobjectsController.deleteImport);
 
 module.exports = routes;

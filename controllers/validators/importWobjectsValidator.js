@@ -15,9 +15,10 @@ exports.importStatisticsSchema = Joi.object().keys({
 
 exports.importStatusSchema = Joi.object().keys({
   user: Joi.string().required(),
-  status: Joi.string().valid(IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD).required(),
+  status: Joi.string().valid(IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD),
+  name: Joi.string(),
   importId: Joi.string().required(),
-});
+}).or('status', 'name');
 
 exports.deleteImportSchema = Joi.object().keys({
   user: Joi.string().required(),

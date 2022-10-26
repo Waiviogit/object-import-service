@@ -77,7 +77,7 @@ const getImportStatistic = async (req, res, next) => {
   res.status(200).json(result);
 };
 
-const changeImportStatus = async (req, res, next) => {
+const changeImportDetails = async (req, res, next) => {
   const value = validators.validate(
     req.body,
     validators.importWobjects.importStatusSchema,
@@ -89,7 +89,7 @@ const changeImportStatus = async (req, res, next) => {
   if (authError) return next(authError);
 
   if (!value) return;
-  const { result, error } = await importManage.changeStatus(value);
+  const { result, error } = await importManage.updateImport(value);
   if (error) return next(error);
   res.status(200).json(result);
 };
@@ -117,6 +117,6 @@ module.exports = {
   importWobjectsJson,
   importObjectsFromTextOrJson,
   getImportStatistic,
-  changeImportStatus,
+  changeImportDetails,
   deleteImport,
 };

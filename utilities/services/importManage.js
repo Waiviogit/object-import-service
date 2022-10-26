@@ -21,10 +21,15 @@ const getStatistic = async ({ user }) => {
   return { result };
 };
 
-const changeStatus = async ({ user, status, importId }) => {
+const updateImport = async ({
+  user, status, name, importId,
+}) => {
   const { result, error } = await ImportStatusModel.findOneAndUpdate({
     filter: { user, importId },
-    update: { status },
+    update: {
+      ...(status && { status }),
+      ...(name && { name }),
+    },
     options: { new: true },
   });
 
@@ -66,6 +71,6 @@ const deleteImport = async ({ user, importId }) => {
 
 module.exports = {
   getStatistic,
-  changeStatus,
+  updateImport,
   deleteImport,
 };
