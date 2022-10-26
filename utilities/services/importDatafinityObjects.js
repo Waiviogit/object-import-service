@@ -5,8 +5,6 @@ const uuid = require('uuid');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
-const { getAccount } = require('../hiveApi/userUtil');
-const { checkVotePower } = require('../helpers/checkVotePower');
 const { prepareFieldsForImport, addTagsIfNeeded } = require('../helpers/bookFieldsHelper');
 const { generateUniquePermlink } = require('../helpers/permlinkGenerator');
 const { formPersonObjects } = require('../helpers/formPersonObject');
@@ -14,6 +12,8 @@ const { VOTE_COST } = require('../../constants/voteAbility');
 const { OBJECT_TYPES, OBJECTS_FROM_FIELDS } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
+const { importAccountValidator } = require('../../validators/accountValidator');
+const { IMPORT_STATUS } = require('../../constants/appData');
 
 const bufferToArray = (buffer) => {
   let stringFromBuffer = buffer.toString();
@@ -80,7 +80,21 @@ const importObjects = async ({
   return { result };
 };
 
+const checkImportActiveStatus = async (importId) => {
+  const { result: importDoc } = await ImportStatusModel.findOne({
+    filter: { importId },
+  });
+  const status = _.get(importDoc, 'status');
+  return status === IMPORT_STATUS.ACTIVE;
+};
+
 const startObjectImport = async (user, authorPermlink = null) => {
+  const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
+
+  if (!validAcc) {
+    // поставить ттл, посчитать через сколько
+  }
+
   let objToCreate;
   const { datafinityObject, error } = await DatafinityObject.getOne({
     user,
@@ -90,7 +104,6 @@ const startObjectImport = async (user, authorPermlink = null) => {
 
   if (error) {
     console.error(error.message);
-
     return;
   }
 
@@ -106,49 +119,33 @@ const startObjectImport = async (user, authorPermlink = null) => {
     objToCreate = book;
   }
 
-  const { result, error: validationError } = await validateUser(user, VOTE_COST.USUAL);
+  const processObject = !objToCreate.author_permlink
+      || objToCreate.object_type === OBJECTS_FROM_FIELDS.PERSON;
 
-  if (validationError) {
-    // поставить ттл, посчитать через сколько
-  }
-
-  const processObject = !objToCreate.author_permlink || objToCreate.object_type === OBJECTS_FROM_FIELDS.PERSON;
+  const activeStatus = await checkImportActiveStatus(objToCreate.importId);
+  if (!activeStatus) return;
 
   if (processObject) {
+    // trigger new import from parser
     await processNewObject(objToCreate);
   } else if (authorPermlink) {
     const { wobject, error: dbError } = await Wobj.getOne({
       author_permlink: authorPermlink,
     });
 
-    if (dbError) {
+    if (dbError) return;
+
+    const { result: updatedObj, error: processErr } = await processField(objToCreate, wobject);
+    if (processErr) return;
+
+    if (!updatedObj.fields.length) {
+      await DatafinityObject.removeOne(updatedObj._id);
+      emitStart(datafinityObject.user);
       return;
     }
 
-    await processField(objToCreate, wobject);
+    emitStart(datafinityObject.user, datafinityObject.author_permlink);
   }
-};
-
-const validateUser = async (user) => {
-  const abilityToVote = await checkVotePower(user);
-
-  if (!abilityToVote) {
-    return { error: { status: '409', message: 'Not enough vote power' } };
-  }
-
-  const { account, error } = await getAccount(user);
-
-  if (error) {
-    return { error };
-  }
-
-  const postingAuthorities = account.posting.account_auths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
-
-  if (!postingAuthorities) {
-    return { error: { status: '409', message: 'Posting authorities not delegated' } };
-  }
-
-  return { result: true };
 };
 
 const prepareObjectForImport = async (datafinityObject) => {
@@ -206,15 +203,9 @@ const processField = async (datafinityObject, wobject) => {
   if (error) {
     console.error(error.message);
 
-    return;
+    return { error };
   }
-
-  if (!result.fields.length) {
-    await DatafinityObject.removeOne(result._id);
-    emitStart(datafinityObject.user);
-  }
-
-  emitStart(datafinityObject.user, datafinityObject.author_permlink);
+  return { result };
 };
 
 const createAuthors = async (datafinityObject) => {
