@@ -26,15 +26,13 @@ const WObjectSchema = new Schema({
     author: String, //
     permlink: String, // author+permlink is link to appendObject COMMENT(or to create object post if it's first field)
     id: String,
-    active_votes:
-                {
-                  type:
-                        [{
-                          voter: { type: String },
-                          weight: { type: Number },
-                        }],
-                  default: [],
-                },
+    active_votes: {
+      type: [{
+        voter: { type: String },
+        weight: { type: Number },
+      }],
+      default: [],
+    },
   }],
 },
 {

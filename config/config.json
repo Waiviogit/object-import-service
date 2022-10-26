@@ -1,5 +1,10 @@
 {
   "production": {
+    "importDB": {
+      "host": "localhost",
+      "port": 27017,
+      "database": "import_objects"
+    },
     "db": {
       "host": "localhost",
       "port": 27017,
@@ -20,6 +25,11 @@
     }
   },
   "staging": {
+    "importDB": {
+      "host": "localhost",
+      "port": 27017,
+      "database": "import_objects"
+    },
     "db": {
       "host": "localhost",
       "port": 27017,
@@ -40,6 +50,11 @@
     }
   },
   "development": {
+    "importDB": {
+      "host": "localhost",
+      "port": 27017,
+      "database": "import_objects"
+    },
     "db": {
       "host": "localhost",
       "port": 27017,
@@ -60,6 +75,11 @@
     }
   },
   "test": {
+    "importDB": {
+      "host": "localhost",
+      "port": 27017,
+      "database": "waiviotest"
+    },
     "db": {
       "host": "localhost",
       "port": 27017,

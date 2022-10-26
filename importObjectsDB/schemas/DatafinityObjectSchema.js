@@ -1,22 +1,27 @@
 const mongoose = require('mongoose');
+const db = require('../importObjects_Connection');
 
 const { Schema } = mongoose;
 
 const DatafinityObjectSchema = new Schema({
-  user: { type: String, required: true },
+  user: { type: String, required: true, index: true },
+  importId: { type: String, required: true, index: true },
   object_type: { type: String, required: true },
   author_permlink: String,
   person_permlinks: { type: [String], default: [] },
-  fields: { type: [
-    {
-      weight: Number,
-      locale: String,
-      creator: String,
-      permlin: String,
-      name: String,
-      body: String
-    }
-  ], default: [] },
+  fields: {
+    type: [
+      {
+        weight: Number,
+        locale: String,
+        creator: String,
+        permlink: String,
+        name: String,
+        body: String,
+      },
+    ],
+    default: [],
+  },
   datafinityObject: Boolean,
   authority: String,
   asins: String,
@@ -157,6 +162,6 @@ const DatafinityObjectSchema = new Schema({
   },
 });
 
-const DatafinityObjectModel = mongoose.model('datafinity_object', DatafinityObjectSchema);
+const DatafinityObjectModel = db.model('datafinity_object', DatafinityObjectSchema);
 
 module.exports = DatafinityObjectModel;

@@ -42,7 +42,6 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
   if (req.file.size > FILE_MAX_SIZE) {
     return next({ error: { status: 422, message: 'Allowed file size must be less than 100 MB' } });
   }
-  /// how req body if form data
   const value = validators.validate(
     { ...req.body },
     validators.importWobjects.importDatafinityObjectsSchema,
@@ -51,18 +50,19 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (!value) return;
 
-  // const accessToken = req.headers['access-token'];
-  // const { error: authError } = await authorise(value.user, accessToken);
+  const accessToken = req.headers['access-token'];
+  const { error: authError } = await authorise(value.user, accessToken);
 
-  // if (authError) return next(authError);
+  if (authError) return next(authError);
 
   const { result: validAcc, error: accError } = await importAccountValidator(value.user);
   if (!validAcc) return next(accError);
 
-  const { result, error } = await importDatafinityObjects.importObjects({ file: req.file, ...value });
+  const { result, error } = await importDatafinityObjects
+    .importObjects({ file: req.file, ...value });
   if (error) return next(error);
 
-  res.status(200).json({ message: 'Objects added to queue of creating!' });
+  res.status(200).json({ message: `${result} objects added to queue of creating!` });
 };
 
 module.exports = {

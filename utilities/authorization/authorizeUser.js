@@ -1,8 +1,7 @@
 const sc2 = require('sc2-sdk');
 
 exports.authorise = async (username, accessToken) => {
-  let isValidToken;
-  isValidToken = await authoriseUser(accessToken, username);
+  const isValidToken = await authoriseUser(accessToken, username);
   if (isValidToken) return { isValid: true };
 
   return { error: { status: 401, message: 'Token not valid!' } };

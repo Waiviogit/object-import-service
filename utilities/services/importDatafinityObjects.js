@@ -1,9 +1,10 @@
-const fs = require('fs');
 const EventEmitter = require('events');
-const moment = require('moment');
 const _ = require('lodash');
 const detectLanguage = require('utilities/helpers/detectLanguage');
-const { DatafinityObject, Wobj, ObjectType } = require('../../models');
+const uuid = require('uuid');
+const {
+  DatafinityObject, Wobj, ObjectType, ImportStatusModel,
+} = require('../../models');
 const { getAccount } = require('../hiveApi/userUtil');
 const { checkVotePower } = require('../helpers/checkVotePower');
 const { prepareFieldsForImport, addTagsIfNeeded } = require('../helpers/bookFieldsHelper');
@@ -12,60 +13,26 @@ const { formPersonObjects } = require('../helpers/formPersonObject');
 const { VOTE_COST } = require('../../constants/voteAbility');
 const { OBJECT_TYPES, OBJECTS_FROM_FIELDS } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
+const { parseJson } = require('../helpers/jsonHelper');
 
-const importObjects = async ({
-  file, user, objectType, authority,
-}) => {
-  let funcError;
-
-  try {
-    const path = `${moment().valueOf()}.json`;
-
-    fs.writeFile(path, file.buffer, async (err) => {
-      if (err) {
-        funcError = { status: 409, message: 'Error while writing a file' };
-
-        return;
-      }
-
-      fs.readFile(path, 'utf8', async (readError, products) => {
-        if (readError) {
-          funcError = { status: 409, message: 'Error while reading a file' };
-
-          return;
-        }
-
-        if (products.length) {
-          fs.unlink(path, (deleteError) => {
-            if (deleteError) {
-              console.log('Error while deleting a file');
-            }
-          });
-          console.log()
-          await saveObjects({
-            products: JSON.parse(products),
-            user,
-            objectType,
-            authority,
-          });
-        }
-      });
-    });
-  } catch (err) {
-    return { error: err };
+const bufferToArray = (buffer) => {
+  let stringFromBuffer = buffer.toString();
+  const expectValid = stringFromBuffer[0] === '[';
+  if (!expectValid) {
+    stringFromBuffer = `[${stringFromBuffer.replace(/(}\r\n{|}\n{)/g, '},{')}]`;
   }
-
-  if (funcError) {
-    return { error: funcError };
-  }
-
-  return { result: true };
+  return parseJson(stringFromBuffer, []);
 };
 
 const saveObjects = async ({
-  products, user, objectType, authority,
+  products, user, objectType, authority, importName,
 }) => {
+  if (_.isEmpty(products)) {
+    return { error: new Error('products not found') };
+  }
+  const importId = uuid.v4();
   products.forEach((product) => {
+    product.importId = importId;
     product.user = user;
     product.object_type = objectType;
     if (authority) {
@@ -74,11 +41,43 @@ const saveObjects = async ({
   });
   const { count, error } = await DatafinityObject.insertMany(products);
 
-  if (error) {
-    return;
+  if (error || !count) {
+    return { error: (error || new Error('objects not created')) };
   }
+  await ImportStatusModel.create({
+    importId,
+    user,
+    objectsCount: count,
+    ...(importName && { name: importName }),
+  });
+
+  return { result: count };
+};
+
+const emitStart = (user, authorPermlink = null) => {
+  const myEE = new EventEmitter();
+
+  myEE.once('import', async () => startObjectImport(user, authorPermlink));
+  myEE.emit('import');
+};
+
+const importObjects = async ({
+  file, user, objectType, authority, importName,
+}) => {
+  const products = bufferToArray(file.buffer);
+
+  const { result, error } = await saveObjects({
+    products,
+    user,
+    objectType,
+    authority,
+    importName,
+  });
+  if (error) return { error };
 
   emitStart(user);
+
+  return { result };
 };
 
 const startObjectImport = async (user, authorPermlink = null) => {
@@ -164,7 +163,7 @@ const prepareObjectForImport = async (datafinityObject) => {
     is_extending_open: true,
     is_posting_open: true,
     ...datafinityObject.object_type === OBJECT_TYPES.BOOK && { fields: await prepareFieldsForImport(datafinityObject) },
-    datafinityObject: true
+    datafinityObject: true,
   };
 };
 
@@ -258,26 +257,19 @@ const createObject = async (datafinityObject) => {
   await updateDatafinityObject(obj, datafinityObject);
 };
 
-const emitStart = (user, authorPermlink = null) => {
-  const myEE = new EventEmitter();
-
-  myEE.once('import', async () => startObjectImport(user, authorPermlink));
-  myEE.emit('import');
-};
-
 const checkIfWobjectExists = async (datafinityObject) => {
   if (!datafinityObject.keys) return;
 
-  return await getWobjectByKeys(datafinityObject.keys);
-}
+  return getWobjectByKeys(datafinityObject.keys);
+};
 
 const getWobjectByKeys = async (keys) => {
   for (const key of keys) {
     const textMatch = `\"${key}\"`;
     const regexMatch = JSON.stringify({ productId: key, productIdType: DATAFINITY_KEY });
     const { result, error } = await Wobj.findSameFieldBody(textMatch, regexMatch);
-    if ( error ) {
-      console.error( error.message );
+    if (error) {
+      console.error(error.message);
 
       return;
     }

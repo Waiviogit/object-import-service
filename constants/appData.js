@@ -8,8 +8,15 @@ const appData = {
 const uploadPath = 'uploads/';
 const uploadName = 'wobjects.json';
 
+const IMPORT_STATUS = {
+  ACTIVE: 'active',
+  ON_HOLD: 'onHold',
+  FINISHED: 'finished',
+};
+
 module.exports = {
   appData,
   uploadPath,
   uploadName,
+  IMPORT_STATUS,
 };
