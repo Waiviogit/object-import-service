@@ -7,9 +7,13 @@ bluebird.promisifyAll(redis.Multi.prototype);
 const importWobjectsDataClient = redis.createClient(process.env.REDISCLOUD_URL);
 const importWobjectsQueueClient = redis.createClient(process.env.REDISCLOUD_URL);
 const lastBlockCLient = redis.createClient(process.env.REDISCLOUD_URL);
+const botsData = redis.createClient(process.env.REDISCLOUD_URL);
 
 importWobjectsDataClient.select(config.redis.importWobjData);
 importWobjectsQueueClient.select(config.redis.importQueue);
 lastBlockCLient.select(config.redis.lastBlock);
+botsData.select(config.redis.botsData);
 
-module.exports = { importWobjectsDataClient, importWobjectsQueueClient, lastBlockCLient };
+module.exports = {
+  importWobjectsDataClient, importWobjectsQueueClient, lastBlockCLient, botsData,
+};

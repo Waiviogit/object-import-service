@@ -6,6 +6,7 @@ const { validateImmediatelyImport } = require('../utilities/objectBotApi/validat
 const { FILE_MAX_SIZE } = require('../constants/fileFormats');
 const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
+const { VOTE_COST } = require('../constants/voteAbility');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -55,7 +56,10 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (authError) return next(authError);
 
-  const { result: validAcc, error: accError } = await importAccountValidator(value.user);
+  const { result: validAcc, error: accError } = await importAccountValidator(
+    value.user,
+    VOTE_COST.INITIAL,
+  );
   if (!validAcc) return next(accError);
 
   const { result, error } = await importDatafinityObjects

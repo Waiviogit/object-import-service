@@ -44,7 +44,12 @@ const addWobjectsToQueue = async ({ wobjects = [], immediately } = {}) => {
     } // handle Wobject
     if (wobject.fields && Array.isArray(wobject.fields)) {
       for (const field of wobject.fields) {
-        await addField({ field, wobject, immediately });
+        await addField({
+          field,
+          wobject,
+          immediately,
+          existWobj,
+        });
       }
     }
   }
@@ -213,7 +218,7 @@ const addWobject = async ({ wobject, existObjType, addData = true }) => {
       isPostingOpen: wobject.is_posting_open || true,
       parentAuthor: existObjType ? existObjType.author : '',
       parentPermlink: existObjType ? existObjType.permlink : '',
-      ...wobject.datafinityObject && { datafinityObject: wobject.datafinityObject }
+      ...wobject.datafinityObject && { datafinityObject: wobject.datafinityObject },
     };
 
     if (addData) {
@@ -236,7 +241,9 @@ const addWobject = async ({ wobject, existObjType, addData = true }) => {
   }
 };
 
-const addField = async ({ field, wobject, immediately }) => {
+const addField = async ({
+  field, wobject, immediately, existWobj, importingAccount,
+}) => {
   const { field: existField } = await Wobj.getField({
     permlink: field.permlink,
     author_permlink: wobject.author_permlink,
@@ -254,6 +261,7 @@ const addField = async ({ field, wobject, immediately }) => {
         body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
         title: 'New field on wobject',
         field: JSON.stringify({ ..._.omit(field, ['creator', 'permlink']), locale: field.locale || 'en-US' }),
+        ...(importingAccount && { importingAccount }),
       };
 
       if (immediately) {

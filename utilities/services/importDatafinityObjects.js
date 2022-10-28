@@ -135,7 +135,11 @@ const startObjectImport = async (user, authorPermlink = null) => {
 
     if (dbError) return;
 
-    const { result: updatedObj, error: processErr } = await processField(objToCreate, wobject);
+    const { result: updatedObj, error: processErr } = await processField({
+      datafinityObject: objToCreate,
+      wobject,
+      user,
+    });
     if (processErr) return;
 
     if (!updatedObj.fields.length) {
@@ -190,11 +194,15 @@ const processNewObject = async (datafinityObject) => {
   }
 };
 
-const processField = async (datafinityObject, wobject) => {
+const processField = async ({ datafinityObject, wobject, user }) => {
   if (datafinityObject.object_type === OBJECT_TYPES.BOOK) {
     await addTagsIfNeeded(datafinityObject, wobject);
   }
-  await addField({ field: datafinityObject.fields[0], wobject });
+  await addField({
+    field: datafinityObject.fields[0],
+    wobject,
+    importingAccount: user,
+  });
   const { result, error } = await DatafinityObject.findOneAndModify(
     { _id: datafinityObject._id },
     { $pop: { fields: -1 } },

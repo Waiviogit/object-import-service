@@ -14,7 +14,8 @@
       "wobjectsRefs": 1,
       "lastBlock": 2,
       "importQueue": 3,
-      "importWobjData": 5
+      "importWobjData": 5,
+      "botsData": 8
     },
     "nodeUrl": "https://api.steemit.com/",
     "objectsBot": {
@@ -39,7 +40,8 @@
       "wobjectsRefs": 1,
       "lastBlock": 2,
       "importQueue": 3,
-      "importWobjData": 5
+      "importWobjData": 5,
+      "botsData": 8
     },
     "nodeUrl": "https://api.steemit.com/",
     "objectsBot": {
@@ -64,7 +66,8 @@
       "wobjectsRefs": 1,
       "lastBlock": 2,
       "importQueue": 3,
-      "importWobjData": 5
+      "importWobjData": 5,
+      "botsData": 8
     },
     "nodeUrl": "https://api.steemit.com/",
     "objectsBot": {
@@ -89,7 +92,8 @@
       "wobjectsRefs": 6,
       "lastBlock": 7,
       "importQueue": 8,
-      "importWobjData": 9
+      "importWobjData": 9,
+      "botsData": 7
     },
     "nodeUrl": "https://api.steemit.com/",
     "objectsBot": {

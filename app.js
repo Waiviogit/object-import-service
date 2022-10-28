@@ -2,8 +2,7 @@ const express = require('express');
 const logger = require('morgan');
 const dotenv = require('dotenv');
 const { routes } = require('./routes');
-const { importObjectsService } = require('./utilities/services');
-
+const startup = require('./utilities/helpers/startupHelper');
 require('utilities/redis/subscriber/subscriber');
 
 dotenv.config();
@@ -28,6 +27,6 @@ app.use((err, req, res, next) => {
   res.status(err.status).json({ message: err.message });
 });
 
-importObjectsService.runImportWobjectsQueue();
+startup.init();
 
 module.exports = app;

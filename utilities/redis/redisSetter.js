@@ -1,4 +1,4 @@
-const { importWobjectsDataClient } = require('./redis');
+const { importWobjectsDataClient, botsData } = require('./redis');
 
 const setImportWobjData = async (key, data) => {
   if (key && data) {
@@ -14,7 +14,10 @@ const delImportWobjData = async (key) => {
   }
 };
 
+const sadd = async ({ key, data, client = botsData }) => client.saddAsync(key, ...data);
+
 module.exports = {
   setImportWobjData,
   delImportWobjData,
+  sadd,
 };

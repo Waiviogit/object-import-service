@@ -1,4 +1,5 @@
-exports.WHITE_LIST = [];
+exports.WHITE_LIST = ['flowmaster'];
+exports.WHITE_LIST_KEY = 'white_list_import';
 
 exports.VOTE_COST = {
   INITIAL: 0.01,
