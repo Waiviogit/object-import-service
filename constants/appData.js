@@ -15,9 +15,18 @@ const IMPORT_STATUS = {
   DELETED: 'deleted',
 };
 
+const IMPORT_REDIS_KEYS = {
+  CONTINUE: 'continue',
+  MIN_POWER: 'min_power',
+};
+
+const ONE_PERCENT_VOTE_RECOVERY = (60 * 60 * 24) / 20;
+
 module.exports = {
   appData,
   uploadPath,
   uploadName,
   IMPORT_STATUS,
+  IMPORT_REDIS_KEYS,
+  ONE_PERCENT_VOTE_RECOVERY,
 };

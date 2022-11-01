@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const { checkVotePower } = require('../utilities/helpers/checkVotePower');
 const { getAccount } = require('../utilities/hiveApi/userUtil');
+const { ImportStatusModel } = require('../models');
+const { getVotingPowers } = require('../utilities/hiveEngine/hiveEngineOperations');
 
 const importAccountValidator = async (user, voteCost) => {
   const abilityToVote = await checkVotePower(user, voteCost);
@@ -22,6 +24,17 @@ const importAccountValidator = async (user, voteCost) => {
   return { result: true };
 };
 
+const votePowerValidation = async ({ account, importId }) => {
+  const { result, error } = await ImportStatusModel.findOne({
+    filter: { account, importId },
+  });
+  if (error) return false;
+  if (!result) return false;
+  const { votingPower } = await getVotingPowers({ account });
+  return votingPower > result.minVotingPower;
+};
+
 module.exports = {
   importAccountValidator,
+  votePowerValidation,
 };

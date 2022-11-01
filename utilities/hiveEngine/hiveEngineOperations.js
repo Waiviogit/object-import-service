@@ -5,6 +5,7 @@ const commentContract = require('../hiveEngineApi/commentsContract');
 const marketPools = require('../hiveEngineApi/marketPoolsContract');
 const tokensContract = require('../hiveEngineApi/tokensContract');
 const { HIVE_ENGINE_NODES, VOTE_EVALUATION } = require('../../constants/requestsConstants');
+const { getVotingPower } = require('../hiveEngineApi/commentsContract');
 
 exports.calculateHiveEngineVote = async ({
   symbol, account, poolId, weight, dieselPoolId,
@@ -14,7 +15,7 @@ exports.calculateHiveEngineVote = async ({
   const rewards = parseFloat(rewardPool) / parseFloat(pendingClaims);
 
   const requests = await Promise.all([
-    commentContract.getVotingPower(poolId, account),
+    commentContract.getVotingPower({ rewardPoolId: poolId, account }),
     marketPools.getMarketPools({ query: { _id: dieselPoolId } }),
     tokensContract.getTokenBalances({ query: { symbol, account }, hostUrl: HIVE_ENGINE_NODES[1] }),
     redisGetter.getHashAll('current_price_info', lastBlockCLient),
@@ -61,4 +62,13 @@ exports.calculateMana = (votingPower) => {
   result.downvotingPower = Math.min(result.downvotingPower, VOTE_EVALUATION.WEIGHT);
 
   return result;
+};
+
+exports.getVotingPowers = async ({ account }) => {
+  const powers = await getVotingPower({
+    account,
+    rewardPoolId: VOTE_EVALUATION.POOL_ID,
+    method: 'findOne',
+  });
+  return this.calculateMana(powers);
 };

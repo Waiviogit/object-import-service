@@ -2,6 +2,7 @@ const EventEmitter = require('events');
 const _ = require('lodash');
 const detectLanguage = require('utilities/helpers/detectLanguage');
 const uuid = require('uuid');
+const BigNumber = require('bignumber.js');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
@@ -9,11 +10,15 @@ const { prepareFieldsForImport, addTagsIfNeeded } = require('../helpers/bookFiel
 const { generateUniquePermlink } = require('../helpers/permlinkGenerator');
 const { formPersonObjects } = require('../helpers/formPersonObject');
 const { VOTE_COST } = require('../../constants/voteAbility');
-const { OBJECT_TYPES, OBJECTS_FROM_FIELDS } = require('../../constants/objectTypes');
+const { OBJECT_TYPES, OBJECTS_FROM_FIELDS, DATAFINITY_KEY } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { importAccountValidator } = require('../../validators/accountValidator');
-const { IMPORT_STATUS } = require('../../constants/appData');
+const { importAccountValidator, votePowerValidation } = require('../../validators/accountValidator');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS, ONE_PERCENT_VOTE_RECOVERY } = require('../../constants/appData');
+const { redisSetter } = require('../redis');
+const { getVotingPowers } = require('../hiveEngine/hiveEngineOperations');
+const { getTokenBalances, getRewardPool } = require('../hiveEngineApi/tokensContract');
+const { getMinAmountInWaiv } = require('../helpers/checkVotePower');
 
 const bufferToArray = (buffer) => {
   let stringFromBuffer = buffer.toString();
@@ -25,7 +30,7 @@ const bufferToArray = (buffer) => {
 };
 
 const saveObjects = async ({
-  products, user, objectType, authority, importName,
+  products, user, objectType, authority, importName, minVotingPower,
 }) => {
   if (_.isEmpty(products)) {
     return { error: new Error('products not found') };
@@ -49,20 +54,31 @@ const saveObjects = async ({
     user,
     objectsCount: count,
     ...(importName && { name: importName }),
+    minVotingPower,
+  });
+  await redisSetter.set({
+    key: `${IMPORT_REDIS_KEYS.MIN_POWER}:${user}:${importId}`,
+    value: minVotingPower,
   });
 
-  return { result: count };
+  return { result: importId };
 };
 
-const emitStart = (user, authorPermlink = null) => {
+const emitStart = ({
+  user,
+  authorPermlink = null,
+  importId,
+}) => {
   const myEE = new EventEmitter();
 
-  myEE.once('import', async () => startObjectImport(user, authorPermlink));
+  myEE.once('import', async () => startObjectImport({
+    user, authorPermlink, importId,
+  }));
   myEE.emit('import');
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, importName,
+  file, user, objectType, authority, importName, minVotingPower,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -72,10 +88,14 @@ const importObjects = async ({
     objectType,
     authority,
     importName,
+    minVotingPower,
   });
   if (error) return { error };
 
-  emitStart(user);
+  emitStart({
+    user,
+    importId: result,
+  });
 
   return { result };
 };
@@ -88,17 +108,56 @@ const checkImportActiveStatus = async (importId) => {
   return status === IMPORT_STATUS.ACTIVE;
 };
 
-const startObjectImport = async (user, authorPermlink = null) => {
-  const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
+const getVotingPower = async ({ account, amount }) => {
+  const tokenBalance = await getTokenBalances({ query: { symbol: 'WAIV', account }, method: 'findOne' });
+  if (!tokenBalance) return 0;
+  const { stake, delegationsIn } = tokenBalance;
+  const pool = await getRewardPool({ query: { symbol: 'WAIV' }, method: 'findOne' });
+  if (!pool) return 0;
+  const { rewardPool, pendingClaims } = pool;
+  const rewards = new BigNumber(rewardPool).dividedBy(pendingClaims);
+  const finalRsharesCurator = new BigNumber(stake).plus(delegationsIn).div(2);
 
-  if (!validAcc) {
-    // поставить ттл, посчитать через сколько
+  const reverseRshares = new BigNumber(amount).dividedBy(rewards);
+
+  return reverseRshares.times(100).div(finalRsharesCurator).times(100).toNumber();
+};
+
+const getTtlTime = async ({ votingPower, minVotingPower, account }) => {
+  if (votingPower < minVotingPower) {
+    const diff = minVotingPower - votingPower;
+    return ONE_PERCENT_VOTE_RECOVERY * (diff / 100);
   }
+  const amount = await getMinAmountInWaiv(account);
+  const neededPower = await getVotingPower({ account, amount });
+  if (neededPower < votingPower) return ONE_PERCENT_VOTE_RECOVERY;
+  const diff = neededPower - votingPower;
+  return ONE_PERCENT_VOTE_RECOVERY * (diff / 100);
+};
 
+const setTtlToContinue = async ({ user, authorPermlink, importId }) => {
+  const { result: importDoc } = await ImportStatusModel.findOne({
+    filter: { importId },
+  });
+  const { votingPower } = await getVotingPowers({ account: user });
+  const ttl = await getTtlTime({
+    votingPower,
+    minVotingPower: importDoc.minVotingPower,
+    account: user,
+  });
+
+  const key = `${IMPORT_REDIS_KEYS.CONTINUE}:${user}:${authorPermlink}:${importId}`;
+  await redisSetter.set({ key, value: '' });
+  await redisSetter.expire({ key, ttl });
+};
+
+const startObjectImport = async ({ user, authorPermlink = null, importId }) => {
   let objToCreate;
   const { datafinityObject, error } = await DatafinityObject.getOne({
     user,
+    importId,
     object_type: OBJECTS_FROM_FIELDS.PERSON,
+    ...importId && { importId },
     ...authorPermlink && { author_permlink: authorPermlink },
   });
 
@@ -112,6 +171,7 @@ const startObjectImport = async (user, authorPermlink = null) => {
   if (!datafinityObject) {
     const { datafinityObject: book, error: e } = await DatafinityObject.getOne({
       user,
+      ...importId && { importId },
       object_type: OBJECT_TYPES.BOOK,
       ...authorPermlink && { author_permlink: authorPermlink },
     });
@@ -120,10 +180,16 @@ const startObjectImport = async (user, authorPermlink = null) => {
   }
 
   const processObject = !objToCreate.author_permlink
-      || objToCreate.object_type === OBJECTS_FROM_FIELDS.PERSON;
+        || objToCreate.object_type === OBJECTS_FROM_FIELDS.PERSON;
 
   const activeStatus = await checkImportActiveStatus(objToCreate.importId);
   if (!activeStatus) return;
+
+  const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
+  const validVotePower = await votePowerValidation({ account: user, importId: objToCreate.importId });
+  if (!validVotePower || !validAcc) {
+    await setTtlToContinue({ user, authorPermlink, importId });
+  }
 
   if (processObject) {
     // trigger new import from parser
@@ -144,11 +210,18 @@ const startObjectImport = async (user, authorPermlink = null) => {
 
     if (!updatedObj.fields.length) {
       await DatafinityObject.removeOne(updatedObj._id);
-      emitStart(datafinityObject.user);
+      emitStart({
+        user: datafinityObject.user,
+        importId: objToCreate.importId,
+      });
       return;
     }
 
-    emitStart(datafinityObject.user, datafinityObject.author_permlink);
+    emitStart({
+      user: datafinityObject.user,
+      authorPermlink: datafinityObject.author_permlink,
+      importId: objToCreate.importId,
+    });
   }
 };
 
@@ -185,7 +258,7 @@ const updateDatafinityObject = async (obj, datafinityObject) => {
 
 const processNewObject = async (datafinityObject) => {
   const isCreateAuthors = datafinityObject.object_type === OBJECT_TYPES.BOOK
-      && !datafinityObject.person_permlinks.length && !datafinityObject.fields.length;
+        && !datafinityObject.person_permlinks.length && !datafinityObject.fields.length;
 
   if (isCreateAuthors) {
     await createAuthors(datafinityObject);
@@ -202,6 +275,7 @@ const processField = async ({ datafinityObject, wobject, user }) => {
     field: datafinityObject.fields[0],
     wobject,
     importingAccount: user,
+    importId: datafinityObject.importId,
   });
   const { result, error } = await DatafinityObject.findOneAndModify(
     { _id: datafinityObject._id },

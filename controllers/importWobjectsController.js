@@ -66,7 +66,7 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
     .importObjects({ file: req.file, ...value });
   if (error) return next(error);
 
-  res.status(200).json({ message: `${result} objects added to queue of creating!` });
+  res.status(200).json({ result });
 };
 
 const getImportStatistic = async (req, res, next) => {

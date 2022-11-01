@@ -16,8 +16,16 @@ const delImportWobjData = async (key) => {
 
 const sadd = async ({ key, data, client = botsData }) => client.saddAsync(key, ...data);
 
+const set = async ({ key, value, client = importWobjectsDataClient }) => client
+  .setAsync(key, value);
+
+const expire = async ({ key, ttl, client = importWobjectsDataClient }) => client
+  .expireAsync(key, ttl);
+
 module.exports = {
   setImportWobjData,
   delImportWobjData,
   sadd,
+  set,
+  expire,
 };

@@ -242,7 +242,7 @@ const addWobject = async ({ wobject, existObjType, addData = true }) => {
 };
 
 const addField = async ({
-  field, wobject, immediately, existWobj, importingAccount,
+  field, wobject, immediately, existWobj, importingAccount, importId,
 }) => {
   const { field: existField } = await Wobj.getField({
     permlink: field.permlink,
@@ -262,6 +262,7 @@ const addField = async ({
         title: 'New field on wobject',
         field: JSON.stringify({ ..._.omit(field, ['creator', 'permlink']), locale: field.locale || 'en-US' }),
         ...(importingAccount && { importingAccount }),
+        ...(importId && { importId }),
       };
 
       if (immediately) {
