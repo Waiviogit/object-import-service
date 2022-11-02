@@ -1,9 +1,11 @@
 const express = require('express');
 const logger = require('morgan');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
 const { routes } = require('./routes');
 const startup = require('./utilities/helpers/startupHelper');
 require('utilities/redis/subscriber/subscriber');
+const swaggerDocument = require('./swagger');
 
 dotenv.config();
 
@@ -13,6 +15,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/', routes);
+app.use('/import-objects-service/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
