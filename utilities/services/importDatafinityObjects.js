@@ -36,14 +36,17 @@ const saveObjects = async ({
     return { error: new Error('products not found') };
   }
   const importId = uuid.v4();
-  products.forEach((product) => {
+
+  for (const product of products) {
     product.importId = importId;
     product.user = user;
     product.object_type = objectType;
     if (authority) {
       product.authority = authority;
     }
-  });
+    product.fields = await prepareFieldsForImport(product);
+  }
+
   const { count, error } = await DatafinityObject.insertMany(products);
 
   if (error || !count) {
@@ -236,7 +239,7 @@ const prepareObjectForImport = async (datafinityObject) => {
     locale: detectLanguage(datafinityObject.name),
     is_extending_open: true,
     is_posting_open: true,
-    ...datafinityObject.object_type === OBJECT_TYPES.BOOK && { fields: await prepareFieldsForImport(datafinityObject) },
+    fields: datafinityObject.fields,
     datafinityObject: true,
   };
 };
