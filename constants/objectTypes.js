@@ -20,7 +20,7 @@ exports.AUTHORITY_FIELD_OPTIONS = {
   OWNERSHIP: 'ownership',
 };
 
-exports.BOOK_FIELDS = {
+exports.OBJECT_FIELDS = {
   PRODUCT_ID: 'productId',
   AGE_RANGE: 'ageRange',
   OPTIONS: 'options',
@@ -32,6 +32,21 @@ exports.BOOK_FIELDS = {
   AUTHORS: 'authors',
   PUBLISHER: 'publisher',
   AVATAR: 'avatar',
+};
+
+exports.FIELDS_BY_OBJECT_TYPE = {
+  book: [
+    this.OBJECT_FIELDS.PRODUCT_ID,
+    this.OBJECT_FIELDS.AGE_RANGE,
+    this.OBJECT_FIELDS.OPTIONS,
+    this.OBJECT_FIELDS.PUBLICATION_DATE,
+    this.OBJECT_FIELDS.DIMENSIONS,
+    this.OBJECT_FIELDS.LANGUAGE,
+    this.OBJECT_FIELDS.PRINT_LENGTH,
+    this.OBJECT_FIELDS.AUTHORS,
+    this.OBJECT_FIELDS.PUBLISHER,
+    this.OBJECT_FIELDS.AVATAR,
+  ],
 };
 
 exports.FIELDS_FOR_TAGS = {

@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { OBJECTS_FROM_FIELDS, OBJECT_IDS, BOOK_FIELDS } = require('../../constants/objectTypes');
+const { OBJECTS_FROM_FIELDS, OBJECT_IDS, OBJECT_FIELDS } = require('../../constants/objectTypes');
 const { Wobj } = require('../../models');
 const { generateUniquePermlink } = require('./permlinkGenerator');
 const { puppeteerBrowser } = require('../puppeteer/browser');
@@ -35,7 +35,7 @@ const formDatafinityObject = async ({ data, obj, objectType }) => {
     object_type: objectType,
     author_permlink: await generateUniquePermlink(data.name),
     fields: formAuthorFields({ obj, data, productIdBody }),
-    datafinityObject: true
+    datafinityObject: true,
   };
 };
 
@@ -51,7 +51,7 @@ const formAuthors = async (authors, obj) => {
       }));
     } else {
       const field = formField({
-        fieldName: BOOK_FIELDS.AUTHORS,
+        fieldName: OBJECT_FIELDS.AUTHORS,
         objectName: author.name,
         user: obj.user,
         body: JSON.stringify({ name: author.name }),
@@ -76,7 +76,7 @@ const formAuthorFields = ({ obj, data, productIdBody }) => {
     }));
   }
   fields.push(formField({
-    fieldName: BOOK_FIELDS.PRODUCT_ID,
+    fieldName: OBJECT_FIELDS.PRODUCT_ID,
     objectName: data.name,
     user: obj.user,
     body: productIdBody,

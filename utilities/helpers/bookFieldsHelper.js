@@ -3,7 +3,13 @@ const axios = require('axios');
 const _ = require('lodash');
 const moment = require('moment');
 const {
-  BOOK_FIELDS, WEIGHT_UNITS, DIMENSION_UNITS, DATAFINITY_KEY, OBJECT_IDS, FIELDS_FOR_TAGS,
+  WEIGHT_UNITS,
+  DIMENSION_UNITS,
+  DATAFINITY_KEY,
+  OBJECT_IDS,
+  FIELDS_FOR_TAGS,
+  FIELDS_BY_OBJECT_TYPE,
+  OBJECT_FIELDS,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject } = require('../../models');
 const { puppeteerBrowser } = require('../puppeteer/browser');
@@ -20,8 +26,9 @@ exports.prepareFieldsForImport = async (obj) => {
       objectName: obj.name,
     }));
   }
+  const fieldTypes = FIELDS_BY_OBJECT_TYPE[obj.object_type];
 
-  for (const fieldsElementHandle of Object.values(BOOK_FIELDS)) {
+  for (const fieldsElementHandle of fieldTypes) {
     const field = await fieldsHandle[fieldsElementHandle](obj);
 
     if (field && !field.length) {
@@ -36,11 +43,11 @@ exports.prepareFieldsForImport = async (obj) => {
 
 const ageRange = (obj) => {
   const age = obj.features.find((el) => el.key.toLowerCase()
-    .replace(' ', '') === BOOK_FIELDS.AGE_RANGE.toLowerCase());
+    .replace(' ', '') === OBJECT_FIELDS.AGE_RANGE.toLowerCase());
 
   if (age) {
     return formField({
-      fieldName: BOOK_FIELDS.AGE_RANGE,
+      fieldName: OBJECT_FIELDS.AGE_RANGE,
       user: obj.user,
       body: age.value.length ? age.value[0] : age.value,
       objectName: obj.name,
@@ -58,7 +65,7 @@ const dimensions = (obj) => {
     const width = [value1, value2, value3].find((el) => el !== length && el !== depth);
 
     return formField({
-      fieldName: BOOK_FIELDS.DIMENSIONS,
+      fieldName: OBJECT_FIELDS.DIMENSIONS,
       objectName: obj.name,
       body: JSON.stringify({
         length,
@@ -72,11 +79,11 @@ const dimensions = (obj) => {
 };
 
 const language = (obj) => {
-  const lang = obj.features.find((el) => el.key.toLowerCase() === BOOK_FIELDS.LANGUAGE);
+  const lang = obj.features.find((el) => el.key.toLowerCase() === OBJECT_FIELDS.LANGUAGE);
 
   if (lang) {
     return formField({
-      fieldName: BOOK_FIELDS.LANGUAGE,
+      fieldName: OBJECT_FIELDS.LANGUAGE,
       body: lang.value.length ? lang.value[0] : lang.value,
       user: obj.user,
       objectName: obj.name,
@@ -86,11 +93,11 @@ const language = (obj) => {
 
 const publicationDate = (obj) => {
   const date = obj.features.find((el) => el.key.toLowerCase()
-    .replace(' ', '') === BOOK_FIELDS.PUBLICATION_DATE.toLowerCase());
+    .replace(' ', '') === OBJECT_FIELDS.PUBLICATION_DATE.toLowerCase());
 
   if (date) {
     return formField({
-      fieldName: BOOK_FIELDS.PUBLICATION_DATE,
+      fieldName: OBJECT_FIELDS.PUBLICATION_DATE,
       body: date.value.reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
       user: obj.user,
       objectName: obj.name,
@@ -99,14 +106,14 @@ const publicationDate = (obj) => {
 };
 
 const productWeight = (obj) => {
-  const objWeight = _.get(obj, BOOK_FIELDS.WEIGHT);
+  const objWeight = _.get(obj, OBJECT_FIELDS.WEIGHT);
 
   if (objWeight) {
     const [value, unit] = objWeight.split(' ');
     const singUnit = !unit.endsWith('s') ? unit.trim() : unit.trim().slice(0, unit.length - 2);
 
     return formField({
-      fieldName: BOOK_FIELDS.WEIGHT,
+      fieldName: OBJECT_FIELDS.WEIGHT,
       body: JSON.stringify({
         value: parseFloat(value),
         unit: WEIGHT_UNITS.find((el) => el.includes(singUnit)) || 'lb',
@@ -122,7 +129,7 @@ const printLength = (obj) => {
 
   if (printLen) {
     return formField({
-      fieldName: BOOK_FIELDS.PRINT_LENGTH,
+      fieldName: OBJECT_FIELDS.PRINT_LENGTH,
       body: printLen.value[0].split(' ')[0],
       user: obj.user,
       objectName: obj.name,
@@ -142,7 +149,7 @@ const authors = async (obj) => {
 
     if (field) {
       fields.push(formField({
-        fieldName: BOOK_FIELDS.AUTHORS,
+        fieldName: OBJECT_FIELDS.AUTHORS,
         body: JSON.stringify(field),
         user: obj.user,
         objectName: obj.name,
@@ -171,7 +178,7 @@ const publisher = async (obj) => {
 
   if (objPublisher) {
     return formField({
-      fieldName: BOOK_FIELDS.PUBLISHER,
+      fieldName: OBJECT_FIELDS.PUBLISHER,
       objectName: obj.name,
       user: obj.user,
       body: JSON.stringify({ name: objPublisher }),
@@ -219,7 +226,7 @@ const productId = (obj) => {
 
   for (const key of obj.keys) {
     fields.push(formField({
-      fieldName: BOOK_FIELDS.PRODUCT_ID,
+      fieldName: OBJECT_FIELDS.PRODUCT_ID,
       objectName: obj.name,
       user: obj.user,
       body: JSON.stringify({
@@ -234,7 +241,7 @@ const productId = (obj) => {
   for (const id of ids) {
     if (id[1].length) {
       fields.push(formField({
-        fieldName: BOOK_FIELDS.PRODUCT_ID,
+        fieldName: OBJECT_FIELDS.PRODUCT_ID,
         objectName: obj.name,
         user: obj.user,
         body: JSON.stringify({
@@ -271,7 +278,7 @@ const avatar = async (obj) => {
       );
 
       return formField({
-        fieldName: BOOK_FIELDS.AVATAR,
+        fieldName: OBJECT_FIELDS.AVATAR,
         objectName: obj.name,
         user: obj.user,
         body: resp.data.image,
@@ -310,7 +317,7 @@ const formFormats = (uniqFormats, obj) => {
 
   for (let count = 0; count < uniqFormats.length; count++) {
     fields.push(formField({
-      fieldName: BOOK_FIELDS.OPTIONS,
+      fieldName: OBJECT_FIELDS.OPTIONS,
       objectName: obj.name,
       user: obj.user,
       body: JSON.stringify({

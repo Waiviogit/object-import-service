@@ -76,7 +76,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, minVotingPower,
+  file, user, objectType, authority,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -85,7 +85,6 @@ const importObjects = async ({
     user,
     objectType,
     authority,
-    minVotingPower,
   });
 
   if (error) return { error };
