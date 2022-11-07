@@ -30,7 +30,7 @@ const bufferToArray = (buffer) => {
 };
 
 const saveObjects = async ({
-  products, user, objectType, authority, importName, minVotingPower,
+  products, user, objectType, authority,
 }) => {
   if (_.isEmpty(products)) {
     return { error: new Error('products not found') };
@@ -56,12 +56,7 @@ const saveObjects = async ({
     importId,
     user,
     objectsCount: count,
-    ...(importName && { name: importName }),
-    minVotingPower,
-  });
-  await redisSetter.set({
-    key: `${IMPORT_REDIS_KEYS.MIN_POWER}:${user}:${importId}`,
-    value: minVotingPower,
+    objectType,
   });
 
   return { result: importId };
@@ -81,7 +76,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, importName, minVotingPower,
+  file, user, objectType, authority, minVotingPower,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -90,9 +85,9 @@ const importObjects = async ({
     user,
     objectType,
     authority,
-    importName,
     minVotingPower,
   });
+
   if (error) return { error };
 
   emitStart({

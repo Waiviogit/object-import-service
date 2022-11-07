@@ -7,6 +7,8 @@ const { FILE_MAX_SIZE } = require('../constants/fileFormats');
 const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
 const { VOTE_COST } = require('../constants/voteAbility');
+const { redisSetter, redisGetter } = require('../utilities/redis');
+const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -115,6 +117,44 @@ const deleteImport = async (req, res, next) => {
   res.status(200).json(result);
 };
 
+const setVotingPower = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.minVotingPowerSchema,
+    next,
+  );
+
+  const accessToken = req.headers['access-token'];
+  const { error: authError } = await authorise(value.user, accessToken);
+  if (authError) return next(authError);
+
+  if (!value) return;
+  await redisSetter.set({
+    key: `${IMPORT_REDIS_KEYS.MIN_POWER}:${value.user}`,
+    value: value.minVotingPower,
+  });
+
+  res.status(200).json(value);
+};
+
+const getVotingPower = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.getPowerSchema,
+    next,
+  );
+  if (!value) return;
+
+  const key = `${IMPORT_REDIS_KEYS.MIN_POWER}:${value.user}`;
+  const power = await redisGetter.get({ key });
+  if (power) {
+    return res.status(200).json({ minVotingPower: Number(power), user: value.user });
+  }
+  await redisSetter.set({ key, value: DEFAULT_VOTE_POWER_IMPORT });
+
+  res.status(200).json({ minVotingPower: DEFAULT_VOTE_POWER_IMPORT, user: value.user });
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -123,4 +163,6 @@ module.exports = {
   getImportStatistic,
   changeImportDetails,
   deleteImport,
+  setVotingPower,
+  getVotingPower,
 };

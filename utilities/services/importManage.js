@@ -1,7 +1,6 @@
 const { ImportStatusModel, DatafinityObject } = require('../../models');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
+const { IMPORT_STATUS } = require('../../constants/appData');
 const { startObjectImport } = require('./importDatafinityObjects');
-const { redisSetter } = require('../redis');
 
 const getStatistic = async ({ user }) => {
   const { result, error } = await ImportStatusModel.find({
@@ -24,14 +23,12 @@ const getStatistic = async ({ user }) => {
 };
 
 const updateImport = async ({
-  user, status, name, importId, minVotingPower,
+  user, status, importId,
 }) => {
   const { result, error } = await ImportStatusModel.findOneAndUpdate({
     filter: { user, importId },
     update: {
-      ...(status && { status }),
-      ...(name && { name }),
-      ...(minVotingPower && { minVotingPower }),
+      status,
     },
     options: { new: true },
   });
@@ -41,12 +38,6 @@ const updateImport = async ({
     field: '_id',
     filter: { importId, user },
   });
-  if (minVotingPower) {
-    await redisSetter.set({
-      key: `${IMPORT_REDIS_KEYS.MIN_POWER}:${user}:${importId}`,
-      value: minVotingPower,
-    });
-  }
 
   if (status === IMPORT_STATUS.ACTIVE) {
     startObjectImport({ user, importId });

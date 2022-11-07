@@ -6,4 +6,7 @@ const getHashAll = async function (key, client = importWobjectsDataClient) {
   return res;
 };
 
-module.exports = { getHashAll };
+const get = async ({ key, client = importWobjectsDataClient }) => client
+  .getAsync(key);
+
+module.exports = { getHashAll, get };

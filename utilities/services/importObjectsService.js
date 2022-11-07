@@ -1,13 +1,14 @@
+const _ = require('lodash');
 const { importRsmqClient } = require('../redis/rsmq'); // redis queue client
 const { redisGetter, redisSetter } = require('../redis'); // redis getter and setter for manage wobj data
 const { importWobjectsDataClient } = require('../redis').redis; // client for redis db with wobj data
 const objectBotApi = require('../objectBotApi');
 const wobjectLogs = require('../csvLogger/wobject');
 const redisQueue = require('../redis/rsmq/redisQueue');
+
 const { ObjectType, Wobj } = require('../../models');
 
 const IMPORT_WOBJECTS_QNAME = 'import_wobjects';
-const _ = require('lodash');
 
 const REDIS_WOBJ_DATA_ADDITIONAL_FIELDS = 'restaurant_id,dateUpdated'.split(',');
 const { appendObject, createObjectType } = require('../objectBotApi');

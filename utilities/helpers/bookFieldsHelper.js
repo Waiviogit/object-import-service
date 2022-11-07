@@ -130,11 +130,11 @@ const printLength = (obj) => {
   }
 };
 
-authors = async (obj) => {
+const authors = async (obj) => {
   const fields = [];
 
-  if (!obj.person_permlinks.length) {
-    return fields;
+  if (!_.get(obj, 'person_permlinks.length')) {
+    return;
   }
 
   for (const author of obj.person_permlinks) {

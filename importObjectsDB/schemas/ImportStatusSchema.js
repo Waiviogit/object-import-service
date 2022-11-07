@@ -11,8 +11,10 @@ const ImportStatusSchema = new Schema({
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
-  name: { type: String },
-  minVotingPower: { type: Number, default: 7000 },
+  objectType: { type: String },
+  fieldsCount: { type: Number },
+  fieldsCreatedCount: { type: Number },
+  finishedAt: { type: Date },
 }, { timestamps: true, versionKey: false });
 
 ImportStatusSchema.index({ user: 1, importId: 1 }, { unique: true });

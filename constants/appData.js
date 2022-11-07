@@ -20,6 +20,8 @@ const IMPORT_REDIS_KEYS = {
   MIN_POWER: 'min_power',
 };
 
+const DEFAULT_VOTE_POWER_IMPORT = 7000;
+
 const ONE_PERCENT_VOTE_RECOVERY = (60 * 60 * 24) / 20;
 
 module.exports = {
@@ -29,4 +31,5 @@ module.exports = {
   IMPORT_STATUS,
   IMPORT_REDIS_KEYS,
   ONE_PERCENT_VOTE_RECOVERY,
+  DEFAULT_VOTE_POWER_IMPORT,
 };
