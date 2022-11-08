@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const db = require('../importObjects_Connection');
 const { IMPORT_STATUS } = require('../../constants/appData');
+const { AUTHORITY_FIELD_OPTIONS } = require('../../constants/objectTypes');
 
 const { Schema } = mongoose;
 
@@ -12,6 +13,7 @@ const ImportStatusSchema = new Schema({
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
   objectType: { type: String },
+  authority: { type: String, enum: Object.values(AUTHORITY_FIELD_OPTIONS) },
   fieldsCount: { type: Number },
   fieldsCreatedCount: { type: Number },
   finishedAt: { type: Date },

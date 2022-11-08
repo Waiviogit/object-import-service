@@ -57,6 +57,7 @@ const saveObjects = async ({
     user,
     objectsCount: count,
     objectType,
+    authority,
   });
 
   return { result: importId };
@@ -185,7 +186,7 @@ const startObjectImport = async ({ user, authorPermlink = null, importId }) => {
   const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
   const validVotePower = await votePowerValidation({ account: user, importId: objToCreate.importId });
   if (!validVotePower || !validAcc) {
-    await setTtlToContinue({ user, authorPermlink, importId });
+    await setTtlToContinue({ user, authorPermlink, importId: objToCreate.importId });
   }
 
   if (processObject) {

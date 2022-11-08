@@ -37,7 +37,6 @@ exports.prepareFieldsForImport = async (obj) => {
       fields.push(...field);
     }
   }
-
   return fields;
 };
 
