@@ -12,8 +12,8 @@ const {
   OBJECT_FIELDS,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject } = require('../../models');
-const { puppeteerBrowser } = require('../puppeteer/browser');
 const { formField } = require('./formFieldHelper');
+const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
 
 exports.prepareFieldsForImport = async (obj) => {
   const fields = [];
@@ -138,38 +138,33 @@ const printLength = (obj) => {
 
 const authors = async (obj) => {
   const fields = [];
-
-  if (!_.get(obj, 'person_permlinks.length')) {
+  const merchant = 'amazon';
+  const priceDataWithUrl = obj.prices.find((el) => el.merchant.includes(merchant));
+  if (!priceDataWithUrl) {
+    // todo
     return;
   }
+  const url = priceDataWithUrl.sourceURLs.find((el) => el.includes(merchant));
+  if (!url) {
+    // todo
+    return;
+  }
+  const authorsData = await getAuthorsData(url);
 
-  for (const author of obj.person_permlinks) {
-    const field = await formFieldByExistingObject(author);
-
-    if (field) {
-      fields.push(formField({
+  for (const author of authorsData) {
+    const connectedObject = !!author.asin;
+    fields.push({
+      ...formField({
         fieldName: OBJECT_FIELDS.AUTHORS,
-        body: JSON.stringify(field),
+        body: JSON.stringify({ name: author.name }),
         user: obj.user,
         objectName: obj.name,
-      }));
-    }
+      }),
+      ...(connectedObject && { asin: author.asin, connectedObject }),
+    });
   }
 
   return fields;
-};
-
-const formFieldByExistingObject = async (author_permlink) => {
-  const { wobject, error } = await Wobj.getOne({ author_permlink });
-
-  if (!wobject || error) {
-    return;
-  }
-
-  return {
-    name: wobject.name,
-    authorPermlink: wobject.author_permlink,
-  };
 };
 
 const publisher = async (obj) => {
@@ -186,38 +181,42 @@ const publisher = async (obj) => {
 };
 
 const options = async (obj) => {
+  // Todo object type switcher + filter instead find
   const formats = obj.features.find((el) => el.key.toLowerCase().includes('format'));
 
-  if (!formats) {
-    const url = obj.prices.find((el) => el.sourceURLs[0].includes('amazon.com'));
+  if (formats) {
+    const uniqFormats = _.uniq(formats.value);
+    const formatsDatafinity = formFormats(uniqFormats, obj);
 
-    if (!url) {
-      return;
+    if (formatsDatafinity.length) {
+      return formatsDatafinity;
     }
-
-    const page = await puppeteerBrowser.goToObjectPage(url.sourceURLs[0]);
-    const scrapedFormats = await puppeteerBrowser.getFormats(page);
-
-    await puppeteerBrowser.close();
-    if (!scrapedFormats.length) {
-      return;
-    }
-
-    const formatsAmazon = formFormats(scrapedFormats, obj);
-
-    if (!formatsAmazon.length) {
-      return;
-    }
-
-    return formatsAmazon;
   }
 
-  const uniqFormats = _.uniq(formats.value);
-  const formatsDatafinity = formFormats(uniqFormats, obj);
-
-  if (formatsDatafinity.length) {
-    return formatsDatafinity;
+  const merchant = 'amazon';
+  const priceDataWithUrl = obj.prices.find((el) => el.merchant.includes(merchant));
+  if (!priceDataWithUrl) {
+    // todo
+    return;
   }
+  const url = priceDataWithUrl.sourceURLs.find((el) => el.includes(merchant));
+  if (!url) {
+    // todo
+    return;
+  }
+  const scrapedFormats = await getBookFormatData(url);
+
+  if (!scrapedFormats.length) {
+    return;
+  }
+
+  const formatsAmazon = formFormats(scrapedFormats, obj);
+
+  if (!formatsAmazon.length) {
+    return;
+  }
+
+  return formatsAmazon;
 };
 
 const productId = (obj) => {
@@ -257,6 +256,7 @@ const productId = (obj) => {
 };
 
 const avatar = async (obj) => {
+  if (!Array.isArray(obj.imageURLs)) return;
   for (const image of obj.imageURLs) {
     try {
       const response = await axios.get(image);
@@ -323,7 +323,7 @@ const formFormats = (uniqFormats, obj) => {
         category: 'format',
         value: uniqFormats[count],
         position: count,
-        image: obj.imageURLs[count],
+      //  image: obj.imageURLs[count],
       }),
     }));
   }

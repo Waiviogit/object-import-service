@@ -29,6 +29,24 @@ const bufferToArray = (buffer) => {
   return parseJson(stringFromBuffer, []);
 };
 
+const groupByAsins = (products) => {
+  const uniqueProducts = [];
+  const grouped = _.groupBy(products, 'asins');
+
+  for (const groupedKey in grouped) {
+    if (groupedKey === 'undefined') {
+      uniqueProducts.push(...grouped[groupedKey]);
+      continue;
+    }
+    if (grouped[groupedKey].length > 1) {
+      uniqueProducts.push(_.maxBy(grouped[groupedKey], 'dateUpdated'));
+      continue;
+    }
+    uniqueProducts.push(grouped[groupedKey][0]);
+  }
+  return uniqueProducts;
+};
+
 const saveObjects = async ({
   products, user, objectType, authority,
 }) => {
@@ -36,8 +54,9 @@ const saveObjects = async ({
     return { error: new Error('products not found') };
   }
   const importId = uuid.v4();
+  const uniqueProducts = groupByAsins(products);
 
-  for (const product of products) {
+  for (const product of uniqueProducts) {
     product.importId = importId;
     product.user = user;
     product.object_type = objectType;
@@ -47,7 +66,7 @@ const saveObjects = async ({
     product.fields = await prepareFieldsForImport(product);
   }
 
-  const { count, error } = await DatafinityObject.insertMany(products);
+  const { count, error } = await DatafinityObject.insertMany(uniqueProducts);
 
   if (error || !count) {
     return { error: (error || new Error('objects not created')) };
