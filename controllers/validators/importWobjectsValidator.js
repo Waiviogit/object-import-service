@@ -1,10 +1,10 @@
 const Joi = require('joi');
-const { OBJECT_TYPES, AUTHORITY_FIELD_OPTIONS } = require('../../constants/objectTypes');
+const { AUTHORITY_FIELD_OPTIONS, IMPORT_OBJECT_TYPES } = require('../../constants/objectTypes');
 const { IMPORT_STATUS } = require('../../constants/appData');
 
 exports.importDatafinityObjectsSchema = Joi.object().keys({
   user: Joi.string().required(),
-  objectType: Joi.string().valid(...Object.values(OBJECT_TYPES)).default(OBJECT_TYPES.BOOK),
+  objectType: Joi.string().valid(...Object.values(IMPORT_OBJECT_TYPES)).default(IMPORT_OBJECT_TYPES.BOOK),
   authority: Joi.string().valid(...Object.values(AUTHORITY_FIELD_OPTIONS)),
 });
 

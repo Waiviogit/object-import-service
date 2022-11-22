@@ -1,5 +1,11 @@
+exports.IMPORT_OBJECT_TYPES = {
+  BOOK: 'book',
+};
+
 exports.OBJECT_TYPES = {
   BOOK: 'book',
+  BUSINESS: 'business',
+  PERSON: 'person',
 };
 
 exports.DATAFINITY_IDS = 'keys';
@@ -36,7 +42,7 @@ exports.OBJECT_FIELDS = {
 
 exports.FIELDS_BY_OBJECT_TYPE = {
   book: [
-      this.OBJECT_FIELDS.OPTIONS,
+    this.OBJECT_FIELDS.OPTIONS,
     this.OBJECT_FIELDS.PRODUCT_ID,
     this.OBJECT_FIELDS.AGE_RANGE,
     this.OBJECT_FIELDS.PUBLICATION_DATE,

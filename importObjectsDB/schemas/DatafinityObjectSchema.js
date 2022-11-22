@@ -6,6 +6,7 @@ const { Schema } = mongoose;
 const DatafinityObjectSchema = new Schema({
   user: { type: String, required: true, index: true },
   importId: { type: String, required: true, index: true },
+  startAuthorPermlink: { type: String },
   object_type: { type: String, required: true },
   author_permlink: String,
   person_permlinks: { type: [String], default: [] },

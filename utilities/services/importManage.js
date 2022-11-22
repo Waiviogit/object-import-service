@@ -54,7 +54,7 @@ const updateImport = async ({
 const deleteImport = async ({ user, importId }) => {
   const { result, error } = await ImportStatusModel.updateOne({
     filter: { user, importId },
-    update: { status: IMPORT_STATUS.DELETED },
+    update: { status: IMPORT_STATUS.DELETED, finishedAt: new Date() },
     options: { new: true },
   });
   if (error) return { error };
@@ -66,7 +66,6 @@ const deleteImport = async ({ user, importId }) => {
     await ImportStatusModel.updateOne({
       filter: { user, importId },
       update: { status: IMPORT_STATUS.ON_HOLD },
-      options: { new: true },
     });
     return { error: datafinityDeleteError };
   }
