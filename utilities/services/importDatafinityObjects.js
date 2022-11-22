@@ -58,6 +58,14 @@ const saveObjects = async ({
   const importId = uuid.v4();
   const uniqueProducts = groupByAsins(products);
 
+  await ImportStatusModel.create({
+    importId,
+    user,
+    objectsCount: 0,
+    objectType,
+    authority,
+  });
+
   for (const product of uniqueProducts) {
     product.importId = importId;
     product.user = user;
@@ -66,22 +74,18 @@ const saveObjects = async ({
       product.authority = authority;
     }
     product.fields = await prepareFieldsForImport(product);
+    const { result, error } = await DatafinityObject.create(product);
+    if (error) continue;
+    await ImportStatusModel.updateOne({
+      filter: { importId },
+      update: {
+        $inc: {
+          objectsCount: 1,
+          fieldsCount: product.fields.length,
+        },
+      },
+    });
   }
-
-  const { count, error } = await DatafinityObject.insertMany(uniqueProducts);
-
-  if (error || !count) {
-    return { error: (error || new Error('objects not created')) };
-  }
-  await ImportStatusModel.create({
-    importId,
-    user,
-    objectsCount: count,
-    objectType,
-    authority,
-  });
-
-  return { result: importId };
 };
 
 const emitStart = ({
@@ -334,10 +338,18 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
 
   const existObject = await existConnectedObject({ field });
   if (existObject) return false;
+  const newImportObject = await createFieldObject({ field, datafinityObject });
+  const { result } = await DatafinityObject.create(newImportObject);
 
-  const { result } = await DatafinityObject.create(
-    createFieldObject({ field, datafinityObject }),
-  );
+  await ImportStatusModel.updateOne({
+    filter: { importId: datafinityObject.importId },
+    update: {
+      $inc: {
+        objectsCount: 1,
+        fieldsCount: newImportObject.fields.length,
+      },
+    },
+  });
 
   emitStart({
     user: datafinityObject.user,
@@ -360,6 +372,14 @@ const processField = async ({ datafinityObject, wobject, user }) => {
     { _id: datafinityObject._id },
     { $pop: { fields: -1 } },
   );
+  await ImportStatusModel.updateOne({
+    filter: { importId: datafinityObject.importId },
+    update: {
+      $inc: {
+        fieldsCreatedCount: 1,
+      },
+    },
+  });
 
   if (error) {
     console.error(error.message);
@@ -368,7 +388,6 @@ const processField = async ({ datafinityObject, wobject, user }) => {
   }
   return { result };
 };
-
 
 const createObject = async (datafinityObject) => {
   const { objectType: objType, error: dbErr } = await ObjectType.getOne({ name: obj.object_type });
