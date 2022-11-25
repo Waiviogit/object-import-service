@@ -185,6 +185,18 @@ const startObjectImport = async ({
     ...(createdId && { _id: createdId }),
   });
 
+  if (authorPermlink) {
+    await ImportStatusModel.updateOne({
+      filter: {
+        importId: datafinityObject.importId,
+        user,
+      },
+      update: {
+        $addToSet: { objectsLinks: authorPermlink },
+      },
+    });
+  }
+
   if (!datafinityObject && importId) {
     await ImportStatusModel.updateOne({
       filter: { importId, user },
@@ -210,6 +222,7 @@ const startObjectImport = async ({
   const validVotePower = await votePowerValidation({ account: user, importId: datafinityObject.importId });
   if (!validVotePower || !validAcc) {
     await setTtlToContinue({ user, authorPermlink, importId: datafinityObject.importId });
+    return;
   }
 
   if (createNew) {

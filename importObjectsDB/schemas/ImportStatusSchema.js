@@ -17,6 +17,7 @@ const ImportStatusSchema = new Schema({
   fieldsCount: { type: Number },
   fieldsCreatedCount: { type: Number },
   finishedAt: { type: Date },
+  objectsLinks: { type: [String] },
 }, { timestamps: true, versionKey: false });
 
 ImportStatusSchema.index({ user: 1, importId: 1 }, { unique: true });
