@@ -1,8 +1,8 @@
 const EventEmitter = require('events');
 const _ = require('lodash');
-const detectLanguage = require('utilities/helpers/detectLanguage');
 const uuid = require('uuid');
 const BigNumber = require('bignumber.js');
+const detectLanguage = require('../helpers/detectLanguage');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');

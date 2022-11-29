@@ -1,4 +1,4 @@
-const validators = require('controllers/validators');
+const validators = require('./validators');
 const {
   importObjectsService, importTagsService, importObjectsFromFile, importDatafinityObjects, importManage,
 } = require('../utilities/services');

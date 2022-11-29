@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
 const { routes } = require('./routes');
 const startup = require('./utilities/helpers/startupHelper');
-require('utilities/redis/subscriber/subscriber');
+require('./utilities/redis/subscriber/subscriber');
 const swaggerDocument = require('./swagger');
 
 dotenv.config();
