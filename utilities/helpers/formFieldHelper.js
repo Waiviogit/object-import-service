@@ -1,11 +1,10 @@
-const detectLanguage = require('./detectLanguage');
 const { permlinkGenerator } = require('./permlinkGenerator');
 
 exports.formField = ({
-  fieldName, objectName, user, body, categoryItem = false, id,
+  fieldName, user, body, categoryItem = false, id, locale,
 }) => ({
   weight: 1,
-  locale: detectLanguage(objectName),
+  locale,
   creator: user,
   permlink: permlinkGenerator(user),
   name: fieldName,

@@ -23,7 +23,7 @@ exports.prepareFieldsForImport = async (object) => {
       fieldName: 'authority',
       body: object.authority,
       user: object.user,
-      objectName: object.name,
+      locale: object.locale,
     }));
   }
   const fieldTypes = FIELDS_BY_OBJECT_TYPE[object.object_type];
@@ -49,7 +49,7 @@ const ageRange = (obj) => {
       fieldName: OBJECT_FIELDS.AGE_RANGE,
       user: obj.user,
       body: age.value.length ? age.value[0] : age.value,
-      objectName: obj.name,
+      locale: obj.locale,
     });
   }
 };
@@ -65,7 +65,7 @@ const dimensions = (obj) => {
 
     return formField({
       fieldName: OBJECT_FIELDS.DIMENSIONS,
-      objectName: obj.name,
+      locale: obj.locale,
       body: JSON.stringify({
         length,
         depth,
@@ -85,7 +85,7 @@ const language = (obj) => {
       fieldName: OBJECT_FIELDS.LANGUAGE,
       body: lang.value.length ? lang.value[0] : lang.value,
       user: obj.user,
-      objectName: obj.name,
+      locale: obj.locale,
     });
   }
 };
@@ -99,7 +99,7 @@ const publicationDate = (obj) => {
       fieldName: OBJECT_FIELDS.PUBLICATION_DATE,
       body: date.value.reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
       user: obj.user,
-      objectName: obj.name,
+      locale: obj.locale,
     });
   }
 };
@@ -118,7 +118,7 @@ const productWeight = (obj) => {
         unit: WEIGHT_UNITS.find((el) => el.includes(singUnit)) || 'lb',
       }),
       user: obj.user,
-      objectName: obj.name,
+      locale: obj.locale,
     });
   }
 };
@@ -131,7 +131,7 @@ const printLength = (obj) => {
       fieldName: OBJECT_FIELDS.PRINT_LENGTH,
       body: printLen.value[0].split(' ')[0],
       user: obj.user,
-      objectName: obj.name,
+      locale: obj.locale,
     });
   }
 };
@@ -158,7 +158,7 @@ const authors = async (obj) => {
         fieldName: OBJECT_FIELDS.AUTHORS,
         body: JSON.stringify({ name: author.name }),
         user: obj.user,
-        objectName: obj.name,
+        locale: obj.locale,
       }),
       ...(connectedObject && { asin: author.asin, connectedObject }),
     });
@@ -173,7 +173,7 @@ const publisher = async (obj) => {
   if (objPublisher) {
     return formField({
       fieldName: OBJECT_FIELDS.PUBLISHER,
-      objectName: obj.name,
+      locale: obj.locale,
       user: obj.user,
       body: JSON.stringify({ name: objPublisher }),
     });
@@ -225,7 +225,7 @@ const productId = (obj) => {
   for (const key of obj.keys) {
     fields.push(formField({
       fieldName: OBJECT_FIELDS.PRODUCT_ID,
-      objectName: obj.name,
+      locale: obj.locale,
       user: obj.user,
       body: JSON.stringify({
         productId: key,
@@ -240,7 +240,7 @@ const productId = (obj) => {
     if (id[1].length) {
       fields.push(formField({
         fieldName: OBJECT_FIELDS.PRODUCT_ID,
-        objectName: obj.name,
+        locale: obj.locale,
         user: obj.user,
         body: JSON.stringify({
           productId: id[1],
@@ -278,7 +278,7 @@ const avatar = async (obj) => {
 
       return formField({
         fieldName: OBJECT_FIELDS.AVATAR,
-        objectName: obj.name,
+        locale: obj.locale,
         user: obj.user,
         body: resp.data.image,
       });
@@ -302,7 +302,7 @@ const addTags = async (obj, tagCategoryId) => {
       fieldName: FIELDS_FOR_TAGS.CATEGORY_ITEM,
       body: category,
       user: obj.user,
-      objectName: obj.name,
+      locale: obj.locale,
       categoryItem: true,
       id: tagCategoryId,
     }));
@@ -317,7 +317,7 @@ const formFormats = (uniqFormats, obj) => {
   for (let count = 0; count < uniqFormats.length; count++) {
     fields.push(formField({
       fieldName: OBJECT_FIELDS.OPTIONS,
-      objectName: obj.name,
+      locale: obj.locale,
       user: obj.user,
       body: JSON.stringify({
         category: 'format',
@@ -366,7 +366,7 @@ const map = async (object) => {
   if (object.longitude && object.latitude) {
     return formField({
       fieldName: OBJECT_FIELDS.MAP,
-      objectName: object.name,
+      locale: object.locale,
       user: object.user,
       body: JSON.stringify({
         latitude: object.latitude,
@@ -379,7 +379,7 @@ const map = async (object) => {
 
   return formField({
     fieldName: OBJECT_FIELDS.MAP,
-    objectName: object.name,
+    locale: object.locale,
     user: object.user,
     body: JSON.stringify(map),
   });
@@ -387,7 +387,7 @@ const map = async (object) => {
 
 const address = async (object) => formField({
   fieldName: OBJECT_FIELDS.ADDRESS,
-  objectName: object.name,
+  locale: object.locale,
   user: object.user,
   body: JSON.stringify({
     address: _.get(object, 'address', ''),
@@ -403,7 +403,7 @@ const email = async (object) => {
 
   return formField({
     fieldName: OBJECT_FIELDS.EMAIL,
-    objectName: object.name,
+    locale: object.locale,
     user: object.user,
     body: object.emails[0],
   });
@@ -419,7 +419,7 @@ const workTime = async (object) => {
 
   return formField({
     fieldName: OBJECT_FIELDS.WEBSITE,
-    objectName: object.name,
+    locale: object.locale,
     user: object.user,
     body,
   });
@@ -430,7 +430,7 @@ const website = async (object) => {
 
   return formField({
     fieldName: OBJECT_FIELDS.LINK,
-    objectName: object.name,
+    locale: object.locale,
     user: object.user,
     body: JSON.stringify({ title: `${object.name} Website`, link: object.websites[0] }),
   });
