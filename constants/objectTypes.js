@@ -1,11 +1,14 @@
 exports.IMPORT_OBJECT_TYPES = {
   BOOK: 'book',
+  RESTAURANT: 'restaurant',
 };
 
 exports.OBJECT_TYPES = {
   BOOK: 'book',
   BUSINESS: 'business',
   PERSON: 'person',
+  RESTAURANT: 'restaurant',
+  PRODUCT: 'product',
 };
 
 exports.DATAFINITY_IDS = 'keys';
@@ -38,6 +41,13 @@ exports.OBJECT_FIELDS = {
   AUTHORS: 'authors',
   PUBLISHER: 'publisher',
   AVATAR: 'avatar',
+  MAP: 'map',
+  ADDRESS: 'address',
+  EMAIL: 'email',
+  TAG_CATEGORY: 'tagCategory',
+  CATEGORY_ITEM: 'categoryItem',
+  WORK_TIME: 'workTime',
+  WEBSITE: 'website',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -52,6 +62,14 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.PUBLISHER,
     this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.AUTHORS,
+  ],
+  restaurant: [
+    this.OBJECT_FIELDS.ADDRESS,
+    this.OBJECT_FIELDS.MAP,
+    this.OBJECT_FIELDS.EMAIL,
+    //this.OBJECT_FIELDS.TAG_CATEGORY,
+    this.OBJECT_FIELDS.WORK_TIME,
+    this.OBJECT_FIELDS.WEBSITE,
   ],
 };
 

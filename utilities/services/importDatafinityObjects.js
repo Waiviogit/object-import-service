@@ -49,6 +49,34 @@ const groupByAsins = (products) => {
   return uniqueProducts;
 };
 
+const filterImportRestaurants = (restaurants) => _.reduce(restaurants, (acc, el) => {
+  if (!_.includes(el.categories, 'Restaurants')) return acc;
+  if (el.isClosed === 'true') return acc;
+  const duplicate = _.find(
+    acc,
+    (exist) => el.name === exist.name
+          && el.address === exist.address
+          && el.city === exist.city,
+  );
+  if (duplicate) {
+    duplicate.ids ? duplicate.ids.push(el.id) : duplicate.ids = [el.id, duplicate.id];
+    return acc;
+  }
+  acc.push(el);
+  return acc;
+}, []);
+
+const filterImportObjects = ({
+  products, objectType,
+}) => {
+  const filters = {
+    restaurant: filterImportRestaurants,
+    book: groupByAsins,
+    default: () => products,
+  };
+  return (filters[objectType] || filters.default)(products);
+};
+
 const saveObjects = async ({
   products, user, objectType, authority,
 }) => {
@@ -56,7 +84,8 @@ const saveObjects = async ({
     return { error: new Error('products not found') };
   }
   const importId = uuid.v4();
-  const uniqueProducts = groupByAsins(products);
+  const uniqueProducts = filterImportObjects({ products, objectType });
+  if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
   await ImportStatusModel.create({
     importId,

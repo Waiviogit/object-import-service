@@ -15,21 +15,21 @@ const { Wobj, DatafinityObject } = require('../../models');
 const { formField } = require('./formFieldHelper');
 const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
 
-exports.prepareFieldsForImport = async (obj) => {
+exports.prepareFieldsForImport = async (object) => {
   const fields = [];
 
-  if (obj.authority) {
+  if (object.authority) {
     fields.push(formField({
       fieldName: 'authority',
-      body: obj.authority,
-      user: obj.user,
-      objectName: obj.name,
+      body: object.authority,
+      user: object.user,
+      objectName: object.name,
     }));
   }
-  const fieldTypes = FIELDS_BY_OBJECT_TYPE[obj.object_type];
+  const fieldTypes = FIELDS_BY_OBJECT_TYPE[object.object_type];
 
   for (const fieldsElementHandle of fieldTypes) {
-    const field = await fieldsHandle[fieldsElementHandle](obj);
+    const field = await fieldsHandle[fieldsElementHandle](object);
 
     if (field && !field.length) {
       fields.push(field);
@@ -348,6 +348,94 @@ exports.addTagsIfNeeded = async (datafinityObject, wobject) => {
   }
 };
 
+const tryGetMapFromName = async (object) => {
+  try {
+    const accessKey = process.env.POSITIONSTACK_KEY;
+    const query = `${_.get(object, 'postalCode')} ${_.get(object, 'address')}, ${_.get(object, 'city')} `;
+    const resp = await axios.get(`http://api.positionstack.com/v1/forward?access_key=${accessKey}&query=${query}`);
+    const data = _.get(resp, 'data.data');
+    if (_.isEmpty(data)) return { error: new Error('No data') };
+
+    return { map: _.pick(data[0], ['latitude', 'longitude']) };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const map = async (object) => {
+  if (object.longitude && object.latitude) {
+    return formField({
+      fieldName: OBJECT_FIELDS.MAP,
+      objectName: object.name,
+      user: object.user,
+      body: JSON.stringify({
+        latitude: object.latitude,
+        longitude: object.longitude,
+      }),
+    });
+  }
+  const { map, error } = await tryGetMapFromName(object);
+  if (error) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.MAP,
+    objectName: object.name,
+    user: object.user,
+    body: JSON.stringify(map),
+  });
+};
+
+const address = async (object) => formField({
+  fieldName: OBJECT_FIELDS.ADDRESS,
+  objectName: object.name,
+  user: object.user,
+  body: JSON.stringify({
+    address: _.get(object, 'address', ''),
+    city: _.get(object, 'city', ''),
+    state: _.get(object, 'province', ''),
+    postalCode: _.get(object, 'postalCode', ''),
+    country: _.get(object, 'country', ''),
+  }),
+});
+
+const email = async (object) => {
+  if (_.isEmpty(object.emails)) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.EMAIL,
+    objectName: object.name,
+    user: object.user,
+    body: object.emails[0],
+  });
+};
+
+const tagCategory = async (object) => {
+// change to category item check if exist add to that id otherwise  add tag category
+};
+
+const workTime = async (object) => {
+  if (_.isEmpty(object.hours)) return;
+  const body = _.reduce(object.hours, (acc, el) => `${acc}${el.day} ${el.hour}\n`, '');
+
+  return formField({
+    fieldName: OBJECT_FIELDS.WEBSITE,
+    objectName: object.name,
+    user: object.user,
+    body,
+  });
+};
+
+const website = async (object) => {
+  if (_.isEmpty(object.websites)) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.LINK,
+    objectName: object.name,
+    user: object.user,
+    body: JSON.stringify({ title: `${object.name} Website`, link: object.websites[0] }),
+  });
+};
+
 const fieldsHandle = {
   ageRange,
   dimensions,
@@ -360,4 +448,10 @@ const fieldsHandle = {
   options,
   productId,
   avatar,
+  map,
+  address,
+  email,
+  tagCategory,
+  workTime,
+  website,
 };
