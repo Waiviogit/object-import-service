@@ -1,12 +1,12 @@
 const Joi = require('joi');
-const { AUTHORITY_FIELD_OPTIONS, IMPORT_OBJECT_TYPES } = require('../../constants/objectTypes');
+const { AUTHORITY_FIELD_OPTIONS, IMPORT_OBJECT_TYPES, FIELD_LANGUAGES_TO_NLP } = require('../../constants/objectTypes');
 const { IMPORT_STATUS } = require('../../constants/appData');
 
 exports.importDatafinityObjectsSchema = Joi.object().keys({
   user: Joi.string().required(),
   objectType: Joi.string().valid(...Object.values(IMPORT_OBJECT_TYPES)).default(IMPORT_OBJECT_TYPES.BOOK),
   authority: Joi.string().valid(...Object.values(AUTHORITY_FIELD_OPTIONS)),
-  locale: Joi.string().default('en-US'),
+  locale: Joi.string().valid(...Object.keys(FIELD_LANGUAGES_TO_NLP)).default('en-US'),
 });
 
 exports.importStatisticsSchema = Joi.object().keys({

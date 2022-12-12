@@ -403,8 +403,35 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   return true;
 };
 
+const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
+  const field = datafinityObject.fields[0];
+  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
+    const existingCategory = _.find(wobject.fields,
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory);
+    if (existingCategory) {
+      field.id = existingCategory.id;
+      return;
+    }
+    const id = uuid.v4();
+    await addField({
+      field: formField({
+        fieldName: OBJECT_FIELDS.TAG_CATEGORY,
+        locale: datafinityObject.locale,
+        user: datafinityObject.user,
+        body: field.tagCategory,
+        id,
+      }),
+      wobject,
+      importingAccount: datafinityObject.user,
+      importId: datafinityObject.importId,
+    });
+    field.id = id;
+  }
+};
+
 const processField = async ({ datafinityObject, wobject, user }) => {
   const exit = await checkFieldConnectedObject({ datafinityObject });
+  await specialFieldsHelper({ datafinityObject, wobject });
   if (exit) return;
   await addField({
     field: datafinityObject.fields[0],

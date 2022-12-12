@@ -14,9 +14,30 @@ const {
 const { Wobj, DatafinityObject } = require('../../models');
 const { formField } = require('./formFieldHelper');
 const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
+const supposedUpdatesTranslate = require('../../translations/supposedUpdates');
+const { translate } = require('./translateHelper');
 
 exports.prepareFieldsForImport = async (object) => {
   const fields = [];
+  const fieldsHandle = {
+    ageRange,
+    dimensions,
+    language,
+    publicationDate,
+    productWeight,
+    printLength,
+    authors,
+    publisher,
+    options,
+    productId,
+    avatar,
+    map,
+    address,
+    email,
+    tagCategory,
+    workTime,
+    website,
+  };
 
   if (object.authority) {
     fields.push(formField({
@@ -410,7 +431,38 @@ const email = async (object) => {
 };
 
 const tagCategory = async (object) => {
-// change to category item check if exist add to that id otherwise  add tag category
+  if (!object.cuisines) return;
+  const fields = [];
+  if (object.locale === 'en-US') {
+    for (const cuisine of object.cuisines) {
+      const body = cuisine.toLocaleLowerCase();
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
+        locale: object.locale,
+        user: object.user,
+        body,
+        tagCategory: supposedUpdatesTranslate.Cuisine[object.locale],
+      }));
+    }
+    return fields;
+  }
+  for (const cuisine of object.cuisines) {
+    const { error, result } = await translate({
+      text: cuisine.toLocaleLowerCase(),
+      source: 'en-US',
+      target: object.locale,
+    });
+    if (error || !result) continue;
+
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
+      locale: object.locale,
+      user: object.user,
+      body: result,
+      tagCategory: supposedUpdatesTranslate.Cuisine[object.locale],
+    }));
+  }
+  return fields;
 };
 
 const workTime = async (object) => {
@@ -434,24 +486,4 @@ const website = async (object) => {
     user: object.user,
     body: JSON.stringify({ title: `${object.name} Website`, link: object.websites[0] }),
   });
-};
-
-const fieldsHandle = {
-  ageRange,
-  dimensions,
-  language,
-  publicationDate,
-  productWeight,
-  printLength,
-  authors,
-  publisher,
-  options,
-  productId,
-  avatar,
-  map,
-  address,
-  email,
-  tagCategory,
-  workTime,
-  website,
 };
