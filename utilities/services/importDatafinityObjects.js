@@ -78,7 +78,7 @@ const filterImportObjects = ({
 };
 
 const saveObjects = async ({
-  products, user, objectType, authority, locale,
+  products, user, objectType, authority, locale, translate,
 }) => {
   if (_.isEmpty(products)) {
     return { error: new Error('products not found') };
@@ -100,6 +100,7 @@ const saveObjects = async ({
     product.user = user;
     product.object_type = objectType;
     product.locale = locale;
+    product.translate = translate;
     if (authority) {
       product.authority = authority;
     }
@@ -133,7 +134,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale,
+  file, user, objectType, authority, locale, translate,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -143,6 +144,7 @@ const importObjects = async ({
     objectType,
     authority,
     locale,
+    translate,
   });
 
   if (error) return { error };

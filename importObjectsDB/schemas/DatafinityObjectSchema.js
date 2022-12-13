@@ -10,6 +10,7 @@ const DatafinityObjectSchema = new Schema({
   author_permlink: String,
   startAuthorPermlink: { type: String },
   locale: { type: String },
+  translate: { type: Boolean },
   authority: String,
   fields: {
     type: [

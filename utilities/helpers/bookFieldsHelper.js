@@ -447,18 +447,22 @@ const tagCategory = async (object) => {
     return fields;
   }
   for (const cuisine of object.cuisines) {
-    const { error, result } = await translate({
-      text: cuisine.toLocaleLowerCase(),
-      source: 'en-US',
-      target: object.locale,
-    });
-    if (error || !result) continue;
+    let body = cuisine.toLocaleLowerCase();
+    if (object.translate) {
+      const { error, result } = await translate({
+        text: cuisine.toLocaleLowerCase(),
+        source: 'en-US',
+        target: object.locale,
+      });
+      if (error || !result) continue;
+      body = result;
+    }
 
     fields.push(formField({
       fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
       locale: object.locale,
       user: object.user,
-      body: result,
+      body,
       tagCategory: supposedUpdatesTranslate.Cuisine[object.locale],
     }));
   }

@@ -7,6 +7,7 @@ exports.importDatafinityObjectsSchema = Joi.object().keys({
   objectType: Joi.string().valid(...Object.values(IMPORT_OBJECT_TYPES)).default(IMPORT_OBJECT_TYPES.BOOK),
   authority: Joi.string().valid(...Object.values(AUTHORITY_FIELD_OPTIONS)),
   locale: Joi.string().valid(...Object.keys(FIELD_LANGUAGES_TO_NLP)).default('en-US'),
+  translate: Joi.boolean().default(false),
 });
 
 exports.importStatisticsSchema = Joi.object().keys({
