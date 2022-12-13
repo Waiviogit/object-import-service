@@ -462,10 +462,21 @@ const processField = async ({ datafinityObject, wobject, user }) => {
 };
 
 const createObject = async (datafinityObject) => {
-  const { objectType: objType, error: dbErr } = await ObjectType.getOne({ name: obj.object_type });
+  const { objectType: objType, error: dbErr } = await ObjectType
+    .getOne({ name: datafinityObject.object_type });
 
   if (dbErr) {
     console.error(dbErr.message);
+    return;
+  }
+
+  const existedObject = await getWobjectByKeys(datafinityObject);
+  if (existedObject) {
+    await updateDatafinityObject(existedObject, datafinityObject);
+    emitStart({
+      user: datafinityObject.user,
+      authorPermlink: existedObject.author_permlink,
+    });
     return;
   }
 
@@ -475,18 +486,13 @@ const createObject = async (datafinityObject) => {
   await updateDatafinityObject(obj, datafinityObject);
 };
 
-// TODO CHECK
-const checkIfWobjectExists = async (datafinityObject) => {
-  if (!datafinityObject.keys) return;
-
-  return getWobjectByKeys(datafinityObject.keys);
-};
-
-const getWobjectByKeys = async (keys) => {
-  for (const key of keys) {
-    const textMatch = `\"${key}\"`;
-    const regexMatch = JSON.stringify({ productId: key, productIdType: DATAFINITY_KEY });
-    const { result, error } = await Wobj.findSameFieldBody(textMatch, regexMatch);
+const getWobjectByKeys = async (datafinityObject) => {
+  const fields = _.filter(datafinityObject.fields,
+    (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID], f.name));
+  for (const field of fields) {
+    const { result, error } = await Wobj.findOne({
+      filter: { fields: { $elemMatch: { name: field.name, body: field.body } } },
+    });
     if (error) {
       console.error(error.message);
 

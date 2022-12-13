@@ -70,6 +70,16 @@ const findOneByProductId = async (asin, objectType) => {
   }
 };
 
+const findOne = async ({ filter, projection, options }) => {
+  try {
+    const wobject = await WObjectModel.findOne(filter, projection, options).lean();
+
+    return { result: wobject };
+  } catch (e) {
+    return { error: e };
+  }
+};
+
 module.exports = {
-  getOne, getField, findSameFieldBody, findOneByNameAndObjectType, findOneByProductId,
+  getOne, getField, findSameFieldBody, findOneByNameAndObjectType, findOneByProductId, findOne,
 };
