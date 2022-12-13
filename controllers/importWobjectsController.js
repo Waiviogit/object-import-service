@@ -83,6 +83,18 @@ const getImportStatistic = async (req, res, next) => {
   res.status(200).json(result);
 };
 
+const getImportHistory = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.importStatisticsSchema,
+    next,
+  );
+  if (!value) return;
+  const { result, error } = await importManage.getStatistic({ ...value, history: true });
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
 const changeImportDetails = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -165,4 +177,5 @@ module.exports = {
   deleteImport,
   setVotingPower,
   getVotingPower,
+  getImportHistory,
 };

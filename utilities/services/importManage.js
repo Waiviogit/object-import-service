@@ -2,11 +2,15 @@ const { ImportStatusModel, DatafinityObject } = require('../../models');
 const { IMPORT_STATUS } = require('../../constants/appData');
 const { startObjectImport } = require('./importDatafinityObjects');
 
-const getStatistic = async ({ user }) => {
+const getStatistic = async ({ user, history = false }) => {
   const { result, error } = await ImportStatusModel.find({
     filter: {
       user,
-      status: { $in: [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD] },
+      status: {
+        $in: history
+          ? [IMPORT_STATUS.FINISHED, IMPORT_STATUS.DELETED]
+          : [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD],
+      },
     },
   });
   if (error) return { error };
