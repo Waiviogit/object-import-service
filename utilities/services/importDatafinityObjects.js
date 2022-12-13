@@ -33,7 +33,12 @@ const bufferToArray = (buffer) => {
 
 const groupByAsins = (products) => {
   const uniqueProducts = [];
-  const grouped = _.groupBy(products, 'asins');
+  const books = _.filter(
+    products,
+    (p) => _.some(p.categories, (c) => c.toLocaleLowerCase().includes('book')),
+  );
+
+  const grouped = _.groupBy(books, 'asins');
 
   for (const groupedKey in grouped) {
     if (groupedKey === 'undefined') {
