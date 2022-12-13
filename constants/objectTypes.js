@@ -48,6 +48,7 @@ exports.OBJECT_FIELDS = {
   CATEGORY_ITEM: 'categoryItem',
   WORK_TIME: 'workTime',
   WEBSITE: 'website',
+  COMPANY_ID: 'companyId',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -70,6 +71,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.TAG_CATEGORY,
     this.OBJECT_FIELDS.WORK_TIME,
     this.OBJECT_FIELDS.WEBSITE,
+    this.OBJECT_FIELDS.COMPANY_ID,
   ],
 };
 
