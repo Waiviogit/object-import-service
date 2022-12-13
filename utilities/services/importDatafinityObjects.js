@@ -10,7 +10,7 @@ const { prepareFieldsForImport } = require('../helpers/bookFieldsHelper');
 const { generateUniquePermlink } = require('../helpers/permlinkGenerator');
 const { VOTE_COST } = require('../../constants/voteAbility');
 const {
-  OBJECT_TYPES, DATAFINITY_KEY, OBJECT_IDS, OBJECT_FIELDS,
+  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS,
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
@@ -31,14 +31,17 @@ const bufferToArray = (buffer) => {
   return parseJson(stringFromBuffer, []);
 };
 
-const groupByAsins = (products) => {
+const groupByAsins = (products, objectType) => {
   const uniqueProducts = [];
-  const books = _.filter(
-    products,
-    (p) => _.some(p.categories, (c) => c.toLocaleLowerCase().includes('book')),
-  );
 
-  const grouped = _.groupBy(books, 'asins');
+  if (objectType === OBJECT_TYPES.BOOK) {
+    products = _.filter(
+      products,
+      (p) => _.some(p.categories, (c) => c.toLocaleLowerCase().includes('book')),
+    );
+  }
+
+  const grouped = _.groupBy(products, 'asins');
 
   for (const groupedKey in grouped) {
     if (groupedKey === 'undefined') {
@@ -79,7 +82,7 @@ const filterImportObjects = ({
     book: groupByAsins,
     default: () => products,
   };
-  return (filters[objectType] || filters.default)(products);
+  return (filters[objectType] || filters.default)(products, objectType);
 };
 
 const saveObjects = async ({
