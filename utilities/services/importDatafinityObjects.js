@@ -430,28 +430,42 @@ const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
   }
 };
 
+const validateSameFields = ({ fieldData, wobject }) => {
+  const setUniqFields = ['name', 'body', 'locale'];
+
+  const foundedFields = _.map(wobject.fields, (field) => _.pick(field, setUniqFields));
+  const result = foundedFields.find((field) => _.isEqual(field, _.pick(fieldData, setUniqFields)));
+  return !!result;
+};
+
 const processField = async ({ datafinityObject, wobject, user }) => {
   const exit = await checkFieldConnectedObject({ datafinityObject });
-  await specialFieldsHelper({ datafinityObject, wobject });
   if (exit) return;
-  await addField({
-    field: datafinityObject.fields[0],
-    wobject,
-    importingAccount: user,
-    importId: datafinityObject.importId,
-  });
+  await specialFieldsHelper({ datafinityObject, wobject });
+  const sameField = validateSameFields({ fieldData: datafinityObject.fields[0], wobject });
+
+  if (!sameField) {
+    await addField({
+      field: datafinityObject.fields[0],
+      wobject,
+      importingAccount: user,
+      importId: datafinityObject.importId,
+    });
+    await ImportStatusModel.updateOne({
+      filter: { importId: datafinityObject.importId },
+      update: {
+        $inc: {
+          fieldsCreatedCount: 1,
+        },
+      },
+    });
+  }
+  if (sameField) console.error(`same field ${JSON.stringify(datafinityObject.fields[0])}`);
+
   const { result, error } = await DatafinityObject.findOneAndModify(
     { _id: datafinityObject._id },
     { $pop: { fields: -1 } },
   );
-  await ImportStatusModel.updateOne({
-    filter: { importId: datafinityObject.importId },
-    update: {
-      $inc: {
-        fieldsCreatedCount: 1,
-      },
-    },
-  });
 
   if (error) {
     console.error(error.message);
