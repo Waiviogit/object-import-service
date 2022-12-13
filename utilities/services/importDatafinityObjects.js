@@ -78,24 +78,9 @@ const filterImportObjects = ({
 };
 
 const saveObjects = async ({
-  products, user, objectType, authority, locale, translate,
+  products, user, objectType, authority, locale, translate, importId,
 }) => {
-  if (_.isEmpty(products)) {
-    return { error: new Error('products not found') };
-  }
-  const importId = uuid.v4();
-  const uniqueProducts = filterImportObjects({ products, objectType });
-  if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
-
-  await ImportStatusModel.create({
-    importId,
-    user,
-    objectsCount: 0,
-    objectType,
-    authority,
-  });
-
-  for (const product of uniqueProducts) {
+  for (const product of products) {
     product.importId = importId;
     product.user = user;
     product.object_type = objectType;
@@ -117,6 +102,11 @@ const saveObjects = async ({
       },
     });
   }
+
+  emitStart({
+    user,
+    importId,
+  });
 };
 
 const emitStart = ({
@@ -138,23 +128,32 @@ const importObjects = async ({
 }) => {
   const products = bufferToArray(file.buffer);
 
-  const { result, error } = await saveObjects({
-    products,
+  if (_.isEmpty(products)) {
+    return { error: new Error('products not found') };
+  }
+  const importId = uuid.v4();
+  const uniqueProducts = filterImportObjects({ products, objectType });
+  if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
+
+  await ImportStatusModel.create({
+    importId,
+    user,
+    objectsCount: 0,
+    objectType,
+    authority,
+  });
+
+  saveObjects({
+    products: uniqueProducts,
     user,
     objectType,
     authority,
     locale,
     translate,
+    importId,
   });
 
-  if (error) return { error };
-
-  emitStart({
-    user,
-    importId: result,
-  });
-
-  return { result };
+  return { result: importId };
 };
 
 const checkImportActiveStatus = async (importId) => {
