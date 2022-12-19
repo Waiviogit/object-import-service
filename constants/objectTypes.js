@@ -1,6 +1,7 @@
 exports.IMPORT_OBJECT_TYPES = {
   BOOK: 'book',
   RESTAURANT: 'restaurant',
+  PRODUCT: 'product',
 };
 
 exports.OBJECT_TYPES = {
@@ -49,6 +50,11 @@ exports.OBJECT_FIELDS = {
   WORK_TIME: 'workTime',
   WEBSITE: 'website',
   COMPANY_ID: 'companyId',
+  MERCHANT: 'merchant',
+  MANUFACTURER: 'manufacturer',
+  BRAND: 'brand',
+  FEATURES: 'features',
+  DEPARTMENTS: 'departments',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -63,6 +69,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.PUBLISHER,
     this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.AUTHORS,
+    this.OBJECT_FIELDS.DEPARTMENTS,
   ],
   restaurant: [
     this.OBJECT_FIELDS.ADDRESS,
@@ -72,6 +79,18 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.WORK_TIME,
     this.OBJECT_FIELDS.WEBSITE,
     this.OBJECT_FIELDS.COMPANY_ID,
+  ],
+  product: [
+    this.OBJECT_FIELDS.PRODUCT_ID,
+    this.OBJECT_FIELDS.AVATAR,
+    this.OBJECT_FIELDS.DIMENSIONS,
+    this.OBJECT_FIELDS.FEATURES,
+    this.OBJECT_FIELDS.BRAND,
+    this.OBJECT_FIELDS.MANUFACTURER,
+    this.OBJECT_FIELDS.MERCHANT,
+    this.OBJECT_FIELDS.WEIGHT,
+    this.OBJECT_FIELDS.DEPARTMENTS,
+    this.OBJECT_FIELDS.OPTIONS,
   ],
 };
 
@@ -136,3 +155,26 @@ exports.FIELD_LANGUAGES_TO_NLP = {
   'zh-CN': 'zho_Hans',
   default: 'eng_Latn',
 };
+
+exports.FEATURES_FILTER = [
+  'Product Features',
+  'Parent ASIN',
+  'Best Sellers Rank',
+  'Leaf Node Category',
+  'Parent Node Category',
+  'Parent Node Id',
+  'Date First Available',
+  'Leaf Node Id',
+  'Hierarchy',
+  'Color',
+  'Item Dimensions LxWxH',
+  'Packaged Quantity',
+  'Style Name',
+  'Body Color',
+  'Key Points',
+  '3G UMTS Band',
+  'Product Type',
+  'Additional Features',
+  'Header / Brand',
+  'Service Provider',
+];

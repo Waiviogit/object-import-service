@@ -11,6 +11,7 @@ const {
   FIELDS_BY_OBJECT_TYPE,
   OBJECT_FIELDS,
   OBJECT_TYPES,
+  FEATURES_FILTER,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject } = require('../../models');
 const { formField } = require('./formFieldHelper');
@@ -39,6 +40,11 @@ exports.prepareFieldsForImport = async (object) => {
     workTime,
     website,
     companyId,
+    features,
+    brand,
+    manufacturer,
+    merchant,
+    departments,
   };
 
   if (object.authority) {
@@ -128,7 +134,7 @@ const publicationDate = (obj) => {
 };
 
 const productWeight = (obj) => {
-  const objWeight = _.get(obj, OBJECT_FIELDS.WEIGHT);
+  const objWeight = _.get(obj, 'weight');
 
   if (objWeight) {
     const [value, unit] = objWeight.split(' ');
@@ -203,8 +209,42 @@ const publisher = async (obj) => {
   }
 };
 
-const options = async (obj) => {
-  // Todo object type switcher + filter instead find
+const productOptions = (obj) => {
+  const fields = [];
+  if (!_.isEmpty(obj.colors)) {
+    for (const [index, color] of obj.colors.entries()) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.OPTIONS,
+        locale: obj.locale,
+        user: obj.user,
+        body: JSON.stringify({
+          category: 'color',
+          value: color,
+          position: index + 1,
+        }),
+      }));
+    }
+  }
+
+  if (!_.isEmpty(obj.sizes)) {
+    for (const [index, size] of obj.sizes.entries()) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.OPTIONS,
+        locale: obj.locale,
+        user: obj.user,
+        body: JSON.stringify({
+          category: 'size',
+          value: size,
+          position: index + 1,
+        }),
+      }));
+    }
+  }
+
+  return fields;
+};
+
+const bookOptions = async (obj) => {
   const formats = obj.features.find((el) => el.key.toLowerCase().includes('format'));
 
   if (formats) {
@@ -240,6 +280,15 @@ const options = async (obj) => {
   }
 
   return formatsAmazon;
+};
+
+const options = async (obj) => {
+  const optionsHandler = {
+    book: bookOptions,
+    product: productOptions,
+    default: () => {},
+  };
+  return (optionsHandler[obj.object_type] || optionsHandler.default)(obj);
 };
 
 const companyId = async (obj) => {
@@ -523,4 +572,91 @@ const website = async (object) => {
     user: object.user,
     body: JSON.stringify({ title: `${object.name} Website`, link: object.websites[0] }),
   });
+};
+
+const brand = (object) => {
+  if (!object.brand) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.BRAND,
+    locale: object.locale,
+    user: object.user,
+    body: JSON.stringify({ name: object.brand }),
+  });
+};
+
+const manufacturer = (object) => {
+  if (!object.manufacturer) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.MANUFACTURER,
+    locale: object.locale,
+    user: object.user,
+    body: JSON.stringify({ name: object.manufacturer }),
+  });
+};
+
+const merchant = (object) => {
+  if (!object.merchants) return;
+
+  const merchantDatafinitiy = _.find(object.merchants, (m) => !!m.name);
+  if (!merchantDatafinitiy) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.MERCHANT,
+    locale: object.locale,
+    user: object.user,
+    body: JSON.stringify({ name: merchantDatafinitiy.name }),
+  });
+};
+
+const features = (object) => {
+  const datafinityFeatures = _.filter(object.features, (f) => !_.includes(FEATURES_FILTER, f.key));
+  if (_.isEmpty(datafinityFeatures)) return;
+  const fields = [];
+  for (const feature of datafinityFeatures) {
+    if (feature.value.length > 1) continue;
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.FEATURES,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({ key: feature.key, value: feature.value[0] }),
+    }));
+  }
+
+  return fields;
+};
+
+const departments = (object) => {
+  const fields = [];
+  if (!object.taxonomy) {
+    if (!object.categories) return;
+    const categories = _.take(object.categories, 5);
+    for (const category of categories) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.DEPARTMENTS,
+        locale: object.locale,
+        user: object.user,
+        body: category.toLocaleLowerCase().trim(),
+      }));
+    }
+    return fields;
+  }
+
+  const taxonomyElements = _.reduce(object.taxonomy, (acc, el) => {
+    const elements = el.split('>');
+    acc.push(..._.map(elements, (e) => e.trim()));
+    return acc;
+  }, []);
+
+  const toFields = _.take(taxonomyElements, 5);
+  for (const toField of toFields) {
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.DEPARTMENTS,
+      locale: object.locale,
+      user: object.user,
+      body: toField.toLocaleLowerCase(),
+    }));
+  }
+  return fields;
 };

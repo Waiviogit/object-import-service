@@ -124,8 +124,10 @@ const getBookFormatData = async (url) => {
   }
   const root = parse(page);
   const options = root.querySelector(SELECTOR.OPTIONS);
+  if (!options) return onErrorResp;
   // const spans = options.querySelectorAll(SELECTOR.SPAN_IN_A);
   const innerButtons = options.querySelectorAll('.a-button-inner');
+
   const innerButtonsChild = innerButtons
     .flatMap((el) => el.childNodes)
     .filter((el) => el.rawAttrs === 'href="javascript:void(0)" class="a-button-text"');
