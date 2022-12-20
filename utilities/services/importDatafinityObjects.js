@@ -152,7 +152,7 @@ const importObjects = async ({
     authority,
   });
 
-  await saveObjects({
+  saveObjects({
     products: uniqueProducts,
     user,
     objectType,
