@@ -313,7 +313,7 @@ const prepareObjectForImport = async (datafinityObject) => {
     author_permlink: permlink,
     creator: datafinityObject.user,
     default_name: datafinityObject.name,
-    locale: detectLanguage(datafinityObject.name),
+    locale: datafinityObject.locale,
     is_extending_open: true,
     is_posting_open: true,
     fields: datafinityObject.fields,
@@ -504,6 +504,7 @@ const createObject = async (datafinityObject) => {
   }
 
   const obj = await prepareObjectForImport(datafinityObject);
+  console.log(obj.author_permlink, 'creating datafinity object');
 
   await addWobject({ wobject: obj, existObjType: objType, addData: false });
   await updateDatafinityObject(obj, datafinityObject);
