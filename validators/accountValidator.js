@@ -1,8 +1,10 @@
 const _ = require('lodash');
+const BigNumber = require('bignumber.js');
 const { checkVotePower } = require('../utilities/helpers/checkVotePower');
 const { getAccount } = require('../utilities/hiveApi/userUtil');
-const { ImportStatusModel } = require('../models');
 const { getVotingPowers } = require('../utilities/hiveEngine/hiveEngineOperations');
+const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
+const { redisGetter } = require('../utilities/redis');
 
 const importAccountValidator = async (user, voteCost) => {
   const abilityToVote = await checkVotePower(user, voteCost);
@@ -24,14 +26,14 @@ const importAccountValidator = async (user, voteCost) => {
   return { result: true };
 };
 
-const votePowerValidation = async ({ account, importId }) => {
-  const { result, error } = await ImportStatusModel.findOne({
-    filter: { account, importId },
-  });
-  if (error) return false;
-  if (!result) return false;
+const votePowerValidation = async ({ account }) => {
+  const key = `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`;
+  let power = await redisGetter.get({ key });
+  if (!power) power = DEFAULT_VOTE_POWER_IMPORT;
+
   const { votingPower } = await getVotingPowers({ account });
-  return votingPower > result.minVotingPower;
+
+  return BigNumber(votingPower).gt(power);
 };
 
 module.exports = {
