@@ -269,9 +269,9 @@ const startObjectImport = async ({
   if (createNew) {
     await createObject(datafinityObject);
     // trigger new import from parser
-  } else if (authorPermlink) {
+  } else if (authorPermlink || datafinityObject.author_permlink) {
     const { wobject, error: dbError } = await Wobj.getOne({
-      author_permlink: authorPermlink,
+      author_permlink: authorPermlink || datafinityObject.author_permlink,
     });
 
     if (dbError) return;
