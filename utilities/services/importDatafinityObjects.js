@@ -276,16 +276,8 @@ const startObjectImport = async ({
 
     if (dbError) return;
 
-    const { result: updatedObj, error: processErr } = await processField({
-      datafinityObject,
-      wobject,
-      user,
-    });
-
-    if (processErr) return;
-
-    if (!updatedObj.fields.length) {
-      await DatafinityObject.removeOne(updatedObj._id);
+    if (!datafinityObject.fields.length) {
+      await DatafinityObject.removeOne(datafinityObject._id);
       emitStart({
         user: datafinityObject.user,
         importId: datafinityObject.importId,
@@ -296,6 +288,14 @@ const startObjectImport = async ({
       });
       return;
     }
+
+    const { result: updatedObj, error: processErr } = await processField({
+      datafinityObject,
+      wobject,
+      user,
+    });
+
+    if (processErr) return;
 
     emitStart({
       user: datafinityObject.user,
