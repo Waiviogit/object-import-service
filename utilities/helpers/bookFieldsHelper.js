@@ -556,7 +556,7 @@ const workTime = async (object) => {
   const body = _.reduce(object.hours, (acc, el) => `${acc}${el.day} ${el.hour}\n`, '');
 
   return formField({
-    fieldName: OBJECT_FIELDS.WEBSITE,
+    fieldName: OBJECT_FIELDS.WORK_TIME,
     locale: object.locale,
     user: object.user,
     body,
@@ -567,7 +567,7 @@ const website = async (object) => {
   if (_.isEmpty(object.websites)) return;
 
   return formField({
-    fieldName: OBJECT_FIELDS.LINK,
+    fieldName: OBJECT_FIELDS.WEBSITE,
     locale: object.locale,
     user: object.user,
     body: JSON.stringify({ title: `${object.name} Website`, link: object.websites[0] }),

@@ -73,7 +73,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
   ],
   restaurant: [
     this.OBJECT_FIELDS.ADDRESS,
-    this.OBJECT_FIELDS.MAP,
+   this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,
     this.OBJECT_FIELDS.TAG_CATEGORY,
     this.OBJECT_FIELDS.WORK_TIME,

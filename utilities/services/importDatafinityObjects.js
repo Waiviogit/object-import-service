@@ -58,7 +58,8 @@ const groupByAsins = (products, objectType) => {
 };
 
 const filterImportRestaurants = (restaurants) => _.reduce(restaurants, (acc, el) => {
-  if (!_.includes(el.categories, 'Restaurants')) return acc;
+  const someRestaurants = _.some(el.categories, (category) => category.toLocaleLowerCase().includes('restaurant'));
+  if (!someRestaurants) return acc;
   if (el.isClosed === 'true') return acc;
   const duplicate = _.find(
     acc,
@@ -151,7 +152,7 @@ const importObjects = async ({
     authority,
   });
 
-  saveObjects({
+  await saveObjects({
     products: uniqueProducts,
     user,
     objectType,
