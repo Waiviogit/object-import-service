@@ -50,6 +50,7 @@ const addWobjectsToQueue = async ({ wobjects = [], immediately } = {}) => {
           wobject,
           immediately,
           existWobj,
+          ...(wobject.importingAccount && { importingAccount: wobject.importingAccount }),
         });
       }
     }
