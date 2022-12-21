@@ -42,6 +42,9 @@ const importWobjectsJson = async (req, res, next) => {
 };
 
 const importObjectsFromTextOrJson = async (req, res, next) => {
+  if (!req.file) {
+    return next({ error: { status: 422, message: 'No File' } });
+  }
   if (req.file.size > FILE_MAX_SIZE) {
     return next({ error: { status: 422, message: 'Allowed file size must be less than 100 MB' } });
   }
