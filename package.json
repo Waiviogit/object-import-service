@@ -17,6 +17,7 @@
     "bignumber.js": "^9.1.0",
     "bluebird": "^3.5.3",
     "body-parser": "^1.15.2",
+    "cors": "^2.8.5",
     "csv-writer": "^1.5.0",
     "dotenv": "^16.0.1",
     "dsteem": "^0.8.7",
