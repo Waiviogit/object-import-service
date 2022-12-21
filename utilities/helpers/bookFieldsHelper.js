@@ -595,6 +595,7 @@ const tagCategory = async (object) => {
       tagCategory: supposedUpdatesTranslate.Cuisine[object.locale],
     }));
   }
+  if (_.isEmpty(fields)) return;
   return fields;
 };
 
