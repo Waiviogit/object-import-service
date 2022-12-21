@@ -126,7 +126,8 @@ const publicationDate = (obj) => {
   if (date) {
     return formField({
       fieldName: OBJECT_FIELDS.PUBLICATION_DATE,
-      body: date.value.reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
+      body: date.value
+        .reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
       user: obj.user,
       locale: obj.locale,
     });
@@ -337,7 +338,8 @@ const productId = (obj) => {
     }));
   }
 
-  const ids = Object.entries(obj).filter((el) => Object.values(OBJECT_IDS).some((id) => el.includes(id)));
+  const ids = Object.entries(obj)
+    .filter((el) => Object.values(OBJECT_IDS).some((id) => el.includes(id)));
 
   for (const id of ids) {
     if (id[1].length) {
@@ -435,9 +437,12 @@ const formFormats = (uniqFormats, obj) => {
 };
 
 exports.addTagsIfNeeded = async (datafinityObject, wobject) => {
-  const tagCategory = wobject.fields.find((field) => field.name === FIELDS_FOR_TAGS.TAG_CATEGORY);
-  const categoryItems = wobject.fields.filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM && field.id === tagCategory.id);
-  const categoryItemsToSave = datafinityObject.fields.filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM);
+  const tagCategory = wobject.fields
+    .find((field) => field.name === FIELDS_FOR_TAGS.TAG_CATEGORY);
+  const categoryItems = wobject.fields
+    .filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM && field.id === tagCategory.id);
+  const categoryItemsToSave = datafinityObject.fields
+    .filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM);
 
   if (!categoryItems.length && !categoryItemsToSave.length) {
     const fields = await addTags(datafinityObject, tagCategory.id);
@@ -499,7 +504,11 @@ const map = async (object) => {
       }),
     });
   }
-  const { map, error } = await tryGetMapFromName(object);
+
+  const validAddress = checkAddress(object);
+  if (!validAddress) return;
+
+  const { map: positionstackMap, error } = await tryGetMapFromName(object);
   if (error) {
     const { map: openStreet, error: openStreetErr } = await getMapFromOpenStreet(object);
     if (openStreetErr) return;
@@ -515,22 +524,29 @@ const map = async (object) => {
     fieldName: OBJECT_FIELDS.MAP,
     locale: object.locale,
     user: object.user,
-    body: JSON.stringify(map),
+    body: JSON.stringify(positionstackMap),
   });
 };
 
-const address = async (object) => formField({
-  fieldName: OBJECT_FIELDS.ADDRESS,
-  locale: object.locale,
-  user: object.user,
-  body: JSON.stringify({
-    address: _.get(object, 'address', ''),
-    city: _.get(object, 'city', ''),
-    state: _.get(object, 'province', ''),
-    postalCode: _.get(object, 'postalCode', ''),
-    country: _.get(object, 'country', ''),
-  }),
-});
+const address = async (object) => {
+  const validAddress = checkAddress(object);
+  if (!validAddress) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.ADDRESS,
+    locale: object.locale,
+    user: object.user,
+    body: JSON.stringify({
+      address: _.get(object, 'address', ''),
+      city: _.get(object, 'city', ''),
+      state: _.get(object, 'province', ''),
+      postalCode: _.get(object, 'postalCode', ''),
+      country: _.get(object, 'country', ''),
+    }),
+  });
+};
+
+const checkAddress = (object) => /[0-9]/.test(_.get(object, 'address', ''));
 
 const email = async (object) => {
   if (_.isEmpty(object.emails)) return;

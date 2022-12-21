@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const _ = require('lodash');
 const uuid = require('uuid');
 const BigNumber = require('bignumber.js');
-const detectLanguage = require('../helpers/detectLanguage');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
@@ -86,6 +85,14 @@ const filterImportObjects = ({
   return (filters[objectType] || filters.default)(products, objectType);
 };
 
+const needToSaveObject = (object) => {
+  if (object.object_type === OBJECT_TYPES.RESTAURANT) {
+    const map = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.MAP);
+    if (!map) return false;
+  }
+  return true;
+};
+
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId,
 }) => {
@@ -99,6 +106,10 @@ const saveObjects = async ({
       product.authority = authority;
     }
     product.fields = await prepareFieldsForImport(product);
+
+    const save = needToSaveObject(product);
+    if (!save) continue;
+
     const { result, error } = await DatafinityObject.create(product);
     if (error) continue;
     await ImportStatusModel.updateOne({
