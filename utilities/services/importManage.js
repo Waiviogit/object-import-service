@@ -20,7 +20,7 @@ const getStatistic = async ({ user, history = false }) => {
       field: '_id',
       filter: { importId: resultElement.importId, user },
     });
-    resultElement.objectsLastCount = counter;
+    resultElement.objectsPosted = resultElement.objectsCount - counter;
   }
 
   return { result };
