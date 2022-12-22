@@ -2,7 +2,7 @@ const { Wobj } = require('../../models');
 
 const PERMLINK_MAX_LEN = 255;
 
-const genRandomString = (stringLength) => {
+exports.genRandomString = (stringLength) => {
   let randomString = '';
   let randomAscii;
   const asciiLow = 65;
@@ -16,7 +16,7 @@ const genRandomString = (stringLength) => {
 };
 
 exports.permlinkGenerator = (string) => {
-  const permlink = `${genRandomString(3)}-${string}`
+  const permlink = `${this.genRandomString(3)}-${string}`
     .toLowerCase()
     .replace(/[ _]/g, '-')
     .replace(/[.]/g, '')

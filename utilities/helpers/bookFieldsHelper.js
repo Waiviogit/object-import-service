@@ -2,6 +2,7 @@ const FormData = require('form-data');
 const axios = require('axios');
 const _ = require('lodash');
 const moment = require('moment');
+const uuid = require('uuid');
 const {
   WEIGHT_UNITS,
   DIMENSION_UNITS,
@@ -13,11 +14,12 @@ const {
   OBJECT_TYPES,
   FEATURES_FILTER,
 } = require('../../constants/objectTypes');
-const { Wobj, DatafinityObject } = require('../../models');
+const { Wobj, DatafinityObject, ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
 const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
 const supposedUpdatesTranslate = require('../../translations/supposedUpdates');
 const { translate } = require('./translateHelper');
+const { genRandomString } = require('./permlinkGenerator');
 
 exports.prepareFieldsForImport = async (object) => {
   const fields = [];
@@ -45,7 +47,11 @@ exports.prepareFieldsForImport = async (object) => {
     manufacturer,
     merchant,
     departments,
+    name,
   };
+
+  const supposedUpdates = await addSupposedUpdates(object);
+  if (!_.isEmpty(supposedUpdates)) fields.push(...supposedUpdates);
 
   if (object.authority) {
     fields.push(formField({
@@ -66,6 +72,39 @@ exports.prepareFieldsForImport = async (object) => {
       fields.push(...field);
     }
   }
+  return fields;
+};
+
+const addSupposedUpdates = async (wobject) => {
+  if (!_.get(wobject, 'object_type')) return;
+  const fields = [];
+
+  const { locale, user } = wobject;
+
+  const { objectType, error: objTypeError } = await ObjectType.getOne({
+    name: wobject.object_type,
+  });
+  if (objTypeError) return { error: objTypeError };
+
+  const supposedUpdates = _.get(objectType, 'supposed_updates', []);
+  if (_.isEmpty(supposedUpdates)) return;
+
+  const identifier = genRandomString(8).toLowerCase();
+
+  supposedUpdates.forEach((update) => {
+    _.get(update, 'values', []).forEach((value) => {
+      const body = supposedUpdatesTranslate[value][locale] || supposedUpdatesTranslate[value]['en-US'];
+      const field = {
+        name: update.name,
+        body,
+        permlink: `${identifier}-${update.name.toLowerCase()}-${genRandomString(5).toLowerCase()}`,
+        creator: user,
+        locale,
+      };
+      if (update.id_path) field[update.id_path] = uuid.v4();
+      fields.push(field);
+    });
+  });
   return fields;
 };
 
@@ -655,6 +694,17 @@ const merchant = (object) => {
     locale: object.locale,
     user: object.user,
     body: JSON.stringify({ name: merchantDatafinitiy.name }),
+  });
+};
+
+const name = (object) => {
+  if (!object.name) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.NAME,
+    locale: object.locale,
+    user: object.user,
+    body: object.name,
   });
 };
 

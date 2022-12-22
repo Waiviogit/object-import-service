@@ -32,6 +32,7 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 
 exports.OBJECT_FIELDS = {
   PRODUCT_ID: 'productId',
+  NAME: 'name',
   AGE_RANGE: 'ageRange',
   OPTIONS: 'options',
   PUBLICATION_DATE: 'publicationDate',
@@ -59,6 +60,7 @@ exports.OBJECT_FIELDS = {
 
 exports.FIELDS_BY_OBJECT_TYPE = {
   book: [
+    this.OBJECT_FIELDS.NAME,
     this.OBJECT_FIELDS.OPTIONS,
     this.OBJECT_FIELDS.PRODUCT_ID,
     this.OBJECT_FIELDS.AGE_RANGE,
@@ -72,6 +74,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.DEPARTMENTS,
   ],
   restaurant: [
+    this.OBJECT_FIELDS.NAME,
     this.OBJECT_FIELDS.ADDRESS,
     this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,
@@ -81,6 +84,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.COMPANY_ID,
   ],
   product: [
+    this.OBJECT_FIELDS.NAME,
     this.OBJECT_FIELDS.PRODUCT_ID,
     this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.DIMENSIONS,
