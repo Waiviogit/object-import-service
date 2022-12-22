@@ -130,8 +130,7 @@ const getBookFormatData = async (url) => {
 
   if (!innerButtons) return onErrorResp;
 
-  const innerButtonsChild = innerButtons
-    .flatMap((el) => el.childNodes)
+  const innerButtonsChild = _.flatMap(innerButtons, (el) => el.childNodes)
     .filter((el) => el.rawAttrs === 'href="javascript:void(0)" class="a-button-text"');
   if (_.isEmpty(innerButtonsChild)) return onErrorResp;
 
