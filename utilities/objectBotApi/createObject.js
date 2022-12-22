@@ -9,7 +9,7 @@ const send = async (data) => {
   const { error } = await createObjectValidate(data);
 
   if (error) {
-    console.error(error);
+    console.error(error.message);
     return { error };
   }
   while (true) {
