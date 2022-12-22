@@ -22,6 +22,7 @@ const DatafinityObjectSchema = new Schema({
         permlink: String,
         name: String,
         body: String,
+        id: String,
       },
     ],
     default: [],
