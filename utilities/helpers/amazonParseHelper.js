@@ -128,6 +128,8 @@ const getBookFormatData = async (url) => {
   // const spans = options.querySelectorAll(SELECTOR.SPAN_IN_A);
   const innerButtons = options.querySelectorAll('.a-button-inner');
 
+  if (!innerButtons) return onErrorResp;
+
   const innerButtonsChild = innerButtons
     .flatMap((el) => el.childNodes)
     .filter((el) => el.rawAttrs === 'href="javascript:void(0)" class="a-button-text"');
