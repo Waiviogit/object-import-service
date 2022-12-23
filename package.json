@@ -7,7 +7,7 @@
     "url": "git+https://github.com/Waiviogit/object-import-service.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "start": "node ./bin/service.js"
   },
