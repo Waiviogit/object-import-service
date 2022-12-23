@@ -208,12 +208,16 @@ const printLength = (obj) => {
 const authors = async (obj) => {
   const fields = [];
   const merchant = 'amazon';
-  const priceDataWithUrl = obj.prices.find((el) => el.merchant.includes(merchant));
+  if (!obj.prices) return;
+  const priceDataWithUrl = obj.prices.find(
+    (el) => _.includes(_.get(el, 'merchant'), merchant),
+  );
+
   if (!priceDataWithUrl) {
     // todo
     return;
   }
-  const url = priceDataWithUrl.sourceURLs.find((el) => el.includes(merchant));
+  const url = _.find(_.get(priceDataWithUrl, 'sourceURLs'), (el) => el.includes(merchant));
   if (!url) {
     // todo
     return;
