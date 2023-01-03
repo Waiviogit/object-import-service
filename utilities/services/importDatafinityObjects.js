@@ -80,6 +80,7 @@ const filterImportObjects = ({
   const filters = {
     restaurant: filterImportRestaurants,
     book: groupByAsins,
+    product: groupByAsins,
     default: () => products,
   };
   return (filters[objectType] || filters.default)(products, objectType);
