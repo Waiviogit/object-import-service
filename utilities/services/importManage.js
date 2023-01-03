@@ -12,6 +12,9 @@ const getStatistic = async ({ user, history = false }) => {
           : [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD],
       },
     },
+    options: {
+      sort: { createdAt: -1 },
+    },
   });
   if (error) return { error };
 
