@@ -58,6 +58,7 @@ exports.OBJECT_FIELDS = {
   DEPARTMENTS: 'departments',
   GALLERY_ALBUM: 'galleryAlbum',
   GALLERY_ITEM: 'galleryItem',
+  PRICE: 'price',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -75,6 +76,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.AUTHORS,
     this.OBJECT_FIELDS.DEPARTMENTS,
     this.OBJECT_FIELDS.WEIGHT,
+    this.OBJECT_FIELDS.PRICE,
   ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,
@@ -98,6 +100,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.WEIGHT,
     this.OBJECT_FIELDS.DEPARTMENTS,
     this.OBJECT_FIELDS.OPTIONS,
+    this.OBJECT_FIELDS.PRICE,
   ],
 };
 
@@ -185,3 +188,21 @@ exports.FEATURES_FILTER = [
   'Header / Brand',
   'Service Provider',
 ];
+
+exports.CURRENCY_PREFIX = {
+  AUD: 'A$',
+  USD: '$',
+  CAD: 'C$',
+  JPY: '¥',
+  NZD: 'NZ$',
+  EUR: '€',
+  GBP: '£',
+  SGD: 'S$',
+  HKD: 'HK$',
+  MXN: 'MX$',
+  RUB: '₽',
+  CNY: '¥',
+  UAH: '₴',
+  CHF: '₣',
+  default: '$',
+};

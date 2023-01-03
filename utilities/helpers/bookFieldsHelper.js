@@ -13,6 +13,7 @@ const {
   OBJECT_FIELDS,
   OBJECT_TYPES,
   FEATURES_FILTER,
+  CURRENCY_PREFIX,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject, ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
@@ -49,6 +50,7 @@ exports.prepareFieldsForImport = async (object) => {
     merchant,
     departments,
     name,
+    price,
   };
 
   const supposedUpdates = await addSupposedUpdates(object);
@@ -107,6 +109,21 @@ const addSupposedUpdates = async (wobject) => {
     });
   });
   return fields;
+};
+
+const price = (obj) => {
+  if (!obj.MostRecentPriceAmount || !obj.MostRecentPriceCurrency) return;
+
+  const currencyPrefix = CURRENCY_PREFIX[obj.MostRecentPriceCurrency] || CURRENCY_PREFIX.default;
+
+  const body = `${currencyPrefix}${obj.MostRecentPriceAmount}`;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.PRICE,
+    user: obj.user,
+    body,
+    locale: obj.locale,
+  });
 };
 
 const ageRange = (obj) => {
