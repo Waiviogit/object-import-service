@@ -20,6 +20,7 @@ const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
 const supposedUpdatesTranslate = require('../../translations/supposedUpdates');
 const { translate } = require('./translateHelper');
 const { genRandomString } = require('./permlinkGenerator');
+const { IMAGE_SIZE } = require('../../constants/fileFormats');
 
 exports.prepareFieldsForImport = async (object) => {
   const fields = [];
@@ -403,37 +404,92 @@ const productId = (obj) => {
   }
 };
 
-const avatar = async (obj) => {
-  if (!Array.isArray(obj.imageURLs)) return;
-  for (const image of obj.imageURLs) {
-    try {
-      const response = await axios.get(image);
-
-      if (response.status !== 200) {
-        continue;
-      }
-
-      const bodyFormData = new FormData();
-
-      bodyFormData.append('imageUrl', image);
-      const resp = await axios.post(
-        process.env.SAVE_IMAGE_URL,
-        bodyFormData,
-        {
-          headers: bodyFormData.getHeaders(),
-        },
-      );
-
-      return formField({
-        fieldName: OBJECT_FIELDS.AVATAR,
-        locale: obj.locale,
-        user: obj.user,
-        body: resp.data.image,
-      });
-    } catch (error) {
-      console.error(error.message);
-    }
+const checkImageHelper = async (image) => {
+  try {
+    const response = await axios.get(image);
+    return response.status === 200;
+  } catch (e) {
+    return false;
   }
+};
+
+const loadImageByUrl = async (url, size) => {
+  try {
+    const bodyFormData = new FormData();
+
+    bodyFormData.append('imageUrl', url);
+    if (size) {
+      bodyFormData.append('size', size);
+    }
+    const resp = await axios.post(
+      process.env.SAVE_IMAGE_URL,
+      bodyFormData,
+      {
+        headers: bodyFormData.getHeaders(),
+      },
+    );
+    const result = _.get(resp, 'data.image');
+    if (!result) return { error: new Error('Internal server error') };
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const avatar = async (obj) => {
+  const images = _.uniq(_.concat(obj.primaryImageURLs, obj.imageURLs));
+  if (_.isEmpty(images)) return;
+  const fields = [];
+  let sliceStart = 1;
+
+  for (const [index, image] of images.entries()) {
+    const validImage = await checkImageHelper(image);
+    if (!validImage) continue;
+    const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.LARGE);
+    if (error) continue;
+
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.AVATAR,
+      locale: obj.locale,
+      user: obj.user,
+      body: result,
+    }));
+    sliceStart = index + 1;
+    break;
+  }
+  if (_.isEmpty(fields)) return;
+
+  const imagesForGallery = _.slice(images, sliceStart);
+  if (_.isEmpty(imagesForGallery)) return fields;
+
+  for (const imagesForGalleryElement of imagesForGallery) {
+    const validImage = await checkImageHelper(imagesForGalleryElement);
+    if (!validImage) continue;
+    const { result, error } = await loadImageByUrl(imagesForGalleryElement);
+    if (error) continue;
+
+    let album = _.find(fields, (f) => f.name === OBJECT_FIELDS.GALLERY_ALBUM);
+    if (!album) {
+      album = formField({
+        fieldName: OBJECT_FIELDS.GALLERY_ALBUM,
+        body: 'Photos',
+        user: obj.user,
+        locale: obj.locale,
+        id: uuid.v4(),
+      });
+      fields.push(album);
+    }
+
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.GALLERY_ITEM,
+      body: result,
+      user: obj.user,
+      locale: obj.locale,
+      id: album.id,
+    }));
+  }
+
+  return fields;
 };
 
 const addTags = async (obj, tagCategoryId) => {

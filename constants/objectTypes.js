@@ -56,6 +56,8 @@ exports.OBJECT_FIELDS = {
   BRAND: 'brand',
   FEATURES: 'features',
   DEPARTMENTS: 'departments',
+  GALLERY_ALBUM: 'galleryAlbum',
+  GALLERY_ITEM: 'galleryItem',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -72,6 +74,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.AUTHORS,
     this.OBJECT_FIELDS.DEPARTMENTS,
+    this.OBJECT_FIELDS.WEIGHT,
   ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,
