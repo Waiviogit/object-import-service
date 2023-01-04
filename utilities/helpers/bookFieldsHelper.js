@@ -51,6 +51,7 @@ exports.prepareFieldsForImport = async (object) => {
     departments,
     name,
     price,
+    description,
   };
 
   const supposedUpdates = await addSupposedUpdates(object);
@@ -112,11 +113,11 @@ const addSupposedUpdates = async (wobject) => {
 };
 
 const price = (obj) => {
-  if (!obj.MostRecentPriceAmount || !obj.MostRecentPriceCurrency) return;
+  if (!obj.mostRecentPriceAmount || !obj.mostRecentPriceCurrency) return;
 
-  const currencyPrefix = CURRENCY_PREFIX[obj.MostRecentPriceCurrency] || CURRENCY_PREFIX.default;
+  const currencyPrefix = CURRENCY_PREFIX[obj.mostRecentPriceCurrency] || CURRENCY_PREFIX.default;
 
-  const body = `${currencyPrefix}${obj.MostRecentPriceAmount}`;
+  const body = `${currencyPrefix}${obj.mostRecentPriceAmount}`;
 
   return formField({
     fieldName: OBJECT_FIELDS.PRICE,
@@ -124,6 +125,25 @@ const price = (obj) => {
     body,
     locale: obj.locale,
   });
+};
+
+const description = (obj) => {
+  if (!obj.descriptions || !Array.isArray(obj.descriptions)) return;
+  for (const element of obj.descriptions) {
+    const content = _.get(element, 'value');
+    if (!content) continue;
+    if (content.length > 5000) continue;
+    if (content.length < 30) continue;
+    if (content.includes('<')) continue;
+    if (!/^\w/.test(content)) continue;
+
+    return formField({
+      fieldName: OBJECT_FIELDS.DESCRIPTION,
+      user: obj.user,
+      body: content,
+      locale: obj.locale,
+    });
+  }
 };
 
 const ageRange = (obj) => {
@@ -259,14 +279,18 @@ const authors = async (obj) => {
 };
 
 const publisher = async (obj) => {
-  const objPublisher = _.get(obj, 'brand');
+  if (!obj.features || !Array.isArray(obj.features)) return;
+  const objPublisher = _.find(obj.features, (f) => f.key.toLowerCase() === OBJECT_FIELDS.PUBLISHER);
+  if (!objPublisher) return;
+  const publisherName = _.get(objPublisher, 'value[0]');
+  if (!publisherName) return;
 
   if (objPublisher) {
     return formField({
       fieldName: OBJECT_FIELDS.PUBLISHER,
       locale: obj.locale,
       user: obj.user,
-      body: JSON.stringify({ name: objPublisher }),
+      body: JSON.stringify({ name: publisherName }),
     });
   }
 };
@@ -804,33 +828,29 @@ const features = (object) => {
 
 const departments = (object) => {
   const fields = [];
-  if (!object.taxonomy) {
-    if (!object.categories) return;
-    const categories = _.take(object.categories, 5);
-    for (const category of categories) {
+  if (!object.categories) return;
+
+  let categories = _.take(_.uniq(object.categories), 10);
+  if (object.object_type === OBJECT_TYPES.BOOK) {
+    categories = _.filter(categories, (c) => c.toLowerCase() !== 'book');
+    const booksCategory = _.find(categories, (c) => c.toLowerCase() === 'books');
+    if (!booksCategory) {
+      categories.pop();
       fields.push(formField({
         fieldName: OBJECT_FIELDS.DEPARTMENTS,
         locale: object.locale,
         user: object.user,
-        body: category.toLocaleLowerCase().trim(),
+        body: 'Books',
       }));
     }
-    return fields;
   }
 
-  const taxonomyElements = _.reduce(object.taxonomy, (acc, el) => {
-    const elements = el.split('>');
-    acc.push(..._.map(elements, (e) => e.trim()));
-    return acc;
-  }, []);
-
-  const toFields = _.take(taxonomyElements, 5);
-  for (const toField of toFields) {
+  for (const category of categories) {
     fields.push(formField({
       fieldName: OBJECT_FIELDS.DEPARTMENTS,
       locale: object.locale,
       user: object.user,
-      body: toField.toLocaleLowerCase(),
+      body: category.trim(),
     }));
   }
   return fields;

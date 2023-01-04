@@ -59,6 +59,7 @@ exports.OBJECT_FIELDS = {
   GALLERY_ALBUM: 'galleryAlbum',
   GALLERY_ITEM: 'galleryItem',
   PRICE: 'price',
+  DESCRIPTION: 'description',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -77,6 +78,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.DEPARTMENTS,
     this.OBJECT_FIELDS.WEIGHT,
     this.OBJECT_FIELDS.PRICE,
+    this.OBJECT_FIELDS.DESCRIPTION,
   ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,
@@ -101,6 +103,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.DEPARTMENTS,
     this.OBJECT_FIELDS.OPTIONS,
     this.OBJECT_FIELDS.PRICE,
+    this.OBJECT_FIELDS.DESCRIPTION,
   ],
 };
 
