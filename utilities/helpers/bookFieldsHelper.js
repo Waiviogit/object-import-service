@@ -462,7 +462,7 @@ const avatar = async (obj) => {
   for (const [index, image] of images.entries()) {
     const validImage = await checkImageHelper(image);
     if (!validImage) continue;
-    const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.LARGE);
+    const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.CONTAIN);
     if (error) continue;
 
     fields.push(formField({
