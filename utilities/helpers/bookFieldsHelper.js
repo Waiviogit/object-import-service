@@ -411,17 +411,17 @@ const companyId = async (obj) => {
 const productId = (obj) => {
   const fields = [];
 
-  for (const key of obj.keys) {
-    fields.push(formField({
-      fieldName: OBJECT_FIELDS.PRODUCT_ID,
-      locale: obj.locale,
-      user: obj.user,
-      body: JSON.stringify({
-        productId: key,
-        productIdType: DATAFINITY_KEY,
-      }),
-    }));
-  }
+  // for (const key of obj.keys) {
+  //   fields.push(formField({
+  //     fieldName: OBJECT_FIELDS.PRODUCT_ID,
+  //     locale: obj.locale,
+  //     user: obj.user,
+  //     body: JSON.stringify({
+  //       productId: key,
+  //       productIdType: DATAFINITY_KEY,
+  //     }),
+  //   }));
+  // }
 
   const ids = Object.entries(obj)
     .filter((el) => Object.values(OBJECT_IDS).some((id) => el.includes(id)));
@@ -442,6 +442,30 @@ const productId = (obj) => {
 
   if (fields.length) {
     return fields;
+  }
+
+  if (obj.id) {
+    return formField({
+      fieldName: OBJECT_FIELDS.PRODUCT_ID,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        productId: obj.id,
+        productIdType: DATAFINITY_KEY,
+      }),
+    });
+  }
+
+  if (obj.keys) {
+    return formField({
+      fieldName: OBJECT_FIELDS.PRODUCT_ID,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        productId: obj.keys[0],
+        productIdType: DATAFINITY_KEY,
+      }),
+    });
   }
 };
 
