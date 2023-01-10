@@ -216,7 +216,10 @@ const productWeight = (obj) => {
 
   if (objWeight) {
     const [value, unit] = objWeight.split(' ');
-    const singUnit = !unit.endsWith('s') ? unit.trim() : unit.trim().slice(0, unit.length - 2);
+    let singUnit = 'lb';
+    if (unit) {
+      singUnit = !unit.endsWith('s') ? unit.trim() : unit.trim().slice(0, unit.length - 2);
+    }
 
     return formField({
       fieldName: OBJECT_FIELDS.WEIGHT,

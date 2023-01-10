@@ -190,6 +190,10 @@ exports.FEATURES_FILTER = [
   'Additional Features',
   'Header / Brand',
   'Service Provider',
+  'Root Node Id',
+  'UNSPSC Code',
+  'ManufacturerNumber',
+  'Package Dimensions',
 ];
 
 exports.CURRENCY_PREFIX = {
