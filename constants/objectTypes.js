@@ -194,6 +194,7 @@ exports.FEATURES_FILTER = [
   'UNSPSC Code',
   'ManufacturerNumber',
   'Package Dimensions',
+  'Newer model URL',
 ];
 
 exports.CURRENCY_PREFIX = {
