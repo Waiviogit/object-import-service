@@ -9,7 +9,7 @@ const { prepareFieldsForImport } = require('../helpers/bookFieldsHelper');
 const { generateUniquePermlink } = require('../helpers/permlinkGenerator');
 const { VOTE_COST } = require('../../constants/voteAbility');
 const {
-  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS,
+  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS, PARENT_ASIN_FIELDS,
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
@@ -48,7 +48,28 @@ const groupByAsins = (products, objectType) => {
       continue;
     }
     if (grouped[groupedKey].length > 1) {
-      uniqueProducts.push(_.maxBy(grouped[groupedKey], 'dateUpdated'));
+      const latest = _.maxBy(grouped[groupedKey], 'dateUpdated');
+      let parentAsin = _.find(
+        latest.features,
+        (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
+      );
+      if (parentAsin) {
+        uniqueProducts.push(latest);
+        continue;
+      }
+      for (const element of grouped[groupedKey]) {
+        parentAsin = _.find(
+          element.features,
+          (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
+        );
+        if (!parentAsin) continue;
+        if (!latest.features) {
+          latest.features = [parentAsin];
+          break;
+        }
+        latest.features.push(parentAsin);
+      }
+      uniqueProducts.push(latest);
       continue;
     }
     uniqueProducts.push(grouped[groupedKey][0]);

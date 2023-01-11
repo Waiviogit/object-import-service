@@ -14,6 +14,7 @@ const {
   OBJECT_TYPES,
   FEATURES_FILTER,
   CURRENCY_PREFIX,
+  PARENT_ASIN_FIELDS,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject, ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
@@ -52,6 +53,7 @@ exports.prepareFieldsForImport = async (object) => {
     name,
     price,
     description,
+    groupId,
   };
 
   const supposedUpdates = await addSupposedUpdates(object);
@@ -110,6 +112,22 @@ const addSupposedUpdates = async (wobject) => {
     });
   });
   return fields;
+};
+
+const groupId = (object) => {
+  const parentAsin = _.find(_.get(object, 'features'),
+    (f) => _.includes(PARENT_ASIN_FIELDS, f.key));
+  if (!parentAsin) return;
+
+  const body = _.get(parentAsin, 'value[0]', '').replace('‎ ', '');
+  if (!body) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.GROUP_ID,
+    user: object.user,
+    body,
+    locale: object.locale,
+  });
 };
 
 const price = (obj) => {
@@ -413,19 +431,6 @@ const companyId = async (obj) => {
 
 const productId = (obj) => {
   const fields = [];
-
-  // for (const key of obj.keys) {
-  //   fields.push(formField({
-  //     fieldName: OBJECT_FIELDS.PRODUCT_ID,
-  //     locale: obj.locale,
-  //     user: obj.user,
-  //     body: JSON.stringify({
-  //       productId: key,
-  //       productIdType: DATAFINITY_KEY,
-  //     }),
-  //   }));
-  // }
-
   const ids = Object.entries(obj)
     .filter((el) => Object.values(OBJECT_IDS).some((id) => el.includes(id)));
 

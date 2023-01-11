@@ -60,9 +60,20 @@ exports.OBJECT_FIELDS = {
   GALLERY_ITEM: 'galleryItem',
   PRICE: 'price',
   DESCRIPTION: 'description',
+  GROUP_ID: 'groupId',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
+  restaurant: [
+    this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.ADDRESS,
+    this.OBJECT_FIELDS.MAP,
+    this.OBJECT_FIELDS.EMAIL,
+    this.OBJECT_FIELDS.TAG_CATEGORY,
+    this.OBJECT_FIELDS.WORK_TIME,
+    this.OBJECT_FIELDS.WEBSITE,
+    this.OBJECT_FIELDS.COMPANY_ID,
+  ],
   book: [
     this.OBJECT_FIELDS.NAME,
     this.OBJECT_FIELDS.OPTIONS,
@@ -79,16 +90,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.WEIGHT,
     this.OBJECT_FIELDS.PRICE,
     this.OBJECT_FIELDS.DESCRIPTION,
-  ],
-  restaurant: [
-    this.OBJECT_FIELDS.NAME,
-    this.OBJECT_FIELDS.ADDRESS,
-    this.OBJECT_FIELDS.MAP,
-    this.OBJECT_FIELDS.EMAIL,
-    this.OBJECT_FIELDS.TAG_CATEGORY,
-    this.OBJECT_FIELDS.WORK_TIME,
-    this.OBJECT_FIELDS.WEBSITE,
-    this.OBJECT_FIELDS.COMPANY_ID,
+    this.OBJECT_FIELDS.GROUP_ID,
   ],
   product: [
     this.OBJECT_FIELDS.NAME,
@@ -104,6 +106,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.OPTIONS,
     this.OBJECT_FIELDS.PRICE,
     this.OBJECT_FIELDS.DESCRIPTION,
+    this.OBJECT_FIELDS.GROUP_ID,
   ],
 };
 
@@ -195,6 +198,16 @@ exports.FEATURES_FILTER = [
   'ManufacturerNumber',
   'Package Dimensions',
   'Newer model URL',
+];
+
+exports.FEATURES_KEYS = {
+  PARENT_ASIN: 'Parent ASIN',
+  ASIN_PLUS: 'ASIN ‏',
+};
+
+exports.PARENT_ASIN_FIELDS = [
+  this.FEATURES_KEYS.PARENT_ASIN,
+  this.FEATURES_KEYS.ASIN_PLUS,
 ];
 
 exports.CURRENCY_PREFIX = {
