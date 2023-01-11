@@ -538,8 +538,8 @@ const avatar = async (obj) => {
   for (const imagesForGalleryElement of imagesForGallery) {
     const validImage = await checkImageHelper(imagesForGalleryElement);
     if (!validImage) continue;
-    const { result, error } = await loadImageByUrl(imagesForGalleryElement);
-    if (error) continue;
+    const httpsStart = /^https:/.test(imagesForGalleryElement);
+    if (!httpsStart) continue;
 
     let album = _.find(fields, (f) => f.name === OBJECT_FIELDS.GALLERY_ALBUM);
     if (!album) {
@@ -555,7 +555,7 @@ const avatar = async (obj) => {
 
     fields.push(formField({
       fieldName: OBJECT_FIELDS.GALLERY_ITEM,
-      body: result,
+      body: imagesForGalleryElement,
       user: obj.user,
       locale: obj.locale,
       id: album.id,
