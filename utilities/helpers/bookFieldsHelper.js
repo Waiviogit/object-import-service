@@ -131,7 +131,20 @@ const groupId = (object) => {
 };
 
 const price = (obj) => {
-  if (!obj.mostRecentPriceAmount || !obj.mostRecentPriceCurrency) return;
+  if (!obj.mostRecentPriceAmount || !obj.mostRecentPriceCurrency) {
+    const lastPrice = _.maxBy(_.get(obj, 'prices'), (p) => _.get(p, 'dateSeen[0]'));
+    if (!lastPrice) return;
+
+    const currencyPrefix = CURRENCY_PREFIX[lastPrice.currency] || CURRENCY_PREFIX.default;
+    const body = `${currencyPrefix}${lastPrice.amountMax}`;
+
+    return formField({
+      fieldName: OBJECT_FIELDS.PRICE,
+      user: obj.user,
+      body,
+      locale: obj.locale,
+    });
+  }
 
   const currencyPrefix = CURRENCY_PREFIX[obj.mostRecentPriceCurrency] || CURRENCY_PREFIX.default;
 
