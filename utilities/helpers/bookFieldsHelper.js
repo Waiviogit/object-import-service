@@ -15,6 +15,7 @@ const {
   FEATURES_FILTER,
   CURRENCY_PREFIX,
   PARENT_ASIN_FIELDS,
+  FEATURES_KEYS,
 } = require('../../constants/objectTypes');
 const { Wobj, DatafinityObject, ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
@@ -159,14 +160,31 @@ const price = (obj) => {
 };
 
 const description = (obj) => {
-  if (!obj.descriptions || !Array.isArray(obj.descriptions)) return;
+  if (!obj.descriptions || !Array.isArray(obj.descriptions)) {
+    const features = _.find(obj.features, (f) => f.key === FEATURES_KEYS.PRODUCT_FEATURES);
+    if (!features) return;
+    let body = '';
+    for (const featuresValue of features.value) {
+      if (body.length + featuresValue.length < 5000) {
+        body.length ? body += `. ${featuresValue}` : body += featuresValue;
+      }
+    }
+    if (body) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: obj.user,
+        body,
+        locale: obj.locale,
+      });
+    }
+    return;
+  }
   for (const element of obj.descriptions) {
     const content = _.get(element, 'value');
     if (!content) continue;
     if (content.length > 5000) continue;
     if (content.length < 30) continue;
     if (content.includes('<')) continue;
-    if (!/^\w/.test(content)) continue;
 
     return formField({
       fieldName: OBJECT_FIELDS.DESCRIPTION,
@@ -329,14 +347,41 @@ const publisher = async (obj) => {
   }
 };
 
-const productOptions = (obj) => {
-  const fields = [];
-  if (!_.isEmpty(obj.colors)) {
-    for (const [index, color] of obj.colors.entries()) {
+const getProductColor = (object) => {
+  const objectName = object.name.toLocaleLowerCase();
+  if (!_.isEmpty(object.colors)) {
+    if (object.colors.length === 1) {
+      return formField({
+        fieldName: OBJECT_FIELDS.OPTIONS,
+        locale: object.locale,
+        user: object.user,
+        body: JSON.stringify({
+          category: 'color',
+          value: object.colors[0],
+          position: 1,
+        }),
+      });
+    }
+    for (const color of object.colors) {
+      if (objectName.includes(color.toLocaleLowerCase())) {
+        return formField({
+          fieldName: OBJECT_FIELDS.OPTIONS,
+          locale: object.locale,
+          user: object.user,
+          body: JSON.stringify({
+            category: 'color',
+            value: color,
+            position: 1,
+          }),
+        });
+      }
+    }
+    const fields = [];
+    for (const [index, color] of object.colors.entries()) {
       fields.push(formField({
         fieldName: OBJECT_FIELDS.OPTIONS,
-        locale: obj.locale,
-        user: obj.user,
+        locale: object.locale,
+        user: object.user,
         body: JSON.stringify({
           category: 'color',
           value: color,
@@ -344,6 +389,17 @@ const productOptions = (obj) => {
         }),
       }));
     }
+    return fields;
+  }
+};
+
+const productOptions = (obj) => {
+  const fields = [];
+  const color = getProductColor(obj);
+  if (color && !color.length) {
+    fields.push(color);
+  } else if (color && color.length) {
+    fields.push(...color);
   }
 
   if (!_.isEmpty(obj.sizes)) {
