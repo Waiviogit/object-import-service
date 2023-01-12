@@ -198,6 +198,9 @@ exports.FEATURES_FILTER = [
   'ManufacturerNumber',
   'Package Dimensions',
   'Newer model URL',
+  'Department',
+  'Date First Available',
+  'ASIN ‏',
 ];
 
 exports.FEATURES_KEYS = {
