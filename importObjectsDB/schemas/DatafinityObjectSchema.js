@@ -23,6 +23,8 @@ const DatafinityObjectSchema = new Schema({
         name: String,
         body: String,
         id: String,
+        asin: String,
+        connectedObject: Boolean,
       },
     ],
     default: [],
