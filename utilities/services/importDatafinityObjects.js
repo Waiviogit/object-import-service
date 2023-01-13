@@ -424,7 +424,7 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   if (!field.connectedObject) return false;
 
   const { result: existedDatafinity } = await DatafinityObject.findOne({
-    startAuthorPermlink: datafinityObject.author_permlink,
+    filter: { startAuthorPermlink: datafinityObject.author_permlink },
   });
   if (existedDatafinity) {
     emitStart({
