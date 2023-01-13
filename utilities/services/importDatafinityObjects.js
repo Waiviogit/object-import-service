@@ -370,29 +370,29 @@ const createPersonFromAuthors = async ({ datafinityObject, field }) => {
 
   const fields = [];
 
-  if (datafinityObject.authority) {
-    fields.push(formField({
-      fieldName: 'authority',
-      body: datafinityObject.authority,
-      user: datafinityObject.user,
-      objectName: fieldBody.name,
-    }));
-  }
   fields.push(formField({
     fieldName: OBJECT_FIELDS.PRODUCT_ID,
-    objectName: fieldBody.name,
     user: datafinityObject.user,
     body: productIdBody,
+    locale: datafinityObject.locale,
   }));
 
-  return {
+  const object = {
     user: datafinityObject.user,
     importId: datafinityObject.importId,
     object_type: OBJECT_TYPES.PERSON,
     authority: datafinityObject.authority,
-    fields,
     startAuthorPermlink: datafinityObject.author_permlink,
+    name: fieldBody.name,
+    locale: datafinityObject.locale,
   };
+
+  const supposedFields = await prepareFieldsForImport(object);
+  if (supposedFields.length) {
+    fields.push(...supposedFields);
+  }
+  object.fields = fields;
+  return object;
 };
 
 const createFieldObject = async ({ field, datafinityObject }) => {

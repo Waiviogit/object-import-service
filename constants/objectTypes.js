@@ -32,6 +32,7 @@ exports.AUTHORITY_FIELD_OPTIONS = {
 
 exports.OBJECT_FIELDS = {
   PRODUCT_ID: 'productId',
+  AUTHORITY: 'authority',
   NAME: 'name',
   AGE_RANGE: 'ageRange',
   OPTIONS: 'options',
@@ -64,6 +65,9 @@ exports.OBJECT_FIELDS = {
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
+  person: [
+    this.OBJECT_FIELDS.NAME,
+  ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,
     this.OBJECT_FIELDS.ADDRESS,
