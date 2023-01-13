@@ -409,7 +409,7 @@ const existConnectedAuthors = async ({ field }) => {
   });
   if (!result) return false;
   const fieldBody = parseJson(field.body, null);
-  field.body = JSON.stringify({ name: fieldBody.name, authorPermlink: result.authorPermlink });
+  field.body = JSON.stringify({ name: fieldBody.name, authorPermlink: result.author_permlink });
   return true;
 };
 
