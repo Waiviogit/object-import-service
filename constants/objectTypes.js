@@ -201,6 +201,8 @@ exports.FEATURES_FILTER = [
   'Department',
   'Date First Available',
   'ASIN ‏',
+  'Title',
+  'body html',
 ];
 
 exports.FEATURES_KEYS = {

@@ -468,33 +468,27 @@ const options = async (obj) => {
 };
 
 const companyId = async (obj) => {
-  const fields = [];
-
-  if (obj.object_type === OBJECT_TYPES.RESTAURANT) {
-    if (_.isEmpty(obj.ids)) {
-      fields.push(formField({
-        fieldName: OBJECT_FIELDS.COMPANY_ID,
-        locale: obj.locale,
-        user: obj.user,
-        body: JSON.stringify({
-          companyId: obj.id,
-          companyIdType: DATAFINITY_KEY,
-        }),
-      }));
-      return fields;
-    }
-    for (const id of obj.ids) {
-      fields.push(formField({
-        fieldName: OBJECT_FIELDS.COMPANY_ID,
-        locale: obj.locale,
-        user: obj.user,
-        body: JSON.stringify({
-          companyId: id,
-          companyIdType: DATAFINITY_KEY,
-        }),
-      }));
-    }
-    return fields;
+  if (_.isEmpty(obj.ids) && obj.id) {
+    return formField({
+      fieldName: OBJECT_FIELDS.COMPANY_ID,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        productId: obj.id,
+        productIdType: DATAFINITY_KEY,
+      }),
+    });
+  }
+  if (!_.isEmpty(obj.ids)) {
+    return formField({
+      fieldName: OBJECT_FIELDS.COMPANY_ID,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        companyId: obj.ids[0],
+        companyIdType: DATAFINITY_KEY,
+      }),
+    });
   }
 };
 
