@@ -327,7 +327,7 @@ const startObjectImport = async ({
       wobject,
       user,
     });
-
+    if (!updatedObj) return;
     if (processErr) return;
 
     emitStart({
@@ -482,7 +482,7 @@ const validateSameFields = ({ fieldData, wobject }) => {
 
 const processField = async ({ datafinityObject, wobject, user }) => {
   const exit = await checkFieldConnectedObject({ datafinityObject });
-  if (exit) return;
+  if (exit) return { result: false };
   await specialFieldsHelper({ datafinityObject, wobject });
   const sameField = validateSameFields({ fieldData: datafinityObject.fields[0], wobject });
 
