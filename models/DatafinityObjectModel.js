@@ -85,6 +85,15 @@ const find = async ({ filter, projection, options }) => {
   }
 };
 
+const findOne = async ({ filter, projection, options }) => {
+  try {
+    const result = await DatafinityObject.findOne(filter, projection, options).lean();
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
-  insertMany, getOne, updateOne, removeOne, create, findOneAndModify, distinct, deleteMany, find,
+  insertMany, getOne, updateOne, removeOne, create, findOneAndModify, distinct, deleteMany, find, findOne,
 };

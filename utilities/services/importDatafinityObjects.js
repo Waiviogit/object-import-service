@@ -423,6 +423,18 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   if (!field) return false;
   if (!field.connectedObject) return false;
 
+  const { result: existedDatafinity } = await DatafinityObject.findOne({
+    startAuthorPermlink: datafinityObject.author_permlink,
+  });
+  if (existedDatafinity) {
+    emitStart({
+      user: datafinityObject.user,
+      authorPermlink: existedDatafinity.author_permlink,
+      importId: datafinityObject.importId,
+    });
+    return true;
+  }
+
   const existObject = await existConnectedObject({ field });
   if (existObject) return false;
   const newImportObject = await createFieldObject({ field, datafinityObject });
