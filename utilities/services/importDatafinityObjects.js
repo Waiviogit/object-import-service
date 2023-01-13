@@ -404,10 +404,12 @@ const createFieldObject = async ({ field, datafinityObject }) => {
 
 const existConnectedAuthors = async ({ field }) => {
   const productIdBody = JSON.stringify({ productId: field.asin, productIdType: OBJECT_IDS.ASINS });
-  const { wobject } = await Wobj.findOneByProductId(productIdBody, OBJECT_TYPES.PERSON);
-  if (!wobject) return false;
+  const { result } = await Wobj.findOne({
+    filter: { fields: { $elemMatch: { name: OBJECT_FIELDS.PRODUCT_ID, body: productIdBody} } },
+  });
+  if (!result) return false;
   const fieldBody = parseJson(field.body, null);
-  field.body = JSON.stringify({ name: fieldBody.name, authorPermlink: wobject.authorPermlink });
+  field.body = JSON.stringify({ name: fieldBody.name, authorPermlink: result.authorPermlink });
   return true;
 };
 
