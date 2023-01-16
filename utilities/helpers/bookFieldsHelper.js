@@ -8,7 +8,6 @@ const {
   DIMENSION_UNITS,
   DATAFINITY_KEY,
   OBJECT_IDS,
-  FIELDS_FOR_TAGS,
   FIELDS_BY_OBJECT_TYPE,
   OBJECT_FIELDS,
   OBJECT_TYPES,
@@ -17,7 +16,7 @@ const {
   PARENT_ASIN_FIELDS,
   FEATURES_KEYS,
 } = require('../../constants/objectTypes');
-const { Wobj, DatafinityObject, ObjectType } = require('../../models');
+const { ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
 const { getAuthorsData, getBookFormatData } = require('./amazonParseHelper');
 const supposedUpdatesTranslate = require('../../translations/supposedUpdates');
@@ -196,17 +195,17 @@ const description = (obj) => {
 };
 
 const ageRange = (obj) => {
-  const age = obj.features.find((el) => el.key.toLowerCase()
+  const age = _.find(obj.features, (el) => el.key.toLowerCase()
     .replace(' ', '') === OBJECT_FIELDS.AGE_RANGE.toLowerCase());
 
-  if (age) {
-    return formField({
-      fieldName: OBJECT_FIELDS.AGE_RANGE,
-      user: obj.user,
-      body: age.value.length ? age.value[0] : age.value,
-      locale: obj.locale,
-    });
-  }
+  if (!age) return;
+
+  return formField({
+    fieldName: OBJECT_FIELDS.AGE_RANGE,
+    user: obj.user,
+    body: age.value.length ? age.value[0] : age.value,
+    locale: obj.locale,
+  });
 };
 
 const dimensions = (obj) => {
@@ -214,6 +213,7 @@ const dimensions = (obj) => {
 
   if (dimension) {
     const [value1, value2, value3] = dimension.split('x').map((el) => parseFloat(el));
+    if (!value1 || !value2 || !value3) return;
     const length = Math.max(value1, value2, value3);
     const depth = Math.min(value1, value2, value3);
     const width = [value1, value2, value3].find((el) => el !== length && el !== depth);
@@ -233,31 +233,29 @@ const dimensions = (obj) => {
 };
 
 const language = (obj) => {
-  const lang = obj.features.find((el) => el.key.toLowerCase() === OBJECT_FIELDS.LANGUAGE);
+  const lang = _.find(obj.features, (el) => el.key.toLowerCase() === OBJECT_FIELDS.LANGUAGE);
 
-  if (lang) {
-    return formField({
-      fieldName: OBJECT_FIELDS.LANGUAGE,
-      body: lang.value.length ? lang.value[0] : lang.value,
-      user: obj.user,
-      locale: obj.locale,
-    });
-  }
+  if (!lang) return;
+  return formField({
+    fieldName: OBJECT_FIELDS.LANGUAGE,
+    body: lang.value.length ? lang.value[0] : lang.value,
+    user: obj.user,
+    locale: obj.locale,
+  });
 };
 
 const publicationDate = (obj) => {
-  const date = obj.features.find((el) => el.key.toLowerCase()
+  const date = _.find(obj.features, (el) => el.key.toLowerCase()
     .replace(' ', '') === OBJECT_FIELDS.PUBLICATION_DATE.toLowerCase());
 
-  if (date) {
-    return formField({
-      fieldName: OBJECT_FIELDS.PUBLICATION_DATE,
-      body: date.value
-        .reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
-      user: obj.user,
-      locale: obj.locale,
-    });
-  }
+  if (!date) return;
+  return formField({
+    fieldName: OBJECT_FIELDS.PUBLICATION_DATE,
+    body: date.value
+      .reduce((prev, current) => (moment().unix(prev) > moment().unix(current) ? prev : current)),
+    user: obj.user,
+    locale: obj.locale,
+  });
 };
 
 const productWeight = (obj) => {
@@ -283,28 +281,37 @@ const productWeight = (obj) => {
 };
 
 const printLength = (obj) => {
-  const printLen = obj.features.find((el) => el.key.toLowerCase().includes('pages'));
+  const printLen = _.find(obj.features, (el) => el.key.toLowerCase().includes('pages'));
 
-  if (printLen) {
-    return formField({
-      fieldName: OBJECT_FIELDS.PRINT_LENGTH,
-      body: printLen.value[0].split(' ')[0],
-      user: obj.user,
-      locale: obj.locale,
-    });
-  }
+  if (!printLen) return;
+  return formField({
+    fieldName: OBJECT_FIELDS.PRINT_LENGTH,
+    body: printLen.value[0].split(' ')[0],
+    user: obj.user,
+    locale: obj.locale,
+  });
 };
 
 const authors = async (obj) => {
   const fields = [];
   const merchant = 'amazon';
-  if (!obj.prices) return;
-  const priceDataWithUrl = obj.prices.find(
-    (el) => _.includes(_.get(el, 'merchant'), merchant),
-  );
+  const priceDataWithUrl = _.find(obj.prices,
+    (el) => _.includes(_.get(el, 'merchant'), merchant));
 
   if (!priceDataWithUrl) {
-    // todo
+    const authorsFeature = _.find(obj.features, (f) => f.key === FEATURES_KEYS.AUTHORS);
+
+    if (!authorsFeature) return;
+    const authorsFeatureValue = _.uniq(authorsFeature.value);
+    for (const authorsFeatureValueElement of authorsFeatureValue) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.AUTHORS,
+        body: JSON.stringify({ name: authorsFeatureValueElement }),
+        user: obj.user,
+        locale: obj.locale,
+      }));
+    }
+    if (fields.length) return fields;
     return;
   }
   const url = _.find(_.get(priceDataWithUrl, 'sourceURLs'), (el) => el.includes(merchant));
@@ -326,8 +333,7 @@ const authors = async (obj) => {
       ...(connectedObject && { asin: author.asin, connectedObject }),
     });
   }
-
-  return fields;
+  if (fields.length) return fields;
 };
 
 const publisher = async (obj) => {
@@ -421,7 +427,7 @@ const productOptions = (obj) => {
 };
 
 const bookOptions = async (obj) => {
-  const formats = obj.features.find((el) => el.key.toLowerCase().includes('format'));
+  const formats = _.find(obj.features, (el) => el.key.toLowerCase().includes('format'));
 
   if (formats) {
     const uniqFormats = _.uniq(formats.value);
@@ -433,12 +439,12 @@ const bookOptions = async (obj) => {
   }
 
   const merchant = 'amazon';
-  const priceDataWithUrl = obj.prices.find((el) => el.merchant.includes(merchant));
+  const priceDataWithUrl = _.find(obj.prices, (el) => el.merchant.includes(merchant));
   if (!priceDataWithUrl) {
     // todo
     return;
   }
-  const url = priceDataWithUrl.sourceURLs.find((el) => el.includes(merchant));
+  const url = _.find(priceDataWithUrl.sourceURLs, (el) => el.includes(merchant));
   if (!url) {
     // todo
     return;
@@ -628,29 +634,6 @@ const avatar = async (obj) => {
   return fields;
 };
 
-const addTags = async (obj, tagCategoryId) => {
-  const fields = [];
-
-  for (const category of obj.categories) {
-    const { wobject, error } = await Wobj.findOneByNameAndObjectType(category, 'hashtag');
-
-    if (error || !wobject) {
-      continue;
-    }
-
-    fields.push(formField({
-      fieldName: FIELDS_FOR_TAGS.CATEGORY_ITEM,
-      body: category,
-      user: obj.user,
-      locale: obj.locale,
-      categoryItem: true,
-      id: tagCategoryId,
-    }));
-  }
-
-  return fields;
-};
-
 const formFormats = (uniqFormats, obj) => {
   const fields = [];
 
@@ -669,26 +652,6 @@ const formFormats = (uniqFormats, obj) => {
   }
 
   return fields;
-};
-
-exports.addTagsIfNeeded = async (datafinityObject, wobject) => {
-  const tagCategory = wobject.fields
-    .find((field) => field.name === FIELDS_FOR_TAGS.TAG_CATEGORY);
-  const categoryItems = wobject.fields
-    .filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM && field.id === tagCategory.id);
-  const categoryItemsToSave = datafinityObject.fields
-    .filter((field) => field.name === FIELDS_FOR_TAGS.CATEGORY_ITEM);
-
-  if (!categoryItems.length && !categoryItemsToSave.length) {
-    const fields = await addTags(datafinityObject, tagCategory.id);
-
-    if (fields.length) {
-      await DatafinityObject.updateOne(
-        { _id: datafinityObject._id },
-        { $addToSet: { fields: { $each: fields } } },
-      );
-    }
-  }
 };
 
 const tryGetMapFromName = async (object) => {

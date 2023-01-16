@@ -213,6 +213,7 @@ exports.FEATURES_KEYS = {
   PARENT_ASIN: 'Parent ASIN',
   ASIN_PLUS: 'ASIN ‏',
   PRODUCT_FEATURES: 'Product Features',
+  AUTHORS: 'Author',
 };
 
 exports.PARENT_ASIN_FIELDS = [
