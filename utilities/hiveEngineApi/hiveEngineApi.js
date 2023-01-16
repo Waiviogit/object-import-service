@@ -34,7 +34,7 @@ exports.engineProxy = async ({
 };
 
 exports.engineQuery = async ({
-  hostUrl = 'https://api.hive-engine.com/rpc',
+  hostUrl = 'https://herpc.dtools.dev',
   method = 'find',
   params,
   endpoint = '/contracts',
