@@ -355,6 +355,7 @@ const publisher = async (obj) => {
 
 const getProductColor = (object) => {
   const objectName = object.name.toLocaleLowerCase();
+  const avatarField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.AVATAR);
   if (!_.isEmpty(object.colors)) {
     if (object.colors.length === 1) {
       return formField({
@@ -365,6 +366,7 @@ const getProductColor = (object) => {
           category: 'color',
           value: object.colors[0],
           position: 1,
+          ...(avatarField && { image: avatarField.body }),
         }),
       });
     }
@@ -378,6 +380,7 @@ const getProductColor = (object) => {
             category: 'color',
             value: color,
             position: 1,
+            ...(avatarField && { image: avatarField.body }),
           }),
         });
       }
