@@ -1,6 +1,7 @@
 exports.IMPORT_OBJECT_TYPES = {
-  BOOK: 'book',
   RESTAURANT: 'restaurant',
+  BUSINESS: 'business',
+  BOOK: 'book',
   PRODUCT: 'product',
 };
 
@@ -74,6 +75,15 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,
     this.OBJECT_FIELDS.TAG_CATEGORY,
+    this.OBJECT_FIELDS.WORK_TIME,
+    this.OBJECT_FIELDS.WEBSITE,
+    this.OBJECT_FIELDS.COMPANY_ID,
+  ],
+  business: [
+    this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.ADDRESS,
+    this.OBJECT_FIELDS.MAP,
+    this.OBJECT_FIELDS.EMAIL,
     this.OBJECT_FIELDS.WORK_TIME,
     this.OBJECT_FIELDS.WEBSITE,
     this.OBJECT_FIELDS.COMPANY_ID,

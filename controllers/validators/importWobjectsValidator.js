@@ -4,7 +4,7 @@ const { IMPORT_STATUS } = require('../../constants/appData');
 
 exports.importDatafinityObjectsSchema = Joi.object().keys({
   user: Joi.string().required(),
-  objectType: Joi.string().valid(...Object.values(IMPORT_OBJECT_TYPES)).default(IMPORT_OBJECT_TYPES.BOOK),
+  objectType: Joi.string().valid(...Object.values(IMPORT_OBJECT_TYPES)).required(),
   authority: Joi.string().valid(...Object.values(AUTHORITY_FIELD_OPTIONS)),
   locale: Joi.string().valid(...Object.keys(FIELD_LANGUAGES_TO_NLP)).default('en-US'),
   translate: Joi.boolean().default(false),
