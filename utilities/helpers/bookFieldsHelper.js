@@ -412,6 +412,7 @@ const getProductColor = (object) => {
           category: 'color',
           value: color,
           position: index + 1,
+          ...(avatarField && { image: avatarField.body }),
         }),
       }));
     }
