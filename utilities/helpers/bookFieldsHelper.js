@@ -70,7 +70,7 @@ exports.prepareFieldsForImport = async (object) => {
   const fieldTypes = FIELDS_BY_OBJECT_TYPE[object.object_type];
 
   for (const fieldsElementHandle of fieldTypes) {
-    const field = await fieldsHandle[fieldsElementHandle](object);
+    const field = await fieldsHandle[fieldsElementHandle](object, fields);
 
     if (field && !field.length) {
       fields.push(field);
@@ -370,9 +370,9 @@ const publisher = async (obj) => {
   }
 };
 
-const getProductColor = (object) => {
+const getProductColor = (object, allFields) => {
   const objectName = object.name.toLocaleLowerCase();
-  const avatarField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.AVATAR);
+  const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
   if (!_.isEmpty(object.colors)) {
     if (object.colors.length === 1) {
       return formField({
@@ -420,9 +420,9 @@ const getProductColor = (object) => {
   }
 };
 
-const productOptions = (obj) => {
+const productOptions = (obj, allFields) => {
   const fields = [];
-  const color = getProductColor(obj);
+  const color = getProductColor(obj, allFields);
   if (color && !color.length) {
     fields.push(color);
   } else if (color && color.length) {
@@ -485,13 +485,13 @@ const bookOptions = async (obj) => {
   return formatsAmazon;
 };
 
-const options = async (obj) => {
+const options = async (obj, allFields) => {
   const optionsHandler = {
     book: bookOptions,
     product: productOptions,
     default: () => {},
   };
-  return (optionsHandler[obj.object_type] || optionsHandler.default)(obj);
+  return (optionsHandler[obj.object_type] || optionsHandler.default)(obj, allFields);
 };
 
 const companyId = async (obj) => {

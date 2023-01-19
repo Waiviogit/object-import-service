@@ -185,7 +185,7 @@ const importObjects = async ({
     authority,
   });
 
-  saveObjects({
+  await saveObjects({
     products: uniqueProducts,
     user,
     objectType,
@@ -405,7 +405,7 @@ const createFieldObject = async ({ field, datafinityObject }) => {
 const existConnectedAuthors = async ({ field }) => {
   const productIdBody = JSON.stringify({ productId: field.asin, productIdType: OBJECT_IDS.ASINS });
   const { result } = await Wobj.findOne({
-    filter: { fields: { $elemMatch: { name: OBJECT_FIELDS.PRODUCT_ID, body: productIdBody} } },
+    filter: { fields: { $elemMatch: { name: OBJECT_FIELDS.PRODUCT_ID, body: productIdBody } } },
   });
   if (!result) return false;
   const fieldBody = parseJson(field.body, null);
