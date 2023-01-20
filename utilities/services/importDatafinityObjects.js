@@ -13,7 +13,7 @@ const {
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { importAccountValidator, votePowerValidation } = require('../../validators/accountValidator');
+const { importAccountValidator, votePowerValidation, validateRc } = require('../../validators/accountValidator');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS, ONE_PERCENT_VOTE_RECOVERY } = require('../../constants/appData');
 const { redisSetter } = require('../redis');
 const { getVotingPowers } = require('../hiveEngine/hiveEngineOperations');
@@ -185,7 +185,7 @@ const importObjects = async ({
     authority,
   });
 
-  await saveObjects({
+  saveObjects({
     products: uniqueProducts,
     user,
     objectType,
@@ -294,7 +294,9 @@ const startObjectImport = async ({
 
   const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
   const validVotePower = await votePowerValidation({ account: user, importId: datafinityObject.importId });
-  if (!validVotePower || !validAcc) {
+  const validRc = await validateRc({ account: user });
+
+  if (!validVotePower || !validAcc || !validRc) {
     await setTtlToContinue({ user, authorPermlink, importId: datafinityObject.importId });
     return;
   }

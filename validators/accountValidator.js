@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const BigNumber = require('bignumber.js');
 const { checkVotePower } = require('../utilities/helpers/checkVotePower');
-const { getAccount } = require('../utilities/hiveApi/userUtil');
+const { getAccount, getAccountRC } = require('../utilities/hiveApi/userUtil');
 const { getVotingPowers } = require('../utilities/hiveEngine/hiveEngineOperations');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
 const { redisGetter } = require('../utilities/redis');
@@ -36,7 +36,14 @@ const votePowerValidation = async ({ account }) => {
   return BigNumber(votingPower).gt(power);
 };
 
+const validateRc = async ({ account }) => {
+  const { percentage, error } = await getAccountRC(account);
+  if (error) return false;
+  return percentage > 1000;
+};
+
 module.exports = {
   importAccountValidator,
   votePowerValidation,
+  validateRc,
 };
