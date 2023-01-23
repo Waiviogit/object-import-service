@@ -15,6 +15,7 @@ const {
   CURRENCY_PREFIX,
   PARENT_ASIN_FIELDS,
   FEATURES_KEYS,
+  SIZE_POSITION,
 } = require('../../constants/objectTypes');
 const { ObjectType } = require('../../models');
 const { formField } = require('./formFieldHelper');
@@ -370,7 +371,7 @@ const publisher = async (obj) => {
   }
 };
 
-const getProductColor = (object, allFields) => {
+const getProductColor = (object, allFields, lastDateSeen) => {
   const objectName = object.name.toLocaleLowerCase();
   const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
   if (!_.isEmpty(object.colors)) {
@@ -382,7 +383,6 @@ const getProductColor = (object, allFields) => {
         body: JSON.stringify({
           category: 'color',
           value: object.colors[0],
-          position: 1,
           ...(avatarField && { image: avatarField.body }),
         }),
       });
@@ -396,7 +396,6 @@ const getProductColor = (object, allFields) => {
           body: JSON.stringify({
             category: 'color',
             value: color,
-            position: 1,
             ...(avatarField && { image: avatarField.body }),
           }),
         });
@@ -418,11 +417,24 @@ const getProductColor = (object, allFields) => {
     }
     return fields;
   }
+  if (_.get(lastDateSeen, 'color')) {
+    return formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        category: 'color',
+        value: lastDateSeen.color,
+        ...(avatarField && { image: avatarField.body }),
+      }),
+    });
+  }
 };
 
 const productOptions = (obj, allFields) => {
   const fields = [];
-  const color = getProductColor(obj, allFields);
+  const lastDateSeen = _.maxBy(_.get(obj, 'prices'), (p) => _.get(p, 'dateSeen[0]'));
+  const color = getProductColor(obj, allFields, lastDateSeen);
   if (color && !color.length) {
     fields.push(color);
   } else if (color && color.length) {
@@ -431,6 +443,7 @@ const productOptions = (obj, allFields) => {
 
   if (!_.isEmpty(obj.sizes)) {
     for (const [index, size] of obj.sizes.entries()) {
+      const sizePosition = SIZE_POSITION[size.toLocaleLowerCase()] || SIZE_POSITION.default;
       fields.push(formField({
         fieldName: OBJECT_FIELDS.OPTIONS,
         locale: obj.locale,
@@ -438,10 +451,24 @@ const productOptions = (obj, allFields) => {
         body: JSON.stringify({
           category: 'size',
           value: size,
-          position: index + 1,
+          ...(sizePosition && { position: sizePosition }),
         }),
       }));
     }
+  }
+  if (_.isEmpty(obj.sizes) && _.get(lastDateSeen, 'size')) {
+    const sizePosition = SIZE_POSITION[lastDateSeen.size.toLocaleLowerCase()]
+        || SIZE_POSITION.default;
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        category: 'size',
+        value: lastDateSeen.size,
+        ...(sizePosition && { position: sizePosition }),
+      }),
+    }));
   }
 
   return fields;

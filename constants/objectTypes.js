@@ -248,3 +248,23 @@ exports.CURRENCY_PREFIX = {
   CHF: '₣',
   default: '$',
 };
+
+exports.SIZE_POSITION = {
+  'extra extra small': 10,
+  xxs: 10,
+  'extra small': 20,
+  xs: 20,
+  small: 30,
+  s: 30,
+  medium: 40,
+  m: 40,
+  large: 50,
+  l: 50,
+  'extra large': 60,
+  xl: 60,
+  'extra extra large': 70,
+  xxl: 70,
+  'extra extra extra large': 80,
+  xxxl: 80,
+  default: 0,
+};
