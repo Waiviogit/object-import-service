@@ -374,28 +374,34 @@ const publisher = async (obj) => {
 const getProductColor = (object, allFields, lastDateSeen) => {
   const objectName = object.name.toLocaleLowerCase();
   const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
+
+  const regExStartWithDash = /^-/;
   if (!_.isEmpty(object.colors)) {
     if (object.colors.length === 1) {
+      const startsDash = regExStartWithDash.test(object.colors[0]);
+
       return formField({
         fieldName: OBJECT_FIELDS.OPTIONS,
         locale: object.locale,
         user: object.user,
         body: JSON.stringify({
           category: 'color',
-          value: object.colors[0],
+          value: startsDash ? object.colors[0].replace('-', '').trim() : object.colors[0],
           ...(avatarField && { image: avatarField.body }),
         }),
       });
     }
     for (const color of object.colors) {
       if (objectName.includes(color.toLocaleLowerCase())) {
+        const startsDash = regExStartWithDash.test(color);
+
         return formField({
           fieldName: OBJECT_FIELDS.OPTIONS,
           locale: object.locale,
           user: object.user,
           body: JSON.stringify({
             category: 'color',
-            value: color,
+            value: startsDash ? color.replace('-', '').trim() : color,
             ...(avatarField && { image: avatarField.body }),
           }),
         });
@@ -403,13 +409,15 @@ const getProductColor = (object, allFields, lastDateSeen) => {
     }
     const fields = [];
     for (const [index, color] of object.colors.entries()) {
+      const startsDash = regExStartWithDash.test(color);
+
       fields.push(formField({
         fieldName: OBJECT_FIELDS.OPTIONS,
         locale: object.locale,
         user: object.user,
         body: JSON.stringify({
           category: 'color',
-          value: color,
+          value: startsDash ? color.replace('-', '').trim() : color,
           position: index + 1,
           ...(avatarField && { image: avatarField.body }),
         }),
@@ -418,13 +426,15 @@ const getProductColor = (object, allFields, lastDateSeen) => {
     return fields;
   }
   if (_.get(lastDateSeen, 'color')) {
+    const startsDash = regExStartWithDash.test(lastDateSeen.color);
+
     return formField({
       fieldName: OBJECT_FIELDS.OPTIONS,
       locale: object.locale,
       user: object.user,
       body: JSON.stringify({
         category: 'color',
-        value: lastDateSeen.color,
+        value: startsDash ? lastDateSeen.color.replace('-', '').trim() : lastDateSeen.color,
         ...(avatarField && { image: avatarField.body }),
       }),
     });
