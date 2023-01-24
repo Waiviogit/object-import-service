@@ -20,6 +20,7 @@ const { getVotingPowers } = require('../hiveEngine/hiveEngineOperations');
 const { getTokenBalances, getRewardPool } = require('../hiveEngineApi/tokensContract');
 const { getMinAmountInWaiv } = require('../helpers/checkVotePower');
 const { formField } = require('../helpers/formFieldHelper');
+const { getVoteCost } = require('../helpers/importDatafinityHelper');
 
 const bufferToArray = (buffer) => {
   let stringFromBuffer = buffer.toString();
@@ -297,7 +298,7 @@ const startObjectImport = async ({
   const activeStatus = await checkImportActiveStatus(datafinityObject.importId);
   if (!activeStatus) return;
 
-  const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
+  const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
   const validVotePower = await votePowerValidation({ account: user, importId: datafinityObject.importId });
   const validRc = await validateRc({ account: user });
 
