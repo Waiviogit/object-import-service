@@ -12,7 +12,12 @@ const { parseJson } = require('../helpers/jsonHelper');
 const { IMPORT_STATUS } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
-  filterImportObjects, bufferToArray, needToSaveObject, prepareObjectForImport, specialFieldsHelper, validateSameFields,
+  filterImportObjects,
+  bufferToArray,
+  needToSaveObject,
+  prepareObjectForImport,
+  specialFieldsHelper,
+  validateSameFields,
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
