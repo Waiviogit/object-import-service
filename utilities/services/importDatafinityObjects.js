@@ -113,11 +113,11 @@ const needToSaveObject = (object) => {
     const map = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.MAP);
     if (!map) return false;
   }
-  if (object.object_type === OBJECT_TYPES.PRODUCT) {
-    const groupIdField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
-    const optionsField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.OPTIONS);
-    if (groupIdField && !optionsField) return false;
-  }
+  // if (object.object_type === OBJECT_TYPES.PRODUCT) {
+  //   const groupIdField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
+  //   const optionsField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.OPTIONS);
+  //   if (groupIdField && !optionsField) return false;
+  // }
   return true;
 };
 
