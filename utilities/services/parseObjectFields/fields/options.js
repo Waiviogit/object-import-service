@@ -76,7 +76,11 @@ const getProductColor = (object, allFields, lastDateSeen) => {
 const formFormats = (uniqFormats, obj) => {
   const fields = [];
 
+  const skipFormats = ['paperbackpaperback'];
+
   for (let count = 0; count < uniqFormats.length; count++) {
+    if (_.includes(skipFormats, uniqFormats[count])) continue;
+
     fields.push(formField({
       fieldName: OBJECT_FIELDS.OPTIONS,
       locale: obj.locale,
