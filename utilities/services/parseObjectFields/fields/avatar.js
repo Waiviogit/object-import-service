@@ -6,6 +6,8 @@ const { IMAGE_SIZE } = require('../../../../constants/fileFormats');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 
+const requestTimeout = 5000;
+
 const loadImageByUrl = async (url, size) => {
   try {
     const bodyFormData = new FormData();
@@ -19,21 +21,26 @@ const loadImageByUrl = async (url, size) => {
       bodyFormData,
       {
         headers: bodyFormData.getHeaders(),
+        timeout: requestTimeout,
       },
     );
     const result = _.get(resp, 'data.image');
     if (!result) return { error: new Error('Internal server error') };
     return { result };
   } catch (error) {
+    console.error(error.message);
     return { error };
   }
 };
 
 const checkImageHelper = async (image) => {
   try {
-    const response = await axios.get(image);
+    const response = await axios.get(image, {
+      timeout: requestTimeout,
+    });
     return response.status === 200;
-  } catch (e) {
+  } catch (error) {
+    console.error(error.message);
     return false;
   }
 };
