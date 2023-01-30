@@ -1,125 +1,26 @@
 const EventEmitter = require('events');
 const _ = require('lodash');
 const uuid = require('uuid');
-const BigNumber = require('bignumber.js');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
-const { prepareFieldsForImport } = require('../helpers/bookFieldsHelper');
-const { generateUniquePermlink } = require('../helpers/permlinkGenerator');
-const { VOTE_COST } = require('../../constants/voteAbility');
 const {
-  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS, PARENT_ASIN_FIELDS,
+  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS,
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { importAccountValidator, votePowerValidation, validateRc } = require('../../validators/accountValidator');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS, ONE_PERCENT_VOTE_RECOVERY } = require('../../constants/appData');
-const { redisSetter } = require('../redis');
-const { getVotingPowers } = require('../hiveEngine/hiveEngineOperations');
-const { getTokenBalances, getRewardPool } = require('../hiveEngineApi/tokensContract');
-const { getMinAmountInWaiv } = require('../helpers/checkVotePower');
+const { IMPORT_STATUS } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
-const { getVoteCost } = require('../helpers/importDatafinityHelper');
-
-const bufferToArray = (buffer) => {
-  let stringFromBuffer = buffer.toString();
-  const expectValid = stringFromBuffer[0] === '[';
-  if (!expectValid) {
-    stringFromBuffer = `[${stringFromBuffer.replace(/(}\r\n{|}\n{)/g, '},{')}]`;
-  }
-  return parseJson(stringFromBuffer, []);
-};
-
-const groupByAsins = (products, objectType) => {
-  const uniqueProducts = [];
-
-  if (objectType === OBJECT_TYPES.BOOK) {
-    products = _.filter(
-      products,
-      (p) => _.some(p.categories, (c) => c.toLocaleLowerCase().includes('book')),
-    );
-  }
-
-  const grouped = _.groupBy(products, 'asins');
-
-  for (const groupedKey in grouped) {
-    if (groupedKey === 'undefined') {
-      uniqueProducts.push(...grouped[groupedKey]);
-      continue;
-    }
-    if (grouped[groupedKey].length > 1) {
-      const latest = _.maxBy(grouped[groupedKey], 'dateUpdated');
-      let parentAsin = _.find(
-        latest.features,
-        (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
-      );
-      if (parentAsin) {
-        uniqueProducts.push(latest);
-        continue;
-      }
-      for (const element of grouped[groupedKey]) {
-        parentAsin = _.find(
-          element.features,
-          (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
-        );
-        if (!parentAsin) continue;
-        if (!latest.features) {
-          latest.features = [parentAsin];
-          break;
-        }
-        latest.features.push(parentAsin);
-      }
-      uniqueProducts.push(latest);
-      continue;
-    }
-    uniqueProducts.push(grouped[groupedKey][0]);
-  }
-  return uniqueProducts;
-};
-
-const filterImportRestaurants = (restaurants) => _.reduce(restaurants, (acc, el) => {
-  const someRestaurants = _.some(el.categories, (category) => category.toLocaleLowerCase().includes('restaurant'));
-  if (!someRestaurants) return acc;
-  if (el.isClosed === 'true') return acc;
-  const duplicate = _.find(
-    acc,
-    (exist) => el.name === exist.name
-          && el.address === exist.address
-          && el.city === exist.city,
-  );
-  if (duplicate) {
-    duplicate.ids ? duplicate.ids.push(el.id) : duplicate.ids = [el.id, duplicate.id];
-    return acc;
-  }
-  acc.push(el);
-  return acc;
-}, []);
-
-const filterImportObjects = ({
-  products, objectType,
-}) => {
-  const filters = {
-    restaurant: filterImportRestaurants,
-    book: groupByAsins,
-    product: groupByAsins,
-    default: () => products,
-  };
-  return (filters[objectType] || filters.default)(products, objectType);
-};
-
-const needToSaveObject = (object) => {
-  if (object.object_type === OBJECT_TYPES.RESTAURANT) {
-    const map = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.MAP);
-    if (!map) return false;
-  }
-  // if (object.object_type === OBJECT_TYPES.PRODUCT) {
-  //   const groupIdField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
-  //   const optionsField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.OPTIONS);
-  //   if (groupIdField && !optionsField) return false;
-  // }
-  return true;
-};
+const {
+  filterImportObjects,
+  bufferToArray,
+  needToSaveObject,
+  prepareObjectForImport,
+  specialFieldsHelper,
+  validateSameFields,
+} = require('../helpers/importDatafinityHelper');
+const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
+const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId,
@@ -133,7 +34,7 @@ const saveObjects = async ({
     if (authority) {
       product.authority = authority;
     }
-    product.fields = await prepareFieldsForImport(product);
+    product.fields = await parseFields(product);
 
     const save = needToSaveObject(product);
     if (!save) continue;
@@ -204,55 +105,26 @@ const importObjects = async ({
   return { result: importId };
 };
 
-const checkImportActiveStatus = async (importId) => {
-  const { result: importDoc } = await ImportStatusModel.findOne({
-    filter: { importId },
+const finishImport = async ({ importId, user }) => {
+  await ImportStatusModel.updateOne({
+    filter: { importId, user },
+    update: {
+      status: IMPORT_STATUS.FINISHED,
+      finishedAt: new Date(),
+    },
   });
-  const status = _.get(importDoc, 'status');
-  return status === IMPORT_STATUS.ACTIVE;
 };
 
-const getVotingPower = async ({ account, amount }) => {
-  const tokenBalance = await getTokenBalances({ query: { symbol: 'WAIV', account }, method: 'findOne' });
-  if (!tokenBalance) return 0;
-  const { stake, delegationsIn } = tokenBalance;
-  const pool = await getRewardPool({ query: { symbol: 'WAIV' }, method: 'findOne' });
-  if (!pool) return 0;
-  const { rewardPool, pendingClaims } = pool;
-  const rewards = new BigNumber(rewardPool).dividedBy(pendingClaims);
-  const finalRsharesCurator = new BigNumber(stake).plus(delegationsIn).div(2);
-
-  const reverseRshares = new BigNumber(amount).dividedBy(rewards);
-
-  return reverseRshares.times(100).div(finalRsharesCurator).times(100).toNumber();
-};
-
-const getTtlTime = async ({ votingPower, minVotingPower, account }) => {
-  if (votingPower < minVotingPower) {
-    const diff = minVotingPower - votingPower;
-    return ONE_PERCENT_VOTE_RECOVERY * (diff / 100);
-  }
-  const amount = await getMinAmountInWaiv(account);
-  const neededPower = await getVotingPower({ account, amount });
-  if (neededPower < votingPower) return ONE_PERCENT_VOTE_RECOVERY;
-  const diff = neededPower - votingPower;
-  return ONE_PERCENT_VOTE_RECOVERY * (diff / 100);
-};
-
-const setTtlToContinue = async ({ user, authorPermlink, importId }) => {
-  const { result: importDoc } = await ImportStatusModel.findOne({
-    filter: { importId },
+const updateImportedObjectsList = async ({ datafinityObject, user, authorPermlink }) => {
+  await ImportStatusModel.updateOne({
+    filter: {
+      importId: datafinityObject.importId,
+      user,
+    },
+    update: {
+      $addToSet: { objectsLinks: authorPermlink },
+    },
   });
-  const { votingPower } = await getVotingPowers({ account: user });
-  const ttl = await getTtlTime({
-    votingPower,
-    minVotingPower: importDoc.minVotingPower,
-    account: user,
-  });
-
-  const key = `${IMPORT_REDIS_KEYS.CONTINUE}:${user}:${authorPermlink}:${importId}`;
-  await redisSetter.set({ key, value: '' });
-  await redisSetter.expire({ key, ttl });
 };
 
 const startObjectImport = async ({
@@ -266,25 +138,13 @@ const startObjectImport = async ({
   });
 
   if (authorPermlink) {
-    await ImportStatusModel.updateOne({
-      filter: {
-        importId: datafinityObject.importId,
-        user,
-      },
-      update: {
-        $addToSet: { objectsLinks: authorPermlink },
-      },
+    await updateImportedObjectsList({
+      datafinityObject, user, authorPermlink,
     });
   }
 
   if (!datafinityObject && importId) {
-    await ImportStatusModel.updateOne({
-      filter: { importId, user },
-      update: {
-        status: IMPORT_STATUS.FINISHED,
-        finishedAt: new Date(),
-      },
-    });
+    await finishImport({ importId, user });
     return;
   }
 
@@ -295,17 +155,8 @@ const startObjectImport = async ({
 
   const createNew = !datafinityObject.author_permlink;
 
-  const activeStatus = await checkImportActiveStatus(datafinityObject.importId);
-  if (!activeStatus) return;
-
-  const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
-  const validVotePower = await votePowerValidation({ account: user, importId: datafinityObject.importId });
-  const validRc = await validateRc({ account: user });
-
-  if (!validVotePower || !validAcc || !validRc) {
-    await setTtlToContinue({ user, authorPermlink, importId: datafinityObject.importId });
-    return;
-  }
+  const runImport = await validateImportToRun({ datafinityObject, user, authorPermlink });
+  if (!runImport) return;
 
   if (createNew) {
     await createObject(datafinityObject);
@@ -346,22 +197,6 @@ const startObjectImport = async ({
   }
 };
 
-const prepareObjectForImport = async (datafinityObject) => {
-  const permlink = datafinityObject.author_permlink ? datafinityObject.author_permlink : await generateUniquePermlink(datafinityObject.name);
-
-  return {
-    object_type: datafinityObject.object_type,
-    author_permlink: permlink,
-    creator: datafinityObject.user,
-    default_name: datafinityObject.name,
-    locale: datafinityObject.locale,
-    is_extending_open: true,
-    is_posting_open: true,
-    fields: datafinityObject.fields,
-    datafinityObject: true,
-  };
-};
-
 const updateDatafinityObject = async (obj, datafinityObject) => {
   if (datafinityObject.fields.length) {
     await DatafinityObject
@@ -395,7 +230,7 @@ const createPersonFromAuthors = async ({ datafinityObject, field }) => {
     locale: datafinityObject.locale,
   };
 
-  const supposedFields = await prepareFieldsForImport(object);
+  const supposedFields = await parseFields(object);
   if (supposedFields.length) {
     fields.push(...supposedFields);
   }
@@ -466,40 +301,6 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
     importId: datafinityObject.importId,
   });
   return true;
-};
-
-const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
-  const field = datafinityObject.fields[0];
-  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
-    const existingCategory = _.find(wobject.fields,
-      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory);
-    if (existingCategory) {
-      field.id = existingCategory.id;
-      return;
-    }
-    const id = uuid.v4();
-    await addField({
-      field: formField({
-        fieldName: OBJECT_FIELDS.TAG_CATEGORY,
-        locale: datafinityObject.locale,
-        user: datafinityObject.user,
-        body: field.tagCategory,
-        id,
-      }),
-      wobject,
-      importingAccount: datafinityObject.user,
-      importId: datafinityObject.importId,
-    });
-    field.id = id;
-  }
-};
-
-const validateSameFields = ({ fieldData, wobject }) => {
-  const setUniqFields = ['name', 'body', 'locale'];
-
-  const foundedFields = _.map(wobject.fields, (field) => _.pick(field, setUniqFields));
-  const result = foundedFields.find((field) => _.isEqual(field, _.pick(fieldData, setUniqFields)));
-  return !!result;
 };
 
 const processField = async ({ datafinityObject, wobject, user }) => {
