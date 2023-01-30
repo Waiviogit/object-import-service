@@ -5,8 +5,7 @@ const FormData = require('form-data');
 const { IMAGE_SIZE } = require('../../../../constants/fileFormats');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../../constants/objectTypes');
-
-const requestTimeout = 5000;
+const { isProperResolution } = require('../../../helpers/imageHelper');
 
 const loadImageByUrl = async (url, size) => {
   try {
@@ -21,7 +20,7 @@ const loadImageByUrl = async (url, size) => {
       bodyFormData,
       {
         headers: bodyFormData.getHeaders(),
-        timeout: requestTimeout,
+        timeout: 5000,
       },
     );
     const result = _.get(resp, 'data.image');
@@ -33,18 +32,6 @@ const loadImageByUrl = async (url, size) => {
   }
 };
 
-const checkImageHelper = async (image) => {
-  try {
-    const response = await axios.get(image, {
-      timeout: requestTimeout,
-    });
-    return response.status === 200;
-  } catch (error) {
-    console.error(error.message);
-    return false;
-  }
-};
-
 module.exports = async (object) => {
   const images = _.uniq(_.concat(object.primaryImageURLs, object.imageURLs));
   if (_.isEmpty(images)) return;
@@ -52,7 +39,7 @@ module.exports = async (object) => {
   let sliceStart = 1;
 
   for (const [index, image] of images.entries()) {
-    const validImage = await checkImageHelper(image);
+    const validImage = await isProperResolution(image);
     if (!validImage) continue;
     const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.CONTAIN);
     if (error) continue;
@@ -72,7 +59,7 @@ module.exports = async (object) => {
   if (_.isEmpty(imagesForGallery)) return fields;
 
   for (const imagesForGalleryElement of imagesForGallery) {
-    const validImage = await checkImageHelper(imagesForGalleryElement);
+    const validImage = await isProperResolution(imagesForGalleryElement);
     if (!validImage) continue;
     const httpsStart = /^https:/.test(imagesForGalleryElement);
     if (!httpsStart) continue;
