@@ -13,6 +13,7 @@ const DatafinityObjectSchema = new Schema({
   name: { type: String },
   translate: { type: Boolean },
   authority: String,
+  groupId: String,
   fields: {
     type: [
       {
