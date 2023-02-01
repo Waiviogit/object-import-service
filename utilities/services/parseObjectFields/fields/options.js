@@ -76,7 +76,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
 const formFormats = (uniqFormats, obj) => {
   const fields = [];
 
-  const skipFormats = ['paperbackpaperback'];
+  const skipFormats = ['paperbackpaperback', 'hardcoverhardcover'];
 
   for (let count = 0; count < uniqFormats.length; count++) {
     if (_.includes(skipFormats, uniqFormats[count])) continue;
