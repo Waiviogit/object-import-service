@@ -24,6 +24,9 @@ exports.OBJECT_IDS = {
   UPCA: 'upca',
   UPCE: 'upce',
   VIN: 'vin',
+  WALMART_NUM: 'walmartNum',
+  WALMART: 'walmart',
+  TARGET: 'target',
 };
 
 exports.AUTHORITY_FIELD_OPTIONS = {
@@ -267,4 +270,10 @@ exports.SIZE_POSITION = {
   'extra extra extra large': 80,
   xxxl: 80,
   default: 0,
+};
+
+exports.DOMAINS = {
+  AMAZON: 'www.amazon.com',
+  TARGET: 'www.target.com',
+  WALMART: 'www.walmart.com',
 };
