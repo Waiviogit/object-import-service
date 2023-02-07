@@ -3,17 +3,20 @@ const { PARENT_ASIN_FIELDS, OBJECT_FIELDS } = require('../../../../constants/obj
 const { formField } = require('../../../helpers/formFieldHelper');
 
 module.exports = (object) => {
-  const parentAsin = _.find(_.get(object, 'features'),
-    (f) => _.includes(PARENT_ASIN_FIELDS, f.key));
-  if (!parentAsin) return;
+  const ids = [];
 
-  const body = _.get(parentAsin, 'value[0]', '').replace('‎ ', '');
-  if (!body) return;
+  for (const feature of object.features) {
+    if (!_.includes(PARENT_ASIN_FIELDS, feature.key)) continue;
+    for (const groupID of feature.value) {
+      ids.push(groupID.replace('‎ ', ''));
+    }
+  }
+  if (_.isEmpty(ids)) return;
 
-  return formField({
+  return _.map(_.uniq(ids), (id) => formField({
     fieldName: OBJECT_FIELDS.GROUP_ID,
     user: object.user,
-    body,
+    body: id,
     locale: object.locale,
-  });
+  }));
 };
