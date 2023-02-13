@@ -116,13 +116,16 @@ const formFormats = (uniqFormats, obj) => {
 };
 
 const getEmptyOptionsSet = async ({ allFields, object }) => {
+  const categoryName = 'version';
   const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
-  const groupId = _.find(allFields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
-  if (!groupId) return;
-  object.groupId = groupId.body;
+  const groupIdFields = _.filter(allFields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
+  const groupIds = _.map(groupIdFields, 'body');
+
+  if (!_.isEmpty(groupIds)) return;
+  object.groupIds = groupIds;
   const { result } = await DatafinityObject.find({
     filter: {
-      groupId: groupId.body,
+      groupIds: { $in: groupIds },
       importId: object.importId,
     },
   });
@@ -135,7 +138,7 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
       locale: object.locale,
       user: object.user,
       body: JSON.stringify({
-        category: 'set',
+        category: categoryName,
         value: `${result.length}`,
         position: result.length,
         ...(firstAvatar && { image: firstAvatar.body }),
@@ -155,7 +158,7 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
     locale: object.locale,
     user: object.user,
     body: JSON.stringify({
-      category: 'set',
+      category: categoryName,
       value: `${result.length + 1}`,
       position: result.length + 1,
       ...(avatarField && { image: avatarField.body }),
