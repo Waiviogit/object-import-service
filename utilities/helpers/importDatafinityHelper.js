@@ -12,6 +12,11 @@ const getVoteCost = (account) => {
   return VOTE_COST.USUAL;
 };
 
+const getVoteCostInitial = (account) => {
+  if (_.includes(WHITE_LIST, account)) return VOTE_COST.INITIAL_FOR_WHITE_LIST;
+  return VOTE_COST.INITIAL;
+};
+
 const groupByAsins = (products, objectType) => {
   const uniqueProducts = [];
 
@@ -172,4 +177,5 @@ module.exports = {
   specialFieldsHelper,
   validateSameFields,
   checkAddress,
+  getVoteCostInitial,
 };

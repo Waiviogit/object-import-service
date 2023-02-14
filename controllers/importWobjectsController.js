@@ -6,9 +6,9 @@ const { validateImmediatelyImport } = require('../utilities/objectBotApi/validat
 const { FILE_MAX_SIZE } = require('../constants/fileFormats');
 const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
-const { VOTE_COST } = require('../constants/voteAbility');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
+const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -63,7 +63,7 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
-    VOTE_COST.INITIAL,
+    getVoteCostInitial(value.user),
   );
   if (!validAcc) return next(accError);
 
