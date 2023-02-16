@@ -188,7 +188,7 @@ const startObjectImport = async ({
     });
     if (!updatedObj) return;
     if (processErr) return;
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 4000));
 
     emitStart({
       user: datafinityObject.user,
