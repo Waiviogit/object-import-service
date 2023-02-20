@@ -1,4 +1,13 @@
-exports.WHITE_LIST = ['flowmaster', 'wiv01', 'campingchecklist', 'reviews.editor', 'beatthebust', 'cleangirl'];
+exports.WHITE_LIST = [
+  'flowmaster',
+  'wiv01',
+  'campingchecklist',
+  'reviews.editor',
+  'beatthebust',
+  'cleangirl',
+  'versentry',
+];
+
 exports.WHITE_LIST_KEY = 'white_list_import';
 
 exports.VOTE_COST = {
