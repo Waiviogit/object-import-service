@@ -6,6 +6,12 @@ exports.WHITE_LIST = [
   'beatthebust',
   'cleangirl',
   'versentry',
+  'sebclem',
+  'antoniokevin',
+  'ahmed365',
+  'thapelo05',
+  'davep96',
+  'campzone',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
