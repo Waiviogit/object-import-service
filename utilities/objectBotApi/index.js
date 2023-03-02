@@ -1,5 +1,5 @@
 module.exports = {
-    createObjectType: require( './createObjectType' ),
-    createObject: require( './createObject' ),
-    appendObject: require( './appendObject' )
+  createObjectType: require('./createObjectType'),
+  createObject: require('./createObject'),
+  appendObject: require('./appendObject'),
 };

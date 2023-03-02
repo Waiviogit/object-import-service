@@ -1,20 +1,31 @@
-const { importWobjectsDataClient } = require( './redis' );
+const { importWobjectsDataClient, botsData } = require('./redis');
 
-const setImportWobjData = async ( key, data ) => {
-    if ( key && data ) {
-        for ( const field in data ) {
-            await importWobjectsDataClient.hsetAsync( key, field, data[ field ] );
-        }
+const setImportWobjData = async (key, data) => {
+  if (key && data) {
+    for (const field in data) {
+      await importWobjectsDataClient.hsetAsync(key, field, data[field]);
     }
+  }
 };
 
-const delImportWobjData = async ( key ) => {
-    if ( key ) {
-        await importWobjectsDataClient.del( key );
-    }
+const delImportWobjData = async (key) => {
+  if (key) {
+    await importWobjectsDataClient.del(key);
+  }
 };
+
+const sadd = async ({ key, data, client = botsData }) => client.saddAsync(key, ...data);
+
+const set = async ({ key, value, client = importWobjectsDataClient }) => client
+  .setAsync(key, value);
+
+const expire = async ({ key, ttl, client = importWobjectsDataClient }) => client
+  .expireAsync(key, ttl);
 
 module.exports = {
-    setImportWobjData,
-    delImportWobjData
+  setImportWobjData,
+  delImportWobjData,
+  sadd,
+  set,
+  expire,
 };
