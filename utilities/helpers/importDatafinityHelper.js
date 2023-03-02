@@ -168,6 +168,14 @@ const validateSameFields = ({ fieldData, wobject }) => {
 
 const checkAddress = (object) => /[0-9]/.test(_.get(object, 'address', ''));
 
+const capitalizeEachWord = (string) => {
+  const arr = string.split(' ');
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+  }
+  return arr.join(' ');
+};
+
 module.exports = {
   filterImportObjects,
   getVoteCost,
@@ -178,4 +186,5 @@ module.exports = {
   validateSameFields,
   checkAddress,
   getVoteCostInitial,
+  capitalizeEachWord,
 };

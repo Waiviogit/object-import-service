@@ -3,6 +3,7 @@ const { getBookFormatData } = require('../../../helpers/amazonParseHelper');
 const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
+const { OPTIONS_CATEGORY } = require('../../../../constants/fieldParseData');
 
 const getProductColor = (object, allFields, lastDateSeen) => {
   const lastDateSeenColor = _.get(lastDateSeen, 'color', '');
@@ -20,7 +21,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
         locale: object.locale,
         user: object.user,
         body: JSON.stringify({
-          category: 'color',
+          category: OPTIONS_CATEGORY.COLOR,
           value: startsDash ? object.colors[0].replace('-', '').trim() : object.colors[0],
           ...(avatarField && { image: avatarField.body }),
         }),
@@ -35,7 +36,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
           locale: object.locale,
           user: object.user,
           body: JSON.stringify({
-            category: 'color',
+            category: OPTIONS_CATEGORY.COLOR,
             value: startsDash ? color.replace('-', '').trim() : color,
             ...(avatarField && { image: avatarField.body }),
           }),
@@ -48,7 +49,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
           locale: object.locale,
           user: object.user,
           body: JSON.stringify({
-            category: 'color',
+            category: OPTIONS_CATEGORY.COLOR,
             value: startsDash ? color.replace('-', '').trim() : color,
             ...(avatarField && { image: avatarField.body }),
           }),
@@ -66,7 +67,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
         locale: object.locale,
         user: object.user,
         body: JSON.stringify({
-          category: 'color',
+          category: OPTIONS_CATEGORY.COLOR,
           value: startsDash ? color.replace('-', '').trim() : color,
           position: index + 1,
           ...(avatarField && { image: avatarField.body }),
@@ -83,7 +84,7 @@ const getProductColor = (object, allFields, lastDateSeen) => {
       locale: object.locale,
       user: object.user,
       body: JSON.stringify({
-        category: 'color',
+        category: OPTIONS_CATEGORY.COLOR,
         value: startsDash ? lastDateSeenColor.replace('-', '').trim() : lastDateSeenColor,
         ...(avatarField && { image: avatarField.body }),
       }),
@@ -104,7 +105,7 @@ const formFormats = (uniqFormats, obj) => {
       locale: obj.locale,
       user: obj.user,
       body: JSON.stringify({
-        category: 'format',
+        category: OPTIONS_CATEGORY.FORMAT,
         value: uniqFormats[count],
         position: count,
         //  image: obj.imageURLs[count],
@@ -116,7 +117,6 @@ const formFormats = (uniqFormats, obj) => {
 };
 
 const getEmptyOptionsSet = async ({ allFields, object }) => {
-  const categoryName = 'version';
   const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
   const groupIdFields = _.filter(allFields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
   const groupIds = _.map(groupIdFields, 'body');
@@ -138,7 +138,7 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
       locale: object.locale,
       user: object.user,
       body: JSON.stringify({
-        category: categoryName,
+        category: OPTIONS_CATEGORY.VERSION,
         value: `${result.length}`,
         position: result.length,
         ...(firstAvatar && { image: firstAvatar.body }),
@@ -158,7 +158,7 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
     locale: object.locale,
     user: object.user,
     body: JSON.stringify({
-      category: categoryName,
+      category: OPTIONS_CATEGORY.VERSION,
       value: `${result.length + 1}`,
       position: result.length + 1,
       ...(avatarField && { image: avatarField.body }),
@@ -184,7 +184,7 @@ const productOptions = async (object, allFields) => {
         locale: object.locale,
         user: object.user,
         body: JSON.stringify({
-          category: 'size',
+          category: OPTIONS_CATEGORY.SIZE,
           value: size,
           ...(sizePosition && { position: sizePosition }),
         }),
@@ -199,7 +199,7 @@ const productOptions = async (object, allFields) => {
       locale: object.locale,
       user: object.user,
       body: JSON.stringify({
-        category: 'size',
+        category: OPTIONS_CATEGORY.SIZE,
         value: lastDateSeen.size,
         ...(sizePosition && { position: sizePosition }),
       }),
