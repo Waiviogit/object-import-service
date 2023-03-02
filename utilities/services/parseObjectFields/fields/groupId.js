@@ -5,7 +5,7 @@ const { formField } = require('../../../helpers/formFieldHelper');
 module.exports = (object) => {
   const ids = [];
 
-  for (const feature of object.features) {
+  for (const feature of _.get(object, 'features', [])) {
     if (!_.includes(PARENT_ASIN_FIELDS, feature.key)) continue;
     for (const groupID of feature.value) {
       ids.push(groupID.replace('‎ ', ''));
