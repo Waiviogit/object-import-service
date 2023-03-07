@@ -22,6 +22,18 @@ module.exports = (object) => {
   }
 
   for (const category of categories) {
+    if (/›/.test(category)) {
+      for (const categoryElement of category.split('›')) {
+        fields.push(formField({
+          fieldName: OBJECT_FIELDS.DEPARTMENTS,
+          locale: object.locale,
+          user: object.user,
+          body: categoryElement.trim(),
+        }));
+      }
+      continue;
+    }
+
     fields.push(formField({
       fieldName: OBJECT_FIELDS.DEPARTMENTS,
       locale: object.locale,
