@@ -37,6 +37,9 @@ const checkForDuplicates = async (urls = []) => {
     const url = process.env.IMAGE_CHECK_URL || 'http://localhost:8022/images-hash-filter';
     const response = await axios.post(url, {
       urls,
+    },
+    {
+      timeout: 15000,
     });
     return _.get(response, 'data.result');
   } catch (error) {
