@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { getBookFormatData } = require('../../../helpers/amazonParseHelper');
+const { getBookFormatData, getProductData } = require('../../../helpers/amazonParseHelper');
 const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
@@ -165,6 +165,27 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
 
 const productOptions = async (object, allFields) => {
   const fields = [];
+  if (object.asins) {
+    const amazonOptions = await getProductData(`https://www.amazon.com/dp/${object.asins}`);
+    if (!_.isEmpty(amazonOptions)) {
+      for (const amazonOption of amazonOptions) {
+        const { category, value } = amazonOption;
+        const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
+        fields.push(formField({
+          fieldName: OBJECT_FIELDS.OPTIONS,
+          locale: object.locale,
+          user: object.user,
+          body: JSON.stringify({
+            category,
+            value,
+            ...(avatarField && category === OPTIONS_CATEGORY.COLOR && { image: avatarField.body }),
+          }),
+        }));
+      }
+      return fields;
+    }
+  }
+
   const lastDateSeen = _.maxBy(_.get(object, 'prices'), (p) => _.get(p, 'dateSeen[0]'));
   const color = getProductColor(object, allFields, lastDateSeen);
   if (color && !color.length) {

@@ -220,6 +220,12 @@ exports.FEATURES_FILTER = [
   'ASIN ‏',
   'Title',
   'body html',
+  'Brand',
+  'Flavor',
+  'Size',
+  'Manufacturing Brand',
+  'Tags',
+  'Our Values',
 ];
 
 exports.FEATURES_KEYS = {
