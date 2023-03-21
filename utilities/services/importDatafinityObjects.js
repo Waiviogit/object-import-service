@@ -175,7 +175,7 @@ const startObjectImport = async ({
         importId: datafinityObject.importId,
         ...(
           datafinityObject.startAuthorPermlink
-            && { authorPermlink: datafinityObject.startAuthorPermlink }
+                    && { authorPermlink: datafinityObject.startAuthorPermlink }
         ),
       });
       return;
