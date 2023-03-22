@@ -4,25 +4,26 @@ const { getAccountRC } = require('../utilities/hiveApi/userUtil');
 const { ImportStatusModel } = require('../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../constants/appData');
 const { startObjectImport } = require('../utilities/services/importDatafinityObjects');
-const { redisSetter } = require('../utilities/redis');
+const { redisSetter, redisGetter } = require('../utilities/redis');
 
 const stopImports = async () => {
   const { result } = await ImportStatusModel.findOne({
     filter: { status: IMPORT_STATUS.ACTIVE },
   });
+  await redisSetter
+    .set({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER, value: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
   if (!result) return;
   await ImportStatusModel.updateMany({
     filter: { status: IMPORT_STATUS.ACTIVE },
     update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
   });
-  await redisSetter
-    .set({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER, value: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
 };
 
 const startImports = async () => {
   const { result } = await ImportStatusModel.findOne({
     filter: { status: IMPORT_STATUS.WAITING_RECOVER },
   });
+  await redisSetter.delImportWobjData(IMPORT_REDIS_KEYS.STOP_FOR_RECOVER);
   if (!result) return;
 
   const { result: stoppedImports } = await ImportStatusModel.find({
@@ -34,7 +35,6 @@ const startImports = async () => {
     filter: { status: IMPORT_STATUS.WAITING_RECOVER },
     update: { $set: { status: IMPORT_STATUS.ACTIVE } },
   });
-  await redisSetter.delImportWobjData(IMPORT_REDIS_KEYS.STOP_FOR_RECOVER);
 
   for (const resultElement of stoppedImports) {
     const { user, importId } = resultElement;
