@@ -43,8 +43,6 @@ const startImports = async () => {
 };
 
 const checkBots = new CronJob('0 */10 * * * *', async () => {
-  await redisSetter.delImportWobjData(IMPORT_REDIS_KEYS.STOP_FOR_RECOVER);
-
   const rc = await getAccountRC('waivio.updates01');
 
   const { percentage = 0 } = rc;
