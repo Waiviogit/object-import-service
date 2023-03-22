@@ -9,7 +9,7 @@ const {
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { IMPORT_STATUS } = require('../../constants/appData');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
   filterImportObjects,
@@ -21,6 +21,7 @@ const {
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
+const { redisGetter } = require('../redis');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId,
@@ -84,12 +85,17 @@ const importObjects = async ({
   const uniqueProducts = filterImportObjects({ products, objectType });
   if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
+  const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
+
+  const status = recovering ? IMPORT_STATUS.WAITING_RECOVER : IMPORT_STATUS.ACTIVE;
+
   await ImportStatusModel.create({
     importId,
     user,
     objectsCount: 0,
     objectType,
     authority,
+    status,
   });
 
   saveObjects({

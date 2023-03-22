@@ -13,11 +13,13 @@ const IMPORT_STATUS = {
   ON_HOLD: 'onHold',
   FINISHED: 'finished',
   DELETED: 'deleted',
+  WAITING_RECOVER: 'waitingRecover',
 };
 
 const IMPORT_REDIS_KEYS = {
   CONTINUE: 'continue',
   MIN_POWER: 'min_power',
+  STOP_FOR_RECOVER: 'stop_for_recover',
 };
 
 const DEFAULT_VOTE_POWER_IMPORT = 3000;
