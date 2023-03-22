@@ -19,6 +19,7 @@
     },
     "nodeUrl": "https://api.steemit.com/",
     "swaggerHost": "www.waivio.com",
+    "appHost": "waivio.com",
     "objectsBot": {
       "OBJECT_BOT_HOST_URL": "https://www.waivio.com/objects-bot",
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
@@ -46,6 +47,7 @@
     },
     "nodeUrl": "https://api.steemit.com/",
     "swaggerHost": "waiviodev.com",
+    "appHost": "waiviodev.com",
     "objectsBot": {
       "OBJECT_BOT_HOST_URL": "https://waiviodev.com/objects-bot",
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
@@ -73,6 +75,7 @@
     },
     "nodeUrl": "https://api.steemit.com/",
     "swaggerHost": "localhost:8085",
+    "appHost": "waiviodev.com",
     "objectsBot": {
       "OBJECT_BOT_HOST_URL": "http://localhost:8093/objects-bot",
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
@@ -100,6 +103,7 @@
     },
     "nodeUrl": "https://api.steemit.com/",
     "swaggerHost": "localhost:8085",
+    "appHost": "waiviodev.com",
     "objectsBot": {
       "OBJECT_BOT_HOST_URL": "localhost/objects-bot",
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",

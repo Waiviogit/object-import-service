@@ -18,5 +18,6 @@ module.exports = {
     WObject: require('./schemas/wObjectSchema'),
     ObjectType: require('./schemas/ObjectTypeSchema'),
     Department: require('./schemas/DepartmentSchema'),
+    App: require('./schemas/AppSchema'),
   },
 };

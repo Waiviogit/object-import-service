@@ -1,10 +1,13 @@
 const { CronJob } = require('cron');
 const _ = require('lodash');
 const { getAccountRC } = require('../utilities/hiveApi/userUtil');
-const { ImportStatusModel } = require('../models');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../constants/appData');
+const { ImportStatusModel, AppModel } = require('../models');
+const {
+  IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
+} = require('../constants/appData');
 const { startObjectImport } = require('../utilities/services/importDatafinityObjects');
 const { redisSetter, redisGetter } = require('../utilities/redis');
+const config = require('../config');
 
 const stopImports = async () => {
   const { result } = await ImportStatusModel.findOne({
@@ -42,15 +45,32 @@ const startImports = async () => {
   }
 };
 
-const checkBots = new CronJob('0 */10 * * * *', async () => {
-  const rc = await getAccountRC('waivio.updates01');
+const getAverageRc = async () => {
+  const botNames = await AppModel.getBotsByRoleAndHost(
+    { host: config.appHost, role: OBJECT_BOT_ROLE.SERVICE_BOT },
+  );
+  if (!botNames.length) return 0;
+  const rates = await Promise.all(botNames.map(async (bot) => getAccountRC(bot)));
+  const filteredRates = _.filter(rates, (r) => !r.error);
+  const sum = _.sumBy(filteredRates, 'percentage');
 
-  const { percentage = 0 } = rc;
-  if (percentage < 8000) {
+  return Math.round(sum / filteredRates.length);
+};
+
+const checkBots = new CronJob('0 */5 * * * *', async () => {
+  const rc = await getAverageRc();
+  const { result: queueLength = 0 } = await redisGetter.getQueueLength();
+
+  if (rc < IMPORT_GLOBAL_SETTINGS.RC_TO_STOP) {
     await stopImports();
+    return;
+  }
+  if (queueLength > IMPORT_GLOBAL_SETTINGS.OBJECTS_MAX_QUEUE) {
+    await stopImports();
+    return;
   }
 
-  if (percentage > 8200) {
+  if (rc > IMPORT_GLOBAL_SETTINGS.RC_TO_RESTORE) {
     await startImports();
   }
 }, null, false, null, null, true);
