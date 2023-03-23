@@ -34,9 +34,11 @@ const updateImport = async ({
   user, status, importId,
 }) => {
   const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
-  if (recovering) {
-    return { error: new Error('Our bots are restoring now, please wait') };
+
+  if (recovering && status === IMPORT_STATUS.ACTIVE) {
+    status = IMPORT_STATUS.WAITING_RECOVER;
   }
+
   const { result, error } = await ImportStatusModel.findOneAndUpdate({
     filter: { user, importId },
     update: {
