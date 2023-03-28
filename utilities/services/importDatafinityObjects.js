@@ -24,7 +24,7 @@ const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 const { redisGetter } = require('../redis');
 
 const saveObjects = async ({
-  products, user, objectType, authority, locale, translate, importId,
+  products, user, objectType, authority, locale, translate, importId, useGPT,
 }) => {
   for (const product of products) {
     product.importId = importId;
@@ -35,6 +35,7 @@ const saveObjects = async ({
     if (authority) {
       product.authority = authority;
     }
+    product.useGPT = useGPT;
     product.fields = await parseFields(product);
 
     const save = needToSaveObject(product);
@@ -74,7 +75,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale, translate,
+  file, user, objectType, authority, locale, translate, useGPT,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -106,6 +107,7 @@ const importObjects = async ({
     locale,
     translate,
     importId,
+    useGPT,
   });
 
   return { result: importId };
