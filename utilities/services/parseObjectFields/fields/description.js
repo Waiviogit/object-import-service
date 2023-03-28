@@ -5,7 +5,7 @@ const { makeDescription } = require('../../gptService');
 
 const getBodyFromFeatures = (object) => {
   const features = _.find(object.features, (f) => f.key === FEATURES_KEYS.PRODUCT_FEATURES);
-  if (!features) return;
+  if (!features) return '';
   let body = '';
   for (const featuresValue of features.value) {
     if (body.length + featuresValue.length < 5000) {
