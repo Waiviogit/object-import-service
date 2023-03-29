@@ -32,8 +32,25 @@ const loadImageByUrl = async (url, size) => {
   }
 };
 
+const checkForDuplicates = async (urls = []) => {
+  try {
+    const url = process.env.IMAGE_CHECK_URL || 'http://localhost:8022/images-hash-filter';
+    const response = await axios.post(url, {
+      urls,
+    },
+    {
+      timeout: 15000,
+    });
+    return _.get(response, 'data.result');
+  } catch (error) {
+    return urls;
+  }
+};
+
 module.exports = async (object) => {
-  const images = _.uniq(_.concat(object.primaryImageURLs, object.imageURLs));
+  const images = await checkForDuplicates(
+    _.uniq(_.concat(object.primaryImageURLs, object.imageURLs)),
+  );
   if (_.isEmpty(images)) return;
   const fields = [];
   let sliceStart = 1;

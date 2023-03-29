@@ -9,7 +9,7 @@ const {
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { IMPORT_STATUS } = require('../../constants/appData');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
   filterImportObjects,
@@ -21,9 +21,10 @@ const {
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
+const { redisGetter } = require('../redis');
 
 const saveObjects = async ({
-  products, user, objectType, authority, locale, translate, importId,
+  products, user, objectType, authority, locale, translate, importId, useGPT,
 }) => {
   for (const product of products) {
     product.importId = importId;
@@ -34,6 +35,7 @@ const saveObjects = async ({
     if (authority) {
       product.authority = authority;
     }
+    product.useGPT = useGPT;
     product.fields = await parseFields(product);
 
     const save = needToSaveObject(product);
@@ -73,7 +75,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale, translate,
+  file, user, objectType, authority, locale, translate, useGPT,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -84,12 +86,17 @@ const importObjects = async ({
   const uniqueProducts = filterImportObjects({ products, objectType });
   if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
+  const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
+
+  const status = recovering ? IMPORT_STATUS.WAITING_RECOVER : IMPORT_STATUS.ACTIVE;
+
   await ImportStatusModel.create({
     importId,
     user,
     objectsCount: 0,
     objectType,
     authority,
+    status,
   });
 
   saveObjects({
@@ -100,6 +107,7 @@ const importObjects = async ({
     locale,
     translate,
     importId,
+    useGPT,
   });
 
   return { result: importId };
@@ -175,7 +183,7 @@ const startObjectImport = async ({
         importId: datafinityObject.importId,
         ...(
           datafinityObject.startAuthorPermlink
-            && { authorPermlink: datafinityObject.startAuthorPermlink }
+                    && { authorPermlink: datafinityObject.startAuthorPermlink }
         ),
       });
       return;

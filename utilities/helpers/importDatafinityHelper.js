@@ -6,6 +6,7 @@ const { parseJson } = require('./jsonHelper');
 const { generateUniquePermlink } = require('./permlinkGenerator');
 const { addField } = require('../services/importObjectsService');
 const { formField } = require('./formFieldHelper');
+const { Wobj } = require('../../models');
 
 const getVoteCost = (account) => {
   if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
@@ -134,7 +135,7 @@ const prepareObjectForImport = async (datafinityObject) => {
 
 const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
   const field = datafinityObject.fields[0];
-  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
+  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM && !field.id) {
     const existingCategory = _.find(wobject.fields,
       (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory);
     if (existingCategory) {
@@ -176,6 +177,20 @@ const capitalizeEachWord = (string) => {
   return arr.join(' ');
 };
 
+const checkObjectExist = async ({ authorPermlink, type }) => {
+  const { result } = await Wobj.findOne({
+    filter: {
+      author_permlink: authorPermlink,
+      ...(type && { object_type: type }),
+    },
+    projection: {
+      _id: 1,
+    },
+  });
+
+  return !!result;
+};
+
 module.exports = {
   filterImportObjects,
   getVoteCost,
@@ -187,4 +202,5 @@ module.exports = {
   checkAddress,
   getVoteCostInitial,
   capitalizeEachWord,
+  checkObjectExist,
 };

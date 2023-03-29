@@ -1,6 +1,7 @@
 const { ImportStatusModel, DatafinityObject } = require('../../models');
-const { IMPORT_STATUS } = require('../../constants/appData');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
 const { startObjectImport } = require('./importDatafinityObjects');
+const { redisGetter } = require('../redis');
 
 const getStatistic = async ({ user, history = false }) => {
   const { result, error } = await ImportStatusModel.find({
@@ -9,7 +10,7 @@ const getStatistic = async ({ user, history = false }) => {
       status: {
         $in: history
           ? [IMPORT_STATUS.FINISHED, IMPORT_STATUS.DELETED]
-          : [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD],
+          : [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD, IMPORT_STATUS.WAITING_RECOVER],
       },
     },
     options: {
@@ -32,6 +33,12 @@ const getStatistic = async ({ user, history = false }) => {
 const updateImport = async ({
   user, status, importId,
 }) => {
+  const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
+
+  if (recovering && status === IMPORT_STATUS.ACTIVE) {
+    status = IMPORT_STATUS.WAITING_RECOVER;
+  }
+
   const { result, error } = await ImportStatusModel.findOneAndUpdate({
     filter: { user, importId },
     update: {

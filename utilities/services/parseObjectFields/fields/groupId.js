@@ -3,6 +3,14 @@ const { PARENT_ASIN_FIELDS, OBJECT_FIELDS } = require('../../../../constants/obj
 const { formField } = require('../../../helpers/formFieldHelper');
 
 module.exports = (object) => {
+  if (object.groupId) {
+    return formField({
+      fieldName: OBJECT_FIELDS.GROUP_ID,
+      user: object.user,
+      body: object.groupId,
+      locale: object.locale,
+    });
+  }
   const ids = [];
 
   for (const feature of _.get(object, 'features', [])) {

@@ -108,6 +108,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.WEIGHT,
     this.OBJECT_FIELDS.PRICE,
     this.OBJECT_FIELDS.DESCRIPTION,
+    this.OBJECT_FIELDS.TAG_CATEGORY,
   ],
   product: [
     this.OBJECT_FIELDS.NAME,
@@ -124,6 +125,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.OPTIONS,
     this.OBJECT_FIELDS.PRICE,
     this.OBJECT_FIELDS.DESCRIPTION,
+    this.OBJECT_FIELDS.TAG_CATEGORY,
   ],
 };
 
@@ -220,6 +222,12 @@ exports.FEATURES_FILTER = [
   'ASIN ‏',
   'Title',
   'body html',
+  'Brand',
+  'Flavor',
+  'Size',
+  'Manufacturing Brand',
+  'Tags',
+  'Our Values',
 ];
 
 exports.FEATURES_KEYS = {

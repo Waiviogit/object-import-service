@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { getBookFormatData } = require('../../../helpers/amazonParseHelper');
+const { getBookFormatData, getProductData } = require('../../../helpers/amazonParseHelper');
 const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
@@ -58,23 +58,20 @@ const getProductColor = (object, allFields, lastDateSeen) => {
     }
     if (colorsFoundInPrice) return colorsFoundInPrice;
 
-    const fields = [];
-    for (const [index, color] of object.colors.entries()) {
-      const startsDash = regExStartWithDash.test(color);
+    const color = object.colors[0];
+    const startsDash = regExStartWithDash.test(color);
 
-      fields.push(formField({
-        fieldName: OBJECT_FIELDS.OPTIONS,
-        locale: object.locale,
-        user: object.user,
-        body: JSON.stringify({
-          category: OPTIONS_CATEGORY.COLOR,
-          value: startsDash ? color.replace('-', '').trim() : color,
-          position: index + 1,
-          ...(avatarField && { image: avatarField.body }),
-        }),
-      }));
-    }
-    return fields;
+    return formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        category: OPTIONS_CATEGORY.COLOR,
+        value: startsDash ? color.replace('-', '').trim() : color,
+        position: 1,
+        ...(avatarField && { image: avatarField.body }),
+      }),
+    });
   }
   if (lastDateSeenColor) {
     const startsDash = regExStartWithDash.test(lastDateSeenColor);
@@ -168,6 +165,27 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
 
 const productOptions = async (object, allFields) => {
   const fields = [];
+  if (object.asins && !object.dontFetchAmazonOptions) {
+    const amazonOptions = await getProductData(`https://www.amazon.com/dp/${object.asins}`);
+    if (!_.isEmpty(amazonOptions)) {
+      for (const amazonOption of amazonOptions) {
+        const { category, value } = amazonOption;
+        const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
+        fields.push(formField({
+          fieldName: OBJECT_FIELDS.OPTIONS,
+          locale: object.locale,
+          user: object.user,
+          body: JSON.stringify({
+            category,
+            value,
+            ...(avatarField && category === OPTIONS_CATEGORY.COLOR && { image: avatarField.body }),
+          }),
+        }));
+      }
+      return fields;
+    }
+  }
+
   const lastDateSeen = _.maxBy(_.get(object, 'prices'), (p) => _.get(p, 'dateSeen[0]'));
   const color = getProductColor(object, allFields, lastDateSeen);
   if (color && !color.length) {
@@ -176,21 +194,35 @@ const productOptions = async (object, allFields) => {
     fields.push(...color);
   }
 
-  if (!_.isEmpty(object.sizes)) {
-    for (const [index, size] of object.sizes.entries()) {
-      const sizePosition = SIZE_POSITION[size.toLocaleLowerCase()] || SIZE_POSITION.default;
-      fields.push(formField({
-        fieldName: OBJECT_FIELDS.OPTIONS,
-        locale: object.locale,
-        user: object.user,
-        body: JSON.stringify({
-          category: OPTIONS_CATEGORY.SIZE,
-          value: size,
-          ...(sizePosition && { position: sizePosition }),
-        }),
-      }));
-    }
+  if (object.size) {
+    const sizePosition = SIZE_POSITION[object.size.toLocaleLowerCase()] || SIZE_POSITION.default;
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        category: OPTIONS_CATEGORY.SIZE,
+        value: object.size,
+        ...(sizePosition && { position: sizePosition }),
+      }),
+    }));
   }
+
+  if (!_.isEmpty(object.sizes) && !object.size) {
+    const size = object.sizes[0];
+    const sizePosition = SIZE_POSITION[size.toLocaleLowerCase()] || SIZE_POSITION.default;
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        category: OPTIONS_CATEGORY.SIZE,
+        value: size,
+        ...(sizePosition && { position: sizePosition }),
+      }),
+    }));
+  }
+
   if (_.isEmpty(object.sizes) && _.get(lastDateSeen, 'size')) {
     const sizePosition = SIZE_POSITION[lastDateSeen.size.toLocaleLowerCase()]
             || SIZE_POSITION.default;

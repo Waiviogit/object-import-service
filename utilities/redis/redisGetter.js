@@ -1,4 +1,5 @@
 const { importWobjectsDataClient } = require('./redis');
+const { importRsmqClient } = require('./rsmq');
 
 const getHashAll = async function (key, client = importWobjectsDataClient) {
   const res = await client.hgetallAsync(key);
@@ -9,4 +10,13 @@ const getHashAll = async function (key, client = importWobjectsDataClient) {
 const get = async ({ key, client = importWobjectsDataClient }) => client
   .getAsync(key);
 
-module.exports = { getHashAll, get };
+const getQueueLength = async (qname = 'import_wobjects', client = importRsmqClient) => {
+  try {
+    const attributes = await client.getQueueAttributesAsync({ qname });
+    return { result: attributes.msgs };
+  } catch (e) {
+    return { error: e };
+  }
+};
+
+module.exports = { getHashAll, get, getQueueLength };

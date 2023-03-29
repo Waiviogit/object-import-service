@@ -36,6 +36,15 @@ const updateOne = async ({ filter, update, options }) => {
   }
 };
 
+const updateMany = async ({ filter, update, options }) => {
+  try {
+    const result = await ImportStatus.updateMany(filter, update, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const findOneAndDelete = async ({ filter, options }) => {
   try {
     const result = await ImportStatus.findOneAndDelete(filter, options);
@@ -55,5 +64,5 @@ const findOneAndUpdate = async ({ filter, update, options }) => {
 };
 
 module.exports = {
-  find, findOne, updateOne, findOneAndDelete, create, findOneAndUpdate,
+  find, findOne, updateOne, findOneAndDelete, create, findOneAndUpdate, updateMany,
 };

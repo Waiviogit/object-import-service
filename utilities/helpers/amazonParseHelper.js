@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { parse } = require('node-html-parser');
 const _ = require('lodash');
+const { capitalizeEachWord } = require('./importDatafinityHelper');
 
 const SELECTOR = {
   BOOK_PAGE: '.author, .notFaded',
@@ -8,6 +9,9 @@ const SELECTOR = {
   FILTER_AUTHOR_PAGE: '.a-size-base .a-link-normal',
   OPTIONS: 'ul.a-unordered-list.a-nostyle.a-button-list.a-horizontal',
   SPAN_IN_A: 'a span',
+  TWISTER_ID: '#twister .a-row',
+  OPTION_NAME: '.a-form-label',
+  OPTION_VALUE: '.selection',
 };
 
 const REF = {
@@ -142,7 +146,47 @@ const getBookFormatData = async (url) => {
   }, []);
 };
 
+const getOptionValuesFromNodes = ({ nameNode, valueNode }) => {
+  try {
+    const name = nameNode.innerText;
+    const value = valueNode.innerText;
+
+    return {
+      category: capitalizeEachWord(name
+        .trim()
+        .replace(/[.,%?+*|{}[\]()<>“”^'"\\\-_=!&$:]/g, '')
+        .replace(/  +/g, ' ')),
+      value: value.trim(),
+    };
+  } catch (error) {
+
+  }
+};
+
+const getProductData = async (url) => {
+  const onErrorResp = [];
+  const { page, error } = await getPage(url);
+  if (error) {
+    console.error(error.message);
+    return onErrorResp;
+  }
+  const root = parse(page);
+  const options = root.querySelectorAll(SELECTOR.TWISTER_ID);
+  if (_.isEmpty(options)) return onErrorResp;
+
+  const productOptions = [];
+  for (const option of options) {
+    const nameNode = option.querySelector(SELECTOR.OPTION_NAME);
+    const valueNode = option.querySelector(SELECTOR.OPTION_VALUE);
+    const formattedValues = getOptionValuesFromNodes({ nameNode, valueNode });
+    if (!formattedValues || !formattedValues.category || !formattedValues.value) continue;
+    productOptions.push(formattedValues);
+  }
+  return productOptions;
+};
+
 module.exports = {
   getAuthorsData,
   getBookFormatData,
+  getProductData,
 };

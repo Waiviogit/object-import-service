@@ -3,11 +3,16 @@ const { FEATURES_FILTER, OBJECT_FIELDS } = require('../../../../constants/object
 const { formField } = require('../../../helpers/formFieldHelper');
 
 module.exports = (object) => {
-  const datafinityFeatures = _.filter(object.features, (f) => !_.includes(FEATURES_FILTER, f.key));
+  const datafinityFeatures = _.chain(object.features)
+    .filter(
+      (f) => !_.includes(FEATURES_FILTER, f.key) && f.value.length === 1,
+    )
+    .take(20)
+    .value();
+
   if (_.isEmpty(datafinityFeatures)) return;
   const fields = [];
   for (const feature of datafinityFeatures) {
-    if (feature.value.length > 1) continue;
     fields.push(formField({
       fieldName: OBJECT_FIELDS.FEATURES,
       locale: object.locale,

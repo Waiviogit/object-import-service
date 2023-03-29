@@ -12,6 +12,8 @@ exports.WHITE_LIST = [
   'thapelo05',
   'davep96',
   'campzone',
+  'dataoperator',
+  'dataoperator2',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
