@@ -165,7 +165,7 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
 
 const productOptions = async (object, allFields) => {
   const fields = [];
-  if (object.asins) {
+  if (object.asins && !object.dontFetchAmazonOptions) {
     const amazonOptions = await getProductData(`https://www.amazon.com/dp/${object.asins}`);
     if (!_.isEmpty(amazonOptions)) {
       for (const amazonOption of amazonOptions) {

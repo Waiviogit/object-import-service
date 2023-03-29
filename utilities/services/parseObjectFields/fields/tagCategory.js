@@ -71,12 +71,16 @@ const createWaivioTags = async (object, allFields) => {
   for (const tag of object.waivio_tags) {
     const { key = '', value = '' } = tag;
     if (!key || !value) continue;
+    const tagCategory = _.find([...allFields, ...categoryFields],
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === key);
+
     itemFields.push(formField({
       fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
       locale: object.locale,
       user: object.user,
       body: value,
       tagCategory: key,
+      ...(tagCategory && { id: tagCategory.id }),
     }));
   }
 

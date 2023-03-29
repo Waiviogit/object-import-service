@@ -135,7 +135,7 @@ const prepareObjectForImport = async (datafinityObject) => {
 
 const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
   const field = datafinityObject.fields[0];
-  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
+  if (field.name === OBJECT_FIELDS.CATEGORY_ITEM && !field.id) {
     const existingCategory = _.find(wobject.fields,
       (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory);
     if (existingCategory) {
