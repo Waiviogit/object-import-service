@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "node ./bin/service.js"
+    "start": "node --max-old-space-size=400 ./bin/service.js"
   },
   "dependencies": {
     "@hiveio/dhive": "^1.2.3",
