@@ -48,16 +48,20 @@ const checkForDuplicates = async (urls = []) => {
 };
 
 module.exports = async (object) => {
-  const images = await checkForDuplicates(
-    _.uniq(_.concat(object.primaryImageURLs, object.imageURLs)),
-  );
+  const imagesWithOkResolution = [];
+  for (const element of _.uniq(_.concat(object.primaryImageURLs, object.imageURLs))) {
+    const validImage = await isProperResolution(element);
+    if (!validImage) continue;
+    imagesWithOkResolution.push(element);
+  }
+  if (_.isEmpty(imagesWithOkResolution)) return;
+
+  const images = await checkForDuplicates(imagesWithOkResolution);
   if (_.isEmpty(images)) return;
   const fields = [];
   let sliceStart = 1;
 
   for (const [index, image] of images.entries()) {
-    const validImage = await isProperResolution(image);
-    if (!validImage) continue;
     const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.CONTAIN);
     if (error) continue;
 
@@ -76,8 +80,6 @@ module.exports = async (object) => {
   if (_.isEmpty(imagesForGallery)) return fields;
 
   for (const imagesForGalleryElement of imagesForGallery) {
-    const validImage = await isProperResolution(imagesForGalleryElement);
-    if (!validImage) continue;
     const httpsStart = /^https:/.test(imagesForGalleryElement);
     if (!httpsStart) continue;
 
