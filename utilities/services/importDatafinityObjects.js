@@ -145,15 +145,15 @@ const startObjectImport = async ({
     ...(createdId && { _id: createdId }),
   });
 
+  if (!datafinityObject && importId) {
+    await finishImport({ importId, user });
+    return;
+  }
+
   if (authorPermlink) {
     await updateImportedObjectsList({
       datafinityObject, user, authorPermlink,
     });
-  }
-
-  if (!datafinityObject && importId) {
-    await finishImport({ importId, user });
-    return;
   }
 
   if (error || !datafinityObject) {
