@@ -34,3 +34,7 @@ exports.minVotingPowerSchema = Joi.object().keys({
 exports.getPowerSchema = Joi.object().keys({
   user: Joi.string().required(),
 });
+
+exports.getAsinsSchema = Joi.object().keys({
+  uri: Joi.string().uri().required(),
+});

@@ -37,6 +37,7 @@
     "nlpcloud": "^1.0.39",
     "node-html-parser": "^6.1.4",
     "openai": "^3.2.1",
+    "puppeteer": "^19.8.2",
     "redis": "^2.8.0",
     "rsmq": "^0.10.0",
     "sc2-sdk": "^2.0.1",
