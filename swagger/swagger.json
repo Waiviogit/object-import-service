@@ -288,6 +288,49 @@
           }
         }
       }
+    },
+    "/import-objects-service/amazon-asins": {
+      "post": {
+        "tags": [
+          "import"
+        ],
+        "summary": "get asins query by uri",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "params",
+            "description": "get asins query by uri",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
     }
   },
   "definitions": {
