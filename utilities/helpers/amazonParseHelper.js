@@ -201,7 +201,9 @@ const formatAsins = (array) => array.map((item) => `asins:${item}`).join(' OR ')
 const parseAmazonPageLinks = async (url) => {
   let browser;
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     const page = await browser.newPage();
 
     // Navigate to a specific URL
