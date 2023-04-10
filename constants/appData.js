@@ -34,7 +34,7 @@ const OBJECT_BOT_ROLE = {
 
 const DEFAULT_VOTE_POWER_IMPORT = 3000;
 
-const ONE_PERCENT_VOTE_RECOVERY = (60 * 60 * 24) / 20;
+const ONE_PERCENT_VOTE_RECOVERY = Math.round((60 * 60 * 24) / 20);
 
 module.exports = {
   appData,
