@@ -375,12 +375,34 @@ const createObject = async (datafinityObject) => {
   await updateDatafinityObject(obj, datafinityObject);
 };
 
+const createReversedJSONStringArray = (input) => {
+  const jsonObject = parseJson(input, null);
+  if (!jsonObject) return [input];
+  const reversedJsonObject = {};
+
+  const keys = Object.keys(jsonObject).reverse();
+  for (const key of keys) {
+    reversedJsonObject[key] = jsonObject[key];
+  }
+
+  return [input, JSON.stringify(reversedJsonObject)];
+};
+
 const getWobjectByKeys = async (datafinityObject) => {
   const fields = _.filter(datafinityObject.fields,
     (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID], f.name));
   for (const field of fields) {
+    const keyIds = createReversedJSONStringArray(field.body);
+
     const { result, error } = await Wobj.findOne({
-      filter: { fields: { $elemMatch: { name: field.name, body: field.body } } },
+      filter: {
+        fields: {
+          $elemMatch: {
+            name: field.name,
+            body: { $in: keyIds },
+          },
+        },
+      },
     });
     if (error) {
       console.error(error.message);
