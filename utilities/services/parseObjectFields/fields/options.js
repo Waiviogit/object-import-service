@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { getBookFormatData, getProductData } = require('../../../helpers/amazonParseHelper');
+const { getProductData } = require('../../../helpers/amazonParseHelper');
 const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
@@ -89,30 +89,6 @@ const getProductColor = (object, allFields, lastDateSeen) => {
   }
 };
 
-const formFormats = (uniqFormats, obj) => {
-  const fields = [];
-
-  const skipFormats = ['paperbackpaperback', 'hardcoverhardcover'];
-
-  for (let count = 0; count < uniqFormats.length; count++) {
-    if (_.includes(skipFormats, uniqFormats[count])) continue;
-
-    fields.push(formField({
-      fieldName: OBJECT_FIELDS.OPTIONS,
-      locale: obj.locale,
-      user: obj.user,
-      body: JSON.stringify({
-        category: OPTIONS_CATEGORY.FORMAT,
-        value: uniqFormats[count],
-        position: count,
-        //  image: obj.imageURLs[count],
-      }),
-    }));
-  }
-
-  return fields;
-};
-
 const getEmptyOptionsSet = async ({ allFields, object }) => {
   const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
   const groupIdFields = _.filter(allFields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
@@ -163,27 +139,33 @@ const getEmptyOptionsSet = async ({ allFields, object }) => {
   });
 };
 
+const scrapAmazonOptions = async ({ object, allFields }) => {
+  const fields = [];
+  const amazonOptions = await getProductData(`https://www.amazon.com/dp/${object.asins}`);
+  if (_.isEmpty(amazonOptions)) return fields;
+
+  for (const amazonOption of amazonOptions) {
+    const { category, value } = amazonOption;
+    const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        category,
+        value,
+        ...(avatarField && category === OPTIONS_CATEGORY.COLOR && { image: avatarField.body }),
+      }),
+    }));
+  }
+  return fields;
+};
+
 const productOptions = async (object, allFields) => {
   const fields = [];
   if (object.asins && !object.dontFetchAmazonOptions) {
-    const amazonOptions = await getProductData(`https://www.amazon.com/dp/${object.asins}`);
-    if (!_.isEmpty(amazonOptions)) {
-      for (const amazonOption of amazonOptions) {
-        const { category, value } = amazonOption;
-        const avatarField = _.find(allFields, (f) => f.name === OBJECT_FIELDS.AVATAR);
-        fields.push(formField({
-          fieldName: OBJECT_FIELDS.OPTIONS,
-          locale: object.locale,
-          user: object.user,
-          body: JSON.stringify({
-            category,
-            value,
-            ...(avatarField && category === OPTIONS_CATEGORY.COLOR && { image: avatarField.body }),
-          }),
-        }));
-      }
-      return fields;
-    }
+    const amazonFields = await scrapAmazonOptions({ object, allFields });
+    if (!_.isEmpty(amazonFields)) return amazonFields;
   }
 
   const lastDateSeen = _.maxBy(_.get(object, 'prices'), (p) => _.get(p, 'dateSeen[0]'));
@@ -244,42 +226,29 @@ const productOptions = async (object, allFields) => {
   return fields;
 };
 
-const bookOptions = async (obj) => {
+const bookOptions = async (obj, allFields) => {
+  if (obj.asins && !obj.dontFetchAmazonOptions) {
+    const amazonFields = await scrapAmazonOptions({ object: obj, allFields });
+    if (!_.isEmpty(amazonFields)) return amazonFields;
+  }
   const formats = _.find(obj.features, (el) => el.key.toLowerCase().includes('format'));
 
   if (formats) {
-    const uniqFormats = _.uniq(formats.value);
-    const formatsDatafinity = formFormats(uniqFormats, obj);
+    const uniqFormats = _.filter(
+      _.uniq(formats.value),
+      (f) => !_.includes(['paperbackpaperback', 'hardcoverhardcover'], f),
+    );
 
-    if (formatsDatafinity.length) {
-      return formatsDatafinity;
-    }
+    return formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        category: OPTIONS_CATEGORY.FORMAT,
+        value: uniqFormats[0] || 'paperback',
+      }),
+    });
   }
-
-  const merchant = 'amazon';
-  const priceDataWithUrl = _.find(obj.prices, (el) => el.merchant.includes(merchant));
-  if (!priceDataWithUrl) {
-    // todo
-    return;
-  }
-  const url = _.find(priceDataWithUrl.sourceURLs, (el) => el.includes(merchant));
-  if (!url) {
-    // todo
-    return;
-  }
-  const scrapedFormats = await getBookFormatData(url);
-
-  if (!scrapedFormats.length) {
-    return;
-  }
-
-  const formatsAmazon = formFormats(scrapedFormats, obj);
-
-  if (!formatsAmazon.length) {
-    return;
-  }
-
-  return formatsAmazon;
 };
 
 module.exports = async (obj, allFields) => {
