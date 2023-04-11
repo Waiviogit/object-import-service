@@ -7,13 +7,13 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const gptCreateCompletion = async ({ instruction = '', text = '' }) => {
+const gptCreateCompletion = async ({ content = '' }) => {
   try {
     const response = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [{
         role: 'user',
-        content: `${instruction} ${text}`,
+        content,
       }],
     }, {
       timeout: 60000,
@@ -27,13 +27,22 @@ const gptCreateCompletion = async ({ instruction = '', text = '' }) => {
 
 const makeDescription = async (description = '') => {
   const { result, error } = await gptCreateCompletion({
-    instruction: 'Create description for product max 3 paragraph from following text:',
-    text: description,
+    content: `Create description for product max 3 paragraph from following text: ${description}`,
   });
+  if (error) return '';
+  return result;
+};
+
+const makeAuthorDescription = async ({ author = '', book = '' }) => {
+  const { result, error } = await gptCreateCompletion({
+    content: `tell me more about ${author}, the author of ${book}`,
+  });
+
   if (error) return '';
   return result;
 };
 
 module.exports = {
   makeDescription,
+  makeAuthorDescription,
 };

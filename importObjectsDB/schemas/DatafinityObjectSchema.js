@@ -26,11 +26,13 @@ const DatafinityObjectSchema = new Schema({
         id: String,
         asin: String,
         connectedObject: Boolean,
+        bookName: String,
       },
     ],
     default: [],
   },
   datafinityObject: Boolean,
+  useGPT: Boolean,
 }, {
   timestamps: true,
   versionKey: false,

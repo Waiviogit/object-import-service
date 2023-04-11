@@ -41,7 +41,11 @@ module.exports = async (object) => {
         user: object.user,
         locale: object.locale,
       }),
-      ...(connectedObject && { asin: author.asin, connectedObject }),
+      ...(connectedObject && {
+        asin: author.asin,
+        connectedObject,
+        bookName: object.name,
+      }),
     });
   }
   if (fields.length) return fields;

@@ -22,6 +22,7 @@ const {
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 const { redisGetter } = require('../redis');
+const { makeAuthorDescription } = require('./gptService');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
@@ -228,6 +229,22 @@ const createPersonFromAuthors = async ({ datafinityObject, field }) => {
     body: productIdBody,
     locale: datafinityObject.locale,
   }));
+
+  // description chat gpt
+  if (field.bookName && datafinityObject.useGPT) {
+    const description = await makeAuthorDescription({
+      author: fieldBody.name, book: field.bookName,
+    });
+
+    if (description) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: datafinityObject.user,
+        body: description,
+        locale: datafinityObject.locale,
+      }));
+    }
+  }
 
   const object = {
     user: datafinityObject.user,
