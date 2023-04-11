@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 const { parse } = require('node-html-parser');
 const _ = require('lodash');
 const { capitalizeEachWord } = require('./importDatafinityHelper');
+const { AMAZON_HOST } = require('../../constants/requestsConstants');
 
 const SELECTOR = {
   BOOK_PAGE: '.author, .notFaded',
@@ -18,8 +19,6 @@ const SELECTOR = {
 const REF = {
   AUTHOR: 'field-author=',
 };
-
-const AMAZON_HOST = 'https://www.amazon.com';
 
 const getPage = async (url) => {
   try {

@@ -2,6 +2,7 @@ const _ = require('lodash');
 const { FEATURES_KEYS, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { getAuthorsData } = require('../../../helpers/amazonParseHelper');
+const { AMAZON_HOST } = require('../../../../constants/requestsConstants');
 
 module.exports = async (object) => {
   const fields = [];
@@ -25,11 +26,12 @@ module.exports = async (object) => {
     if (fields.length) return fields;
     return;
   }
-  const url = _.find(_.get(priceDataWithUrl, 'sourceURLs'), (el) => el.includes(merchant));
+  let url = _.find(_.get(priceDataWithUrl, 'sourceURLs'), (el) => el.includes(merchant));
   if (!url) {
-    // todo
-    return;
+    if (!object.asins) return;
+    url = `${AMAZON_HOST}/dp/${object.asins}`;
   }
+
   const authorsData = await getAuthorsData(url);
 
   for (const author of authorsData) {

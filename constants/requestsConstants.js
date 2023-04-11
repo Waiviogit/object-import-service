@@ -20,3 +20,5 @@ exports.NODE_URLS = [
   'https://api.hive.blog',
   'https://api.openhive.network',
 ];
+
+exports.AMAZON_HOST = 'https://www.amazon.com';
