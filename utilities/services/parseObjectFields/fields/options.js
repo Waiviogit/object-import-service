@@ -236,7 +236,7 @@ const bookOptions = async (obj, allFields) => {
   if (formats) {
     const uniqFormats = _.filter(
       _.uniq(formats.value),
-      (f) => !_.includes(['paperbackpaperback', 'hardcoverhardcover'], f),
+      (f) => !_.includes(['paperbackpaperback', 'hardcoverhardcover'], f.toLocaleLowerCase()),
     );
 
     return formField({
