@@ -7,6 +7,8 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+const GPT_CRAFTED = '\n\nCrafted by ChatGPT';
+
 const gptCreateCompletion = async ({ content = '' }) => {
   try {
     const response = await openai.createChatCompletion({
@@ -29,8 +31,8 @@ const makeDescription = async (description = '') => {
   const { result, error } = await gptCreateCompletion({
     content: `Create description for product max 3 paragraph from following text: ${description}`,
   });
-  if (error) return '';
-  return result;
+  if (!result || error) return '';
+  return `${result}${GPT_CRAFTED}`;
 };
 
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
@@ -38,8 +40,8 @@ const makeAuthorDescription = async ({ author = '', book = '' }) => {
     content: `tell me more about ${author}, the author of ${book}`,
   });
 
-  if (error) return '';
-  return result;
+  if (!result || error) return '';
+  return `${result}${GPT_CRAFTED}`;
 };
 
 module.exports = {
