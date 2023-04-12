@@ -159,10 +159,33 @@ const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
   }
 };
 
+const createReversedJSONStringArray = (input) => {
+  const jsonObject = parseJson(input, null);
+  if (!jsonObject) return [input];
+  const reversedJsonObject = {};
+
+  const keys = Object.keys(jsonObject).reverse();
+  for (const key of keys) {
+    reversedJsonObject[key] = jsonObject[key];
+  }
+
+  return [input, JSON.stringify(reversedJsonObject)];
+};
+
 const validateSameFields = ({ fieldData, wobject }) => {
   const setUniqFields = ['name', 'body', 'locale'];
-
   const foundedFields = _.map(wobject.fields, (field) => _.pick(field, setUniqFields));
+
+  if (fieldData.name === OBJECT_FIELDS.PRODUCT_ID) {
+    let same;
+    for (const body of createReversedJSONStringArray(fieldData.body)) {
+      const newField = { ...fieldData, body };
+      same = foundedFields.find((field) => _.isEqual(field, _.pick(newField, setUniqFields)));
+      if (same) return !!same;
+    }
+    return !!same;
+  }
+
   const result = foundedFields.find((field) => _.isEqual(field, _.pick(fieldData, setUniqFields)));
   return !!result;
 };
@@ -203,4 +226,5 @@ module.exports = {
   getVoteCostInitial,
   capitalizeEachWord,
   checkObjectExist,
+  createReversedJSONStringArray,
 };

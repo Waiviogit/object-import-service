@@ -18,6 +18,7 @@ const {
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
+  createReversedJSONStringArray,
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
@@ -390,19 +391,6 @@ const createObject = async (datafinityObject) => {
 
   await addWobject({ wobject: obj, existObjType: objType, addData: false });
   await updateDatafinityObject(obj, datafinityObject);
-};
-
-const createReversedJSONStringArray = (input) => {
-  const jsonObject = parseJson(input, null);
-  if (!jsonObject) return [input];
-  const reversedJsonObject = {};
-
-  const keys = Object.keys(jsonObject).reverse();
-  for (const key of keys) {
-    reversedJsonObject[key] = jsonObject[key];
-  }
-
-  return [input, JSON.stringify(reversedJsonObject)];
 };
 
 const getWobjectByKeys = async (datafinityObject) => {
