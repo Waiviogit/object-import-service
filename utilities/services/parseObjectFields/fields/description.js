@@ -1,7 +1,8 @@
 const _ = require('lodash');
-const { FEATURES_KEYS, OBJECT_FIELDS } = require('../../../../constants/objectTypes');
+const { FEATURES_KEYS, OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
-const { makeDescription } = require('../../gptService');
+const { makeDescription, makeBookDescription } = require('../../gptService');
+const { parseJson } = require('../../../helpers/jsonHelper');
 
 const getBodyFromFeatures = (object) => {
   const features = _.find(object.features, (f) => f.key === FEATURES_KEYS.PRODUCT_FEATURES);
@@ -28,24 +29,7 @@ const getBodyFromDescriptions = (object, notGpt = true) => {
   return '';
 };
 
-module.exports = async (object) => {
-  if (object.useGPT) {
-    const featuresBody = getBodyFromFeatures(object);
-    const descriptionBody = getBodyFromDescriptions(object, false);
-    const reqBody = featuresBody.length > 1000 ? featuresBody : `${featuresBody}.${descriptionBody}`.slice(0, 5000);
-    if (reqBody) {
-      const gptDescription = await makeDescription(reqBody);
-      if (gptDescription) {
-        return formField({
-          fieldName: OBJECT_FIELDS.DESCRIPTION,
-          user: object.user,
-          body: gptDescription,
-          locale: object.locale,
-        });
-      }
-    }
-  }
-
+const getDescriptionFromDatafinity = (object) => {
   if (!object.descriptions || !Array.isArray(object.descriptions)) {
     const body = getBodyFromFeatures(object);
     if (body) {
@@ -68,4 +52,50 @@ module.exports = async (object) => {
       locale: object.locale,
     });
   }
+};
+
+const getDescriptionFromBook = async ({ object, allFields = [] }) => {
+  if (object.useGPT) {
+    const book = object.name;
+    const author = allFields
+      .filter((f) => f.name === OBJECT_FIELDS.AUTHORS)
+      .map((f) => {
+        const parsedBody = parseJson(f.body, null);
+        return _.get(parsedBody, 'name');
+      }).filter((f) => !!f).join(', ');
+    const gptDescription = await makeBookDescription({ author, book });
+    if (gptDescription) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: object.user,
+        body: gptDescription,
+        locale: object.locale,
+      });
+    }
+  }
+  return getDescriptionFromDatafinity(object);
+};
+
+module.exports = async (object, allFields) => {
+  if (object.object_type === OBJECT_TYPES.BOOK) {
+    return getDescriptionFromBook({ object, allFields });
+  }
+  if (object.useGPT) {
+    const featuresBody = getBodyFromFeatures(object);
+    const descriptionBody = getBodyFromDescriptions(object, false);
+    const reqBody = featuresBody.length > 1000 ? featuresBody : `${featuresBody}.${descriptionBody}`.slice(0, 5000);
+    if (reqBody) {
+      const gptDescription = await makeDescription(reqBody);
+      if (gptDescription) {
+        return formField({
+          fieldName: OBJECT_FIELDS.DESCRIPTION,
+          user: object.user,
+          body: gptDescription,
+          locale: object.locale,
+        });
+      }
+    }
+  }
+
+  return getDescriptionFromDatafinity(object);
 };

@@ -16,7 +16,7 @@ const findTopLvlCategory = async (object) => {
   }
 };
 
-module.exports = async (object) => {
+module.exports = async (object, allFields) => {
   const fields = [];
   if (!object.categories) return;
 
@@ -32,7 +32,8 @@ module.exports = async (object) => {
   if (object.object_type === OBJECT_TYPES.BOOK) {
     categories = _.filter(categories, (c) => c.toLowerCase() !== 'book');
     const booksCategory = _.find(categories, (c) => c.toLowerCase() === 'books');
-    if (!booksCategory) {
+    const booksDepartment = _.find(allFields, (f) => f.body === 'Books' && f.name === OBJECT_FIELDS.DEPARTMENTS);
+    if (!booksCategory && !booksDepartment) {
       categories.pop();
       fields.push(formField({
         fieldName: OBJECT_FIELDS.DEPARTMENTS,

@@ -44,7 +44,17 @@ const makeAuthorDescription = async ({ author = '', book = '' }) => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const makeBookDescription = async ({ author = '', book = '' }) => {
+  const { result, error } = await gptCreateCompletion({
+    content: `tell me more about book ${book}, by ${author}`,
+  });
+
+  if (!result || error) return '';
+  return `${result}${GPT_CRAFTED}`;
+};
+
 module.exports = {
   makeDescription,
   makeAuthorDescription,
+  makeBookDescription,
 };

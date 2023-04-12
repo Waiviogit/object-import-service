@@ -57,7 +57,7 @@ const getAverageRc = async () => {
   return Math.round(sum / filteredRates.length);
 };
 
-const checkBots = new CronJob('0 */5 * * * *', async () => {
+const checkBots = new CronJob('0 */1 * * * *', async () => {
   const rc = await getAverageRc();
   const { result: queueLength = 0 } = await redisGetter.getQueueLength();
 
