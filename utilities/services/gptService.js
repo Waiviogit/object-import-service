@@ -9,6 +9,8 @@ const openai = new OpenAIApi(configuration);
 
 const GPT_CRAFTED = '\n\nCrafted by ChatGPT';
 
+const checkForPositiveAnswer = (answer = '') => answer.toLowerCase().includes('yes');
+
 const gptCreateCompletion = async ({ content = '' }) => {
   try {
     const response = await openai.createChatCompletion({
@@ -36,6 +38,13 @@ const makeDescription = async (description = '') => {
 };
 
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
+  const { result: firstResponse, error: answerError } = await gptCreateCompletion({
+    content: `do you have any information about ${author}, the author of ${book}, answer only yes or no`,
+  });
+  if (answerError) return '';
+  const positiveAnswer = checkForPositiveAnswer(firstResponse);
+  if (!positiveAnswer) return '';
+
   const { result, error } = await gptCreateCompletion({
     content: `tell me more about ${author}, the author of ${book}`,
   });
@@ -45,6 +54,13 @@ const makeAuthorDescription = async ({ author = '', book = '' }) => {
 };
 
 const makeBookDescription = async ({ author = '', book = '' }) => {
+  const { result: firstResponse, error: answerError } = await gptCreateCompletion({
+    content: `do you have any information about book ${book}, by ${author}, answer only yes or no`,
+  });
+  if (answerError) return '';
+  const positiveAnswer = checkForPositiveAnswer(firstResponse);
+  if (!positiveAnswer) return '';
+
   const { result, error } = await gptCreateCompletion({
     content: `tell me more about book ${book}, by ${author}`,
   });
