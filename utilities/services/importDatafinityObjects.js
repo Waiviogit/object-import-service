@@ -24,6 +24,7 @@ const { validateImportToRun } = require('../helpers/importDatafinityValidationHe
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 const { redisGetter } = require('../redis');
 const { makeAuthorDescription } = require('./gptService');
+const { sendUpdateImportForUser } = require('./socketClient');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
@@ -54,6 +55,7 @@ const saveObjects = async ({
         },
       },
     });
+    await sendUpdateImportForUser({ account: user });
   }
 
   emitStart({
@@ -149,6 +151,7 @@ const startObjectImport = async ({
 
   if (!datafinityObject && importId) {
     await finishImport({ importId, user });
+    await sendUpdateImportForUser({ account: user });
     return;
   }
 
@@ -170,6 +173,7 @@ const startObjectImport = async ({
 
   if (createNew) {
     await createObject(datafinityObject);
+    await sendUpdateImportForUser({ account: user });
     // trigger new import from parser
   } else if (authorPermlink || datafinityObject.author_permlink) {
     const { wobject, error: dbError } = await Wobj.getOne({
@@ -198,6 +202,7 @@ const startObjectImport = async ({
     });
     if (!updatedObj) return;
     if (processErr) return;
+    await sendUpdateImportForUser({ account: user });
     await new Promise((resolve) => setTimeout(resolve, 4000));
 
     emitStart({
