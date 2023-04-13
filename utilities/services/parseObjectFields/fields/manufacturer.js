@@ -24,7 +24,7 @@ module.exports = async (object, allFields) => {
   }
 
   const brand = _.find(allFields, (f) => f.name === OBJECT_FIELDS.BRAND);
-  const parsedBrand = parseJson(brand.body, null);
+  const parsedBrand = parseJson(brand?.body, null);
   if (parsedBrand?.name === object.manufacturer) return;
 
   return formField({

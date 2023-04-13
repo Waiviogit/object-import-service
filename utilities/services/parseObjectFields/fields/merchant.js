@@ -28,8 +28,8 @@ module.exports = async (object, allFields) => {
 
   const brand = _.find(allFields, (f) => f.name === OBJECT_FIELDS.BRAND);
   const manufacturer = _.find(allFields, (f) => f.name === OBJECT_FIELDS.MANUFACTURER);
-  const parsedBrand = parseJson(brand.body, null);
-  const parsedManufacturer = parseJson(manufacturer.body, null);
+  const parsedBrand = parseJson(brand?.body, null);
+  const parsedManufacturer = parseJson(manufacturer?.body, null);
 
   if (
     parsedBrand?.name === merchantDatafinitiy.name
