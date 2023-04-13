@@ -6,6 +6,7 @@ const { redisGetter, redisSetter } = require('../redis');
 
 const SEND_UPDATE_MAX_TIME_MS = 2000;
 const UPDATE_IMPORT_TIME_KEY = 'updateImportTime';
+const UPDATE_IMPORT_TIME_EXPIRE = 30;
 const METHOD_UPDATE_IMPORT = 'updateImport';
 
 const { API_KEY = '' } = process.env;
@@ -54,6 +55,10 @@ const setLastDate = async ({ account }) => {
   await redisSetter.set({
     key: `${UPDATE_IMPORT_TIME_KEY}:${account}`,
     value,
+  });
+  await redisSetter.expire({
+    key: `${UPDATE_IMPORT_TIME_KEY}:${account}`,
+    ttl: UPDATE_IMPORT_TIME_EXPIRE,
   });
 };
 
