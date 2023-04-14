@@ -7,7 +7,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const GPT_CRAFTED = '\n\nCrafted by ChatGPT';
+const GPT_CRAFTED = ' Description by ChatGPT.';
 
 const checkForPositiveAnswer = (answer = '') => answer.toLowerCase().includes('yes');
 
