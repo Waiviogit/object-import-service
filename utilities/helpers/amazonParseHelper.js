@@ -226,15 +226,16 @@ const parseAmazonPageLinks = async (url) => {
     });
 
     const links = await page.$$eval('a', (anchors) => anchors.map((anchor) => anchor.href));
+    const asins = await page.$$eval('li', (listItems) => listItems.map((li) => li.getAttribute('data-asin')));
     await browser.close();
 
-    return links;
+    return { links, asins: _.compact(asins) };
   } catch (error) {
     console.error('Error while parsing Amazon page links:', error);
     if (browser) {
       await browser.close();
     }
-    return [];
+    return { links: [], asins: [] };
   }
 };
 

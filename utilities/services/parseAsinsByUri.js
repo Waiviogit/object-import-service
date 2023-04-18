@@ -16,13 +16,14 @@ const getNotPublishedAsins = async ({ asins }) => {
 };
 
 const parseAsinsByUri = async ({ uri }) => {
-  const amazonLinks = await parseAmazonPageLinks(uri);
-  const asins = extractASINs(amazonLinks);
+  const { links, asins } = await parseAmazonPageLinks(uri);
+  const asinsFromLinks = extractASINs(links);
+  const allAsins = [...new Set([...asins, ...asinsFromLinks])];
 
-  const notPublishedAsins = await getNotPublishedAsins({ asins });
+  const notPublishedAsins = await getNotPublishedAsins({ asins: allAsins });
 
   return {
-    result: formatAsins(asins),
+    result: formatAsins(allAsins),
     notPublished: formatAsins(notPublishedAsins),
   };
 };
