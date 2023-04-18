@@ -4,6 +4,7 @@ const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTy
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
 const { OPTIONS_CATEGORY } = require('../../../../constants/fieldParseData');
+const { shortestString } = require('../../../helpers/importDatafinityHelper');
 
 const getProductColor = (object, allFields, lastDateSeen) => {
   const lastDateSeenColor = _.get(lastDateSeen, 'color', '');
@@ -239,13 +240,15 @@ const bookOptions = async (obj, allFields) => {
       (f) => !_.includes(['paperbackpaperback', 'hardcoverhardcover'], f.toLocaleLowerCase()),
     );
 
+    const value = shortestString(uniqFormats) || 'paperback';
+
     return formField({
       fieldName: OBJECT_FIELDS.OPTIONS,
       locale: obj.locale,
       user: obj.user,
       body: JSON.stringify({
         category: OPTIONS_CATEGORY.FORMAT,
-        value: uniqFormats[0] || 'paperback',
+        value,
       }),
     });
   }

@@ -242,6 +242,16 @@ const checkObjectExist = async ({ authorPermlink, type }) => {
   return !!result;
 };
 
+const shortestString = (arr = []) => {
+  let shortest = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i].length < shortest.length) {
+      shortest = arr[i];
+    }
+  }
+  return shortest;
+};
+
 module.exports = {
   filterImportObjects,
   getVoteCost,
@@ -257,4 +267,5 @@ module.exports = {
   createReversedJSONStringArray,
   createAsinVariations,
   checkObjectExistsByBodyArray,
+  shortestString,
 };

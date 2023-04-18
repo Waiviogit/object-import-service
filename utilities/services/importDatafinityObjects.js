@@ -9,7 +9,7 @@ const {
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
   filterImportObjects,
@@ -18,7 +18,7 @@ const {
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
-  createReversedJSONStringArray,
+  createReversedJSONStringArray, createAsinVariations,
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
@@ -399,10 +399,16 @@ const createObject = async (datafinityObject) => {
 };
 
 const getWobjectByKeys = async (datafinityObject) => {
-  const fields = _.filter(datafinityObject.fields,
-    (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID], f.name));
+  const fields = _.filter(
+    datafinityObject.fields,
+    (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID], f.name),
+  );
   for (const field of fields) {
-    const keyIds = createReversedJSONStringArray(field.body);
+    const parsedBody = parseJson(field.body, null);
+
+    const keyIds = AMAZON_ASINS.includes(_.get(parsedBody, 'productIdType'))
+      ? createAsinVariations(parsedBody.productId)
+      : createReversedJSONStringArray(field.body);
 
     const { result, error } = await Wobj.findOne({
       filter: {
@@ -416,11 +422,11 @@ const getWobjectByKeys = async (datafinityObject) => {
     });
     if (error) {
       console.error(error.message);
-
-      return;
+      continue;
     }
-
-    return result;
+    if (result) {
+      return result;
+    }
   }
 };
 
