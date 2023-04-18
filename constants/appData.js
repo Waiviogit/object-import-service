@@ -32,6 +32,30 @@ const OBJECT_BOT_ROLE = {
   SERVICE_BOT: 'serviceBot',
 };
 
+const AMAZON_ASINS = [
+  'amazon.com',
+  'amazon.ca',
+  'amazon.com.mx',
+  'amazon.com.br',
+  'amazon.co.uk',
+  'amazon.fr',
+  'amazon.it',
+  'amazon.es',
+  'amazon.de',
+  'amazon.nl',
+  'amazon.se',
+  'amazon.pl',
+  'amazon.in',
+  'amazon.ae',
+  'amazon.sa',
+  'amazon.sg',
+  'amazon.co.jp',
+  'amazon.com.au',
+  'asin',
+  'asins',
+  'isbn-10',
+];
+
 const DEFAULT_VOTE_POWER_IMPORT = 3000;
 
 const ONE_PERCENT_VOTE_RECOVERY = Math.round((60 * 60 * 24) / 20);
@@ -68,4 +92,5 @@ module.exports = {
   IMPORT_GLOBAL_SETTINGS,
   OBJECT_BOT_ROLE,
   notificationsApi: notificationsApi[process.env.NODE_ENV || 'development'],
+  AMAZON_ASINS,
 };

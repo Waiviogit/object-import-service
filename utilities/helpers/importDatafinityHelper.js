@@ -7,6 +7,7 @@ const { generateUniquePermlink } = require('./permlinkGenerator');
 const { addField } = require('../services/importObjectsService');
 const { formField } = require('./formFieldHelper');
 const { Wobj } = require('../../models');
+const { AMAZON_ASINS } = require('../../constants/appData');
 
 const getVoteCost = (account) => {
   if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
@@ -136,8 +137,10 @@ const prepareObjectForImport = async (datafinityObject) => {
 const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
   const field = datafinityObject.fields[0];
   if (field.name === OBJECT_FIELDS.CATEGORY_ITEM && !field.id) {
-    const existingCategory = _.find(wobject.fields,
-      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory);
+    const existingCategory = _.find(
+      wobject.fields,
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === field.tagCategory,
+    );
     if (existingCategory) {
       field.id = existingCategory.id;
       return;
@@ -170,6 +173,31 @@ const createReversedJSONStringArray = (input) => {
   }
 
   return [input, JSON.stringify(reversedJsonObject)];
+};
+
+const createAsinVariations = (asin) => {
+  const result = [];
+  for (const asinName of AMAZON_ASINS) {
+    result.push(JSON.stringify({ productIdType: asinName, productId: asin }));
+    result.push(JSON.stringify({ productId: asin, productIdType: asinName }));
+  }
+  return result;
+};
+
+const checkObjectExistsByBodyArray = async ({ bodyArr = [], fieldName = '' }) => {
+  const { result, error } = await Wobj.findOne({
+    filter: {
+      fields: {
+        $elemMatch: {
+          name: fieldName,
+          body: { $in: bodyArr },
+        },
+      },
+    },
+  });
+  if (error) return false;
+
+  return !!result;
 };
 
 const validateSameFields = ({ fieldData, wobject }) => {
@@ -227,4 +255,6 @@ module.exports = {
   capitalizeEachWord,
   checkObjectExist,
   createReversedJSONStringArray,
+  createAsinVariations,
+  checkObjectExistsByBodyArray,
 };
