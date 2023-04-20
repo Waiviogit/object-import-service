@@ -62,8 +62,8 @@ const ONE_PERCENT_VOTE_RECOVERY = Math.round((60 * 60 * 24) / 20);
 
 const notificationsApi = {
   production: {
-    HOST: 'https://waiviodev.com',
-    WS: 'wss://waiviodev.com',
+    HOST: 'https://www.waivio.com',
+    WS: 'wss://www.waivio.com',
     BASE_URL: '/notifications-api',
     SET_NOTIFICATION: '/set',
     STATUS: ['relisted', 'nsfw', 'unavailable'],
