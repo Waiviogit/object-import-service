@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { FEATURES_KEYS, OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
-const { makeDescription, makeBookDescription } = require('../../gptService');
+const { makeDescription, makeBookDescription, makeProductDescription } = require('../../gptService');
 const { parseJson } = require('../../../helpers/jsonHelper');
 
 const getBodyFromFeatures = (object) => {
@@ -81,10 +81,20 @@ module.exports = async (object, allFields) => {
     return getDescriptionFromBook({ object, allFields });
   }
   if (object.useGPT) {
+    const gptDbAnswer = await makeProductDescription(object.name);
+    if (gptDbAnswer) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: object.user,
+        body: gptDbAnswer,
+        locale: object.locale,
+      });
+    }
+
     const featuresBody = getBodyFromFeatures(object);
     const descriptionBody = getBodyFromDescriptions(object, false);
     const reqBody = featuresBody.length > 1000 ? featuresBody : `${featuresBody}.${descriptionBody}`.slice(0, 5000);
-    if (reqBody) {
+    if (featuresBody || descriptionBody) {
       const gptDescription = await makeDescription(reqBody);
       if (gptDescription) {
         return formField({

@@ -37,6 +37,21 @@ const makeDescription = async (description = '') => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const makeProductDescription = async (product = '') => {
+  const { result: firstResponse, error: answerError } = await gptCreateCompletion({
+    content: `do you have any information about product ${product}, answer only yes or no`,
+  });
+  if (answerError) return '';
+  const positiveAnswer = checkForPositiveAnswer(firstResponse);
+  if (!positiveAnswer) return '';
+
+  const { result, error } = await gptCreateCompletion({
+    content: `tell me more about ${product}`,
+  });
+  if (!result || error) return '';
+  return `${result}${GPT_CRAFTED}`;
+};
+
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
   const { result: firstResponse, error: answerError } = await gptCreateCompletion({
     content: `do you have any information about ${author}, the author of ${book}, answer only yes or no`,
@@ -73,4 +88,5 @@ module.exports = {
   makeDescription,
   makeAuthorDescription,
   makeBookDescription,
+  makeProductDescription,
 };
