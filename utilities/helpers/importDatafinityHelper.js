@@ -58,7 +58,7 @@ const groupByAsins = (products, objectType) => {
         }
         latest.features.push(parentAsin);
       }
-      uniqueProducts.push(latest);
+      uniqueProducts.push(latest || grouped[groupedKey][0]);
       continue;
     }
     uniqueProducts.push(grouped[groupedKey][0]);
