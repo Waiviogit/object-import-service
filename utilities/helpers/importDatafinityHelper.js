@@ -39,7 +39,7 @@ const groupByAsins = (products, objectType) => {
     if (grouped[groupedKey].length > 1) {
       const latest = _.maxBy(grouped[groupedKey], 'dateUpdated');
       let parentAsin = _.find(
-        latest.features,
+        latest?.features,
         (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
       );
       if (parentAsin) {
@@ -48,7 +48,7 @@ const groupByAsins = (products, objectType) => {
       }
       for (const element of grouped[groupedKey]) {
         parentAsin = _.find(
-          element.features,
+          element?.features,
           (f) => _.includes(PARENT_ASIN_FIELDS, f.key),
         );
         if (!parentAsin) continue;
