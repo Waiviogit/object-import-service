@@ -203,7 +203,6 @@ const startObjectImport = async ({
     if (!updatedObj) return;
     if (processErr) return;
     await sendUpdateImportForUser({ account: user });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
 
     emitStart({
       user: datafinityObject.user,
@@ -356,6 +355,7 @@ const processField = async ({ datafinityObject, wobject, user }) => {
         },
       },
     });
+    await new Promise((resolve) => setTimeout(resolve, 4000));
   }
   if (sameField) console.error(`same field ${JSON.stringify(datafinityObject.fields[0])}`);
 
