@@ -89,4 +89,5 @@ module.exports = {
   makeAuthorDescription,
   makeBookDescription,
   makeProductDescription,
+  gptCreateCompletion,
 };

@@ -7,6 +7,7 @@ const { routes } = require('./routes');
 const startup = require('./utilities/helpers/startupHelper');
 require('./utilities/redis/subscriber/subscriber');
 require('./jobs');
+require('./utilities/services/telegramBot/chatBot');
 const swaggerDocument = require('./swagger');
 
 dotenv.config();
