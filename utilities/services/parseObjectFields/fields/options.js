@@ -4,7 +4,7 @@ const { SIZE_POSITION, OBJECT_FIELDS } = require('../../../../constants/objectTy
 const { formField } = require('../../../helpers/formFieldHelper');
 const { DatafinityObject } = require('../../../../models');
 const { OPTIONS_CATEGORY } = require('../../../../constants/fieldParseData');
-const { shortestString } = require('../../../helpers/importDatafinityHelper');
+const { shortestString, isValidHttpUrl, capitalizeEachWord } = require('../../../helpers/importDatafinityHelper');
 
 const getProductColor = (object, allFields, lastDateSeen) => {
   const lastDateSeenColor = _.get(lastDateSeen, 'color', '');
@@ -254,7 +254,37 @@ const bookOptions = async (obj, allFields) => {
   }
 };
 
+const waivioOptions = (obj) => {
+  if (!Array.isArray(obj.waivio_options)) return;
+  const fields = [];
+
+  for (const option of obj.waivio_options) {
+    const {
+      category, value, position = '', image = '',
+    } = option;
+    if (!category || !value) continue;
+
+    const validUrl = isValidHttpUrl(image);
+
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.OPTIONS,
+      locale: obj.locale,
+      user: obj.user,
+      body: JSON.stringify({
+        category: capitalizeEachWord(category.trim()),
+        value: value.trim(),
+        ...(validUrl && { image: image.trim() }),
+        ...(position && { position: position.trim() }),
+      }),
+    }));
+  }
+
+  return fields;
+};
+
 module.exports = async (obj, allFields) => {
+  if (obj.waivio_options) return waivioOptions(obj);
+
   const optionsHandler = {
     book: bookOptions,
     product: productOptions,

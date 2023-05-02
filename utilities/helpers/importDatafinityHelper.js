@@ -252,6 +252,16 @@ const shortestString = (arr = []) => {
   return shortest;
 };
 
+const isValidHttpUrl = (string) => {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (error) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
+};
+
 module.exports = {
   filterImportObjects,
   getVoteCost,
@@ -268,4 +278,5 @@ module.exports = {
   createAsinVariations,
   checkObjectExistsByBodyArray,
   shortestString,
+  isValidHttpUrl,
 };
