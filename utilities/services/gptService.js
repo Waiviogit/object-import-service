@@ -1,11 +1,18 @@
 const { Configuration, OpenAIApi } = require('openai');
 const _ = require('lodash');
 
-const configuration = new Configuration({
+const configurationImport = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   organization: process.env.OPENAI_API_ORG,
 });
-const openai = new OpenAIApi(configuration);
+
+const configurationBot = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY_BOT,
+  organization: process.env.OPENAI_API_ORG,
+});
+
+const openai = new OpenAIApi(configurationImport);
+const openaiBot = new OpenAIApi(configurationBot);
 
 const GPT_CRAFTED = ' Description by ChatGPT.';
 
@@ -14,6 +21,24 @@ const checkForPositiveAnswer = (answer = '') => answer.toLowerCase().includes('y
 const gptCreateCompletion = async ({ content = '' }) => {
   try {
     const response = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: [{
+        role: 'user',
+        content,
+      }],
+    }, {
+      timeout: 60000,
+    });
+    const result = _.get(response, 'data.choices[0].message.content', '');
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const gptCreateCompletionBot = async ({ content = '' }) => {
+  try {
+    const response = await openaiBot.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [{
         role: 'user',
@@ -90,4 +115,5 @@ module.exports = {
   makeBookDescription,
   makeProductDescription,
   gptCreateCompletion,
+  gptCreateCompletionBot,
 };

@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { gptCreateCompletion } = require('../gptService');
+const { gptCreateCompletionBot } = require('../gptService');
 
 const token = process.env.CHAT_BOT_TOKEN;
 
@@ -20,7 +20,7 @@ const handleMessage = async (msg) => {
   if (from?.is_bot) return;
   const chatId = chat.id;
 
-  const { result: message, error } = await gptCreateCompletion({ content: text });
+  const { result: message, error } = await gptCreateCompletionBot({ content: text });
   if (error) return sendMessage({ chatId, message: error.message });
 
   await sendMessage({ chatId, message });
