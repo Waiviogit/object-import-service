@@ -19,6 +19,25 @@ const getVoteCostInitial = (account) => {
   return VOTE_COST.INITIAL;
 };
 
+const checkBookInProduct = (products) => {
+  let book = false;
+
+  for (const product of products) {
+    const bookInTaxonomy = _.some(product?.taxonomy ?? [], (c) => c.toLocaleLowerCase().includes('book'));
+    if (bookInTaxonomy) {
+      book = true;
+      break;
+    }
+    const bookInCategories = _.some(product?.categories ?? [], (c) => c.toLocaleLowerCase().includes('book'));
+    if (bookInCategories) {
+      book = true;
+      break;
+    }
+  }
+
+  return book;
+};
+
 const groupByAsins = (products, objectType) => {
   const uniqueProducts = [];
 
@@ -27,6 +46,18 @@ const groupByAsins = (products, objectType) => {
       products,
       (p) => _.some(p.categories, (c) => c.toLocaleLowerCase().includes('book')),
     );
+  }
+
+  if (objectType === OBJECT_TYPES.PRODUCT) {
+    const book = checkBookInProduct(products);
+    if (book) {
+      return {
+        error: {
+          status: 422,
+          message: 'It looks like you are trying to import books with type product',
+        },
+      };
+    }
   }
 
   const grouped = _.groupBy(products, 'asins');
@@ -63,26 +94,30 @@ const groupByAsins = (products, objectType) => {
     }
     uniqueProducts.push(grouped[groupedKey][0]);
   }
-  return uniqueProducts;
+  return { uniqueProducts };
 };
 
-const filterImportRestaurants = (restaurants) => _.reduce(restaurants, (acc, el) => {
-  const someRestaurants = _.some(el.categories, (category) => category.toLocaleLowerCase().includes('restaurant'));
-  if (!someRestaurants) return acc;
-  if (el.isClosed === 'true') return acc;
-  const duplicate = _.find(
-    acc,
-    (exist) => el.name === exist.name
-          && el.address === exist.address
-          && el.city === exist.city,
-  );
-  if (duplicate) {
-    duplicate.ids ? duplicate.ids.push(el.id) : duplicate.ids = [el.id, duplicate.id];
+const filterImportRestaurants = (restaurants) => {
+  const uniqueProducts = _.reduce(restaurants, (acc, el) => {
+    const someRestaurants = _.some(el.categories, (category) => category.toLocaleLowerCase().includes('restaurant'));
+    if (!someRestaurants) return acc;
+    if (el.isClosed === 'true') return acc;
+    const duplicate = _.find(
+      acc,
+      (exist) => el.name === exist.name
+            && el.address === exist.address
+            && el.city === exist.city,
+    );
+    if (duplicate) {
+      duplicate.ids ? duplicate.ids.push(el.id) : duplicate.ids = [el.id, duplicate.id];
+      return acc;
+    }
+    acc.push(el);
     return acc;
-  }
-  acc.push(el);
-  return acc;
-}, []);
+  }, []);
+
+  return { uniqueProducts };
+};
 
 const filterImportObjects = ({
   products, objectType,
@@ -91,7 +126,7 @@ const filterImportObjects = ({
     restaurant: filterImportRestaurants,
     book: groupByAsins,
     product: groupByAsins,
-    default: () => products,
+    default: () => ({ uniqueProducts: products }),
   };
   return (filters[objectType] || filters.default)(products, objectType);
 };

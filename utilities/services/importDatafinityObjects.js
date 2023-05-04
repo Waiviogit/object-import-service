@@ -87,7 +87,8 @@ const importObjects = async ({
     return { error: new Error('products not found') };
   }
   const importId = uuid.v4();
-  const uniqueProducts = filterImportObjects({ products, objectType });
+  const { uniqueProducts, error: filterError } = filterImportObjects({ products, objectType });
+  if (filterError) return { error: filterError };
   if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
   const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
