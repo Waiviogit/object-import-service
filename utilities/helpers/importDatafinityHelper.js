@@ -23,18 +23,20 @@ const checkBookInProduct = (products) => {
   let book = false;
 
   for (const product of products) {
+    if (product?.categories) {
+      const bookInCategories = _.some(product?.categories ?? [], (c) => c.toLocaleLowerCase().includes('book'));
+      if (bookInCategories) {
+        book = true;
+        break;
+      }
+      continue;
+    }
     const bookInTaxonomy = _.some(product?.taxonomy ?? [], (c) => c.toLocaleLowerCase().includes('book'));
     if (bookInTaxonomy) {
       book = true;
       break;
     }
-    const bookInCategories = _.some(product?.categories ?? [], (c) => c.toLocaleLowerCase().includes('book'));
-    if (bookInCategories) {
-      book = true;
-      break;
-    }
   }
-
   return book;
 };
 
