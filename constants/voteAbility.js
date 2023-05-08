@@ -15,6 +15,7 @@ exports.WHITE_LIST = [
   'dataoperator',
   'dataoperator2',
   'ogarces',
+  'glasscity',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
