@@ -42,6 +42,7 @@ const checkBookInProduct = (products) => {
 
 const groupByAsins = (products, objectType) => {
   const uniqueProducts = [];
+  let error;
 
   if (objectType === OBJECT_TYPES.BOOK) {
     products = _.filter(
@@ -53,11 +54,9 @@ const groupByAsins = (products, objectType) => {
   if (objectType === OBJECT_TYPES.PRODUCT) {
     const book = checkBookInProduct(products);
     if (book) {
-      return {
-        error: {
-          status: 422,
-          message: 'It looks like you are trying to import books with type product',
-        },
+      error = {
+        status: 422,
+        message: 'It looks like you are trying to import books with type product',
       };
     }
   }
@@ -96,7 +95,7 @@ const groupByAsins = (products, objectType) => {
     }
     uniqueProducts.push(grouped[groupedKey][0]);
   }
-  return { uniqueProducts };
+  return { uniqueProducts, error };
 };
 
 const filterImportRestaurants = (restaurants) => {

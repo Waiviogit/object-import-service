@@ -79,7 +79,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale, translate, useGPT,
+  file, user, objectType, authority, locale, translate, useGPT, forceImport,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -88,7 +88,7 @@ const importObjects = async ({
   }
   const importId = uuid.v4();
   const { uniqueProducts, error: filterError } = filterImportObjects({ products, objectType });
-  if (filterError) return { error: filterError };
+  if (filterError && !forceImport) return { error: filterError };
   if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
   const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
