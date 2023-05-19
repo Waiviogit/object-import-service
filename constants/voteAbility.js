@@ -16,6 +16,10 @@ exports.WHITE_LIST = [
   'dataoperator2',
   'ogarces',
   'glasscity',
+  'gadgetcentral',
+  'techcity',
+  'thestandard',
+  'kingofreviews',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
