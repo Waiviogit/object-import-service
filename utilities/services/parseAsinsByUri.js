@@ -28,4 +28,7 @@ const parseAsinsByUri = async ({ uri }) => {
   };
 };
 
-module.exports = parseAsinsByUri;
+module.exports = {
+  parseAsinsByUri,
+  getNotPublishedAsins,
+};

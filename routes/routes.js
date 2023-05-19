@@ -29,5 +29,7 @@ objects.route('/import-products/power')
   .put(importWobjectsController.setVotingPower);
 objects.route('/amazon-asins')
   .post(importWobjectsController.getAmazonAsins);
+objects.route('/asins-not-published')
+  .post(importWobjectsController.getNotPublished);
 
 module.exports = routes;

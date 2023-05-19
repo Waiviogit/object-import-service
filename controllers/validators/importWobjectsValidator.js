@@ -39,3 +39,7 @@ exports.getPowerSchema = Joi.object().keys({
 exports.getAsinsSchema = Joi.object().keys({
   uri: Joi.string().uri().required(),
 });
+
+exports.getNotPublishedAsinsSchema = Joi.object().keys({
+  asins: Joi.array().items(Joi.string()),
+});
