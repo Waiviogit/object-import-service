@@ -18,7 +18,10 @@ const {
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
-  createReversedJSONStringArray, createAsinVariations,
+  createReversedJSONStringArray,
+  createAsinVariations,
+  getProductRating,
+  checkRatingFields,
 } = require('../helpers/importDatafinityHelper');
 const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
@@ -39,8 +42,8 @@ const saveObjects = async ({
       product.authority = authority;
     }
     product.useGPT = useGPT;
+    product.rating = getProductRating(product);
     product.fields = await parseFields(product);
-
     const save = needToSaveObject(product);
     if (!save) continue;
 
@@ -182,6 +185,11 @@ const startObjectImport = async ({
     });
 
     if (dbError) return;
+    // rating
+    await checkRatingFields({
+      dbObject: wobject,
+      dfObject: datafinityObject,
+    });
 
     if (!datafinityObject.fields.length) {
       await DatafinityObject.removeOne(datafinityObject._id);

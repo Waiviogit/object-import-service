@@ -33,6 +33,7 @@ const DatafinityObjectSchema = new Schema({
   },
   datafinityObject: Boolean,
   useGPT: Boolean,
+  rating: { type: Number, default: 0 },
 }, {
   timestamps: true,
   versionKey: false,

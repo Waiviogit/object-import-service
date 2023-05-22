@@ -6,8 +6,9 @@ const { parseJson } = require('./jsonHelper');
 const { generateUniquePermlink } = require('./permlinkGenerator');
 const { addField } = require('../services/importObjectsService');
 const { formField } = require('./formFieldHelper');
-const { Wobj } = require('../../models');
+const { Wobj, DatafinityObject } = require('../../models');
 const { AMAZON_ASINS } = require('../../constants/appData');
+const { broadcastJson } = require('../hiveApi/broadcastUtil');
 
 const getVoteCost = (account) => {
   if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
@@ -155,7 +156,9 @@ const needToSaveObject = (object) => {
 };
 
 const prepareObjectForImport = async (datafinityObject) => {
-  const permlink = datafinityObject.author_permlink ? datafinityObject.author_permlink : await generateUniquePermlink(datafinityObject.name);
+  const permlink = datafinityObject.author_permlink
+    ? datafinityObject.author_permlink
+    : await generateUniquePermlink(datafinityObject.name);
 
   return {
     object_type: datafinityObject.object_type,
@@ -298,6 +301,54 @@ const isValidHttpUrl = (string) => {
   return url.protocol === 'http:' || url.protocol === 'https:';
 };
 
+const getProductRating = (product) => {
+  const featuresRating = (product?.features ?? []).find((el) => el.key === 'Overall Rating');
+  if (featuresRating) {
+    return Math.round((_.sum((featuresRating?.value ?? []).map((el) => +el)) ?? 0
+        / (featuresRating?.value ?? []).length) * 2) || 0;
+  }
+  return Math.round((_.sumBy(product?.reviews, 'rating') ?? 0
+      / (product?.reviews ?? []).length) * 2) || 0;
+};
+
+const checkRatingFields = async ({ dbObject, dfObject }) => {
+  if (!dfObject.rating || dfObject.rating > 10) return;
+
+  const searchFields = {
+    [OBJECT_TYPES.PRODUCT]: 'Value',
+    [OBJECT_TYPES.BOOK]: 'Rating',
+    [OBJECT_TYPES.RESTAURANT]: 'Value',
+    default: 'Value',
+  };
+
+  const searchFieldBody = searchFields[dbObject.object_type] || searchFields.default;
+
+  const field = (dbObject?.fields ?? [])
+    .find((f) => f.name === OBJECT_FIELDS.RATING && f.body === searchFieldBody);
+  if (!field) return;
+  const alreadyVoted = (field?.rating_votes ?? []).find((v) => v.voter === dfObject.user);
+  if (alreadyVoted) return;
+  const json = JSON.stringify({
+    author: field.author,
+    permlink: field.permlink,
+    author_permlink: dbObject.author_permlink,
+    rate: dfObject.rating,
+  });
+
+  const { result, error } = await broadcastJson({
+    id: 'wobj_rating',
+    required_posting_auths: [dfObject.user],
+    json,
+    key: process.env.FIELD_VOTES_BOT_KEY,
+  });
+  if (error || !result) return;
+
+  await DatafinityObject.updateOne(
+    { _id: dfObject._id },
+    { rating: 0 },
+  );
+};
+
 module.exports = {
   filterImportObjects,
   getVoteCost,
@@ -315,4 +366,6 @@ module.exports = {
   checkObjectExistsByBodyArray,
   shortestString,
   isValidHttpUrl,
+  getProductRating,
+  checkRatingFields,
 };

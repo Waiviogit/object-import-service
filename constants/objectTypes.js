@@ -66,6 +66,7 @@ exports.OBJECT_FIELDS = {
   PRICE: 'price',
   DESCRIPTION: 'description',
   GROUP_ID: 'groupId',
+  RATING: 'rating',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
