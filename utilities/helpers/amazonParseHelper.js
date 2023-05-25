@@ -1,5 +1,4 @@
 const axios = require('axios');
-const puppeteer = require('puppeteer');
 const { parse } = require('node-html-parser');
 const _ = require('lodash');
 const { capitalizeEachWord } = require('./importDatafinityHelper');
@@ -185,65 +184,8 @@ const getProductData = async (url) => {
   return productOptions;
 };
 
-const extractASINs = (links) => {
-  const asins = links.map((link) => {
-    const match = link.match(/\/dp\/([A-Z0-9]+)/);
-    return match ? match[1] : null;
-  });
-
-  const filtered = asins.filter((asin) => asin !== null);
-  return [...new Set(filtered)];
-};
-
-const formatAsins = (array) => array.map((item) => `asins:${item}`).join(' OR ');
-
-const parseAmazonPageLinks = async (url) => {
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-    const page = await browser.newPage();
-
-    // Navigate to a specific URL
-    await page.goto(url, { waitUntil: 'networkidle2' });
-
-    // Scroll to the bottom of the page
-    await page.evaluate(async () => {
-      await new Promise((resolve) => {
-        const distance = 100;
-        const delay = 50;
-        const timer = setInterval(() => {
-          const scrollTop = window.scrollY;
-          window.scrollBy(0, distance);
-
-          if (scrollTop === window.scrollY) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, delay);
-      });
-    });
-
-    const links = await page.$$eval('a', (anchors) => anchors.map((anchor) => anchor.href));
-    const asins = await page.$$eval('li', (listItems) => listItems.map((li) => li.getAttribute('data-asin')));
-    await browser.close();
-
-    return { links, asins: _.compact(asins) };
-  } catch (error) {
-    console.error('Error while parsing Amazon page links:', error);
-    if (browser) {
-      await browser.close();
-    }
-    return { links: [], asins: [] };
-  }
-};
-
 module.exports = {
   getAuthorsData,
   getBookFormatData,
   getProductData,
-  parseAmazonPageLinks,
-  extractASINs,
-  formatAsins,
 };

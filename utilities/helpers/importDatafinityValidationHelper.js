@@ -26,13 +26,13 @@ const getVotingPower = async ({ account, amount }) => {
 
 const getTtlTime = async ({ votingPower, minVotingPower, account }) => {
   if (votingPower < minVotingPower) {
-    const diff = minVotingPower - votingPower;
+    const diff = (minVotingPower - votingPower) || 1;
     return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
   }
   const amount = await getMinAmountInWaiv(account);
   const neededPower = await getVotingPower({ account, amount });
   if (neededPower < votingPower) return ONE_PERCENT_VOTE_RECOVERY;
-  const diff = neededPower - votingPower;
+  const diff = (neededPower - votingPower) || 1;
   return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
 };
 

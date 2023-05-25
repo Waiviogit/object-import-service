@@ -229,6 +229,10 @@ exports.FEATURES_FILTER = [
   'Manufacturing Brand',
   'Tags',
   'Our Values',
+  'Overall Rating',
+  'Overall Rating Count',
+  'Rating (Quality)',
+  'Rating (Fit)',
 ];
 
 exports.FEATURES_KEYS = {

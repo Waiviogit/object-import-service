@@ -27,8 +27,6 @@ objects.route('/import-products/history')
 objects.route('/import-products/power')
   .get(importWobjectsController.getVotingPower)
   .put(importWobjectsController.setVotingPower);
-objects.route('/amazon-asins')
-  .post(importWobjectsController.getAmazonAsins);
 objects.route('/asins-not-published')
   .post(importWobjectsController.getNotPublished);
 

@@ -56,8 +56,8 @@ const groupByAsins = (products, objectType) => {
     const book = checkBookInProduct(products);
     if (book) {
       error = {
-        status: 422,
-        message: 'It looks like you are trying to import books with type product',
+        status: 425,
+        message: 'It looks like you are trying to import books with type product. Are you sure you want to continue with the import?',
       };
     }
   }

@@ -9,7 +9,7 @@ const { importAccountValidator } = require('../validators/accountValidator');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
 const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
-const { parseAsinsByUri, getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
+const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -171,18 +171,6 @@ const getVotingPower = async (req, res, next) => {
   res.status(200).json({ minVotingPower: DEFAULT_VOTE_POWER_IMPORT, user: value.user });
 };
 
-const getAmazonAsins = async (req, res, next) => {
-  const value = validators.validate(
-    req.body,
-    validators.importWobjects.getAsinsSchema,
-    next,
-  );
-  if (!value) return;
-
-  const result = await parseAsinsByUri(value);
-  res.status(200).json(result);
-};
-
 const getNotPublished = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -206,6 +194,5 @@ module.exports = {
   setVotingPower,
   getVotingPower,
   getImportHistory,
-  getAmazonAsins,
   getNotPublished,
 };
