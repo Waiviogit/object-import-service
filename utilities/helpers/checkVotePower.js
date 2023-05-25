@@ -23,5 +23,5 @@ exports.getMinAmountInWaiv = async (account) => {
   const numerator = WHITE_LIST.includes(account) ? VOTE_COST.FOR_WHITE_LIST : VOTE_COST.USUAL;
   const hiveCurrency = await redisGetter.getHashAll('current_price_info', lastBlockCLient);
   const pool = await getMarketPools({ query: { _id: VOTE_EVALUATION.DIESEL_POOL_ID }, method: 'findOne' });
-  return numerator / (hiveCurrency.price * pool.quotePrice);
+  return numerator / (hiveCurrency?.price * pool?.quotePrice);
 };

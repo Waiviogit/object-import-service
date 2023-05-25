@@ -10,9 +10,9 @@ const { getVotingPower } = require('../hiveEngineApi/commentsContract');
 exports.calculateHiveEngineVote = async ({
   symbol, account, poolId, weight, dieselPoolId,
 }) => {
-  const { rewardPool, pendingClaims } = await redisGetter
+  const smtPool = await redisGetter
     .getHashAll(`smt_pool:${symbol}`, lastBlockCLient);
-  const rewards = parseFloat(rewardPool) / parseFloat(pendingClaims);
+  const rewards = parseFloat(smtPool?.rewardPool) / parseFloat(smtPool?.pendingClaims);
 
   const requests = await Promise.all([
     commentContract.getVotingPower({ rewardPoolId: poolId, account }),
