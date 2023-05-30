@@ -22,7 +22,7 @@ const getBodyFromDescriptions = (object, notGpt = true) => {
     if (!content) continue;
     if (content.length > 5000) continue;
     if (content.length < 30) continue;
-    if (notGpt && content.includes('<')) continue;
+    if (notGpt && content.includes('</')) continue;
 
     return content;
   }

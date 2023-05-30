@@ -20,7 +20,7 @@ const loadImageByUrl = async (url, size) => {
       bodyFormData,
       {
         headers: bodyFormData.getHeaders(),
-        timeout: 5000,
+        timeout: 15000,
       },
     );
     const result = _.get(resp, 'data.image');
@@ -35,12 +35,15 @@ const loadImageByUrl = async (url, size) => {
 const checkForDuplicates = async (urls = []) => {
   try {
     const url = process.env.IMAGE_CHECK_URL || 'http://localhost:8022/images-hash-filter';
-    const response = await axios.post(url, {
-      urls,
-    },
-    {
-      timeout: 15000,
-    });
+    const response = await axios.post(
+      url,
+      {
+        urls,
+      },
+      {
+        timeout: 15000,
+      },
+    );
     return _.get(response, 'data.result');
   } catch (error) {
     return urls;
@@ -57,13 +60,30 @@ module.exports = async (object) => {
   if (_.isEmpty(imagesWithOkResolution)) return;
 
   const images = await checkForDuplicates(imagesWithOkResolution);
-  if (_.isEmpty(images)) return;
+  if (_.isEmpty(images)) {
+    images.push(...imagesWithOkResolution);
+  }
   const fields = [];
   let sliceStart = 1;
 
   for (const [index, image] of images.entries()) {
     const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.CONTAIN);
-    if (error) continue;
+    if (error) {
+      await new Promise((r) => setTimeout(r, 3000));
+      const { result: secondTry, error: secondErr } = await loadImageByUrl(
+        image,
+        IMAGE_SIZE.CONTAIN,
+      );
+      if (secondErr) continue;
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.AVATAR,
+        locale: object.locale,
+        user: object.user,
+        body: secondTry,
+      }));
+      sliceStart = index + 1;
+      break;
+    }
 
     fields.push(formField({
       fieldName: OBJECT_FIELDS.AVATAR,
