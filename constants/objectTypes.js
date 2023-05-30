@@ -27,6 +27,7 @@ exports.OBJECT_IDS = {
   WALMART_NUM: 'walmartNum',
   WALMART: 'walmart',
   TARGET: 'target',
+  MODEL_NUmber: 'modelNumber',
 };
 
 exports.AUTHORITY_FIELD_OPTIONS = {
