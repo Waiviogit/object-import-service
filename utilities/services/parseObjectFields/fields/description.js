@@ -18,7 +18,7 @@ const getBodyFromFeatures = (object) => {
 
 const getBodyFromDescriptions = (object, notGpt = true) => {
   for (const element of _.get(object, 'descriptions', [])) {
-    const content = _.get(element, 'value');
+    const content = typeof element === 'string' ? element : _.get(element, 'value');
     if (!content) continue;
     if (content.length > 5000) continue;
     if (content.length < 30) continue;
