@@ -307,6 +307,11 @@ const getProductRating = (product) => {
     return Math.round((_.sum((featuresRating?.value ?? []).map((el) => +el)) ?? 0
         / (featuresRating?.value ?? []).length) * 2) || 0;
   }
+  const averageRating = (product?.features ?? []).find((el) => el.key === 'Average Overall Rating');
+  if (averageRating) {
+    return Math.round((_.sum((averageRating?.value ?? []).map((el) => +el)) ?? 0
+        / (averageRating?.value ?? []).length) * 2) || 0;
+  }
   return Math.round((_.sumBy(product?.reviews, 'rating') ?? 0
       / (product?.reviews ?? []).length) * 2) || 0;
 };

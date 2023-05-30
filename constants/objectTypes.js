@@ -27,8 +27,9 @@ exports.OBJECT_IDS = {
   WALMART_NUM: 'walmartNum',
   WALMART: 'walmart',
   TARGET: 'target',
-  MODEL_NUmber: 'modelNumber',
 };
+
+exports.MODEL_NUMBER = 'Item model number';
 
 exports.AUTHORITY_FIELD_OPTIONS = {
   ADMINISTRATIVE: 'administrative',
@@ -234,6 +235,7 @@ exports.FEATURES_FILTER = [
   'Overall Rating Count',
   'Rating (Quality)',
   'Rating (Fit)',
+  'Average Overall Rating',
 ];
 
 exports.FEATURES_KEYS = {

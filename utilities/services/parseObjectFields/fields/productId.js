@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const {
-  OBJECT_IDS, OBJECT_FIELDS, DATAFINITY_KEY, DOMAINS,
+  OBJECT_IDS, OBJECT_FIELDS, DATAFINITY_KEY, DOMAINS, MODEL_NUMBER,
 } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 
@@ -67,6 +67,17 @@ module.exports = (object) => {
         }),
       }));
     }
+  }
+  if (object.modelNumber) {
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.PRODUCT_ID,
+      locale: object.locale,
+      user: object.user,
+      body: JSON.stringify({
+        productId: object.modelNumber,
+        productIdType: MODEL_NUMBER,
+      }),
+    }));
   }
 
   if (fields.length) {
