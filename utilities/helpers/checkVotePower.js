@@ -7,16 +7,19 @@ const { lastBlockCLient } = require('../redis/redis');
 const { getMarketPools } = require('../hiveEngineApi/marketPoolsContract');
 
 exports.checkVotePower = async (user, voteCost) => {
-  const { engineVotePrice } = await engineOperations.calculateHiveEngineVote({
+  const { engineVotePrice, error } = await engineOperations.calculateHiveEngineVote({
     symbol: VOTE_EVALUATION.TOKEN_SYMBOL,
     account: user,
     poolId: VOTE_EVALUATION.POOL_ID,
     dieselPoolId: VOTE_EVALUATION.DIESEL_POOL_ID,
     weight: VOTE_EVALUATION.WEIGHT,
   });
+  if (error) return { error };
 
-  return WHITE_LIST.includes(user) ? !new BigNumber(engineVotePrice).lt(VOTE_COST.FOR_WHITE_LIST)
+  const result = WHITE_LIST.includes(user)
+    ? !new BigNumber(engineVotePrice).lt(VOTE_COST.FOR_WHITE_LIST)
     : !new BigNumber(engineVotePrice).lt(voteCost);
+  return { result };
 };
 
 exports.getMinAmountInWaiv = async (account) => {

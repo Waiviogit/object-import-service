@@ -7,7 +7,10 @@ const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/a
 const { redisGetter } = require('../utilities/redis');
 
 const importAccountValidator = async (user, voteCost) => {
-  const abilityToVote = await checkVotePower(user, voteCost);
+  const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
+  if (engineError) {
+    return { result: false, error: { status: '409', message: 'Hive Engine facing problems. Please try again later.' } };
+  }
 
   if (!abilityToVote) {
     return { result: false, error: { status: '409', message: 'Not enough vote power' } };
