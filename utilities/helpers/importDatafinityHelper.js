@@ -9,6 +9,9 @@ const { formField } = require('./formFieldHelper');
 const { Wobj, DatafinityObject } = require('../../models');
 const { AMAZON_ASINS } = require('../../constants/appData');
 const { broadcastJson } = require('../hiveApi/broadcastUtil');
+const { GPT_CRAFTED } = require('../../constants/openai');
+
+const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
 
 const getVoteCost = (account) => {
   if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
@@ -239,22 +242,39 @@ const checkObjectExistsByBodyArray = async ({ bodyArr = [], fieldName = '' }) =>
   return !!result;
 };
 
-const validateSameFields = ({ fieldData, wobject }) => {
-  const setUniqFields = ['name', 'body', 'locale'];
-  const foundedFields = _.map(wobject.fields, (field) => _.pick(field, setUniqFields));
-
-  if (fieldData.name === OBJECT_FIELDS.PRODUCT_ID) {
-    let same;
-    for (const body of createReversedJSONStringArray(fieldData.body)) {
-      const newField = { ...fieldData, body };
-      same = foundedFields.find((field) => _.isEqual(field, _.pick(newField, setUniqFields)));
-      if (same) return !!same;
-    }
-    return !!same;
+const validateSameFieldsProductId = ({ fieldData, foundedFields }) => {
+  let same;
+  for (const body of createReversedJSONStringArray(fieldData.body)) {
+    const newField = { ...fieldData, body };
+    same = foundedFields.find((field) => _.isEqual(field, _.pick(newField, SET_UNIQ_FIELDS)));
+    if (same) return !!same;
   }
+  return !!same;
+};
 
-  const result = foundedFields.find((field) => _.isEqual(field, _.pick(fieldData, setUniqFields)));
-  return !!result;
+const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
+  const chatGptRegEx = new RegExp(GPT_CRAFTED);
+
+  const wroteByGpt = foundedFields
+    .find((f) => f.name === OBJECT_FIELDS.DESCRIPTION && chatGptRegEx.test(f.body));
+  if (wroteByGpt) return true;
+
+  return validateSameFieldDefault({ fieldData, foundedFields });
+};
+
+const validateSameFieldDefault = ({ fieldData, foundedFields }) => !!foundedFields
+  .find((field) => _.isEqual(field, _.pick(fieldData, SET_UNIQ_FIELDS)));
+
+const validateSameFields = ({ fieldData, wobject }) => {
+  const foundedFields = _.map(wobject.fields, (field) => _.pick(field, SET_UNIQ_FIELDS));
+  const validation = {
+    [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
+    [OBJECT_FIELDS.AVATAR]: () => !!foundedFields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
+    [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
+    default: validateSameFieldDefault,
+  };
+
+  return (validation[fieldData.name] || validation.default)({ fieldData, foundedFields });
 };
 
 const checkAddress = (object) => /[0-9]/.test(_.get(object, 'address', ''));

@@ -1,5 +1,6 @@
 const { Configuration, OpenAIApi } = require('openai');
 const _ = require('lodash');
+const { GPT_CRAFTED, QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
 
 const configurationImport = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -13,10 +14,6 @@ const configurationBot = new Configuration({
 
 const openai = new OpenAIApi(configurationImport);
 const openaiBot = new OpenAIApi(configurationBot);
-
-const GPT_CRAFTED = ' Description by ChatGPT.';
-const BASIC_PROMPT = 'provide me with some basic information in a clear and concise article-style format about';
-const QUESTION_PROMPT = 'do you have any information about';
 
 const checkForPositiveAnswer = (answer = '') => answer.toLowerCase().includes('yes');
 
