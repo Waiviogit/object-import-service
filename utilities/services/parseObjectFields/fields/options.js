@@ -283,7 +283,7 @@ const waivioOptions = (obj) => {
 };
 
 module.exports = async (obj, allFields) => {
-  if (obj.waivio_options) return waivioOptions(obj);
+  if (obj.waivio_options && obj.waivio_options.length) return waivioOptions(obj);
 
   const optionsHandler = {
     book: bookOptions,
