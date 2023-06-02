@@ -20,6 +20,7 @@ exports.WHITE_LIST = [
   'techcity',
   'thestandard',
   'kingofreviews',
+  'coffee.time',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
