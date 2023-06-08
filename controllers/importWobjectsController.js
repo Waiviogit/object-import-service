@@ -10,6 +10,7 @@ const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
 const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
 const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
+const { restGptQuery } = require('../utilities/services/gptService');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -183,6 +184,19 @@ const getNotPublished = async (req, res, next) => {
   res.status(200).json(result);
 };
 
+const gptQuery = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.gptQuerySchema,
+    next,
+  );
+  if (!value) return;
+
+  const { result, error } = await restGptQuery(value);
+  if (error) return next(error);
+  res.status(200).json({ result });
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -195,4 +209,5 @@ module.exports = {
   getVotingPower,
   getImportHistory,
   getNotPublished,
+  gptQuery,
 };

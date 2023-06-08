@@ -43,3 +43,7 @@ exports.getAsinsSchema = Joi.object().keys({
 exports.getNotPublishedAsinsSchema = Joi.object().keys({
   asins: Joi.array().items(Joi.string()),
 });
+
+exports.gptQuerySchema = Joi.object().keys({
+  query: Joi.string().required(),
+});

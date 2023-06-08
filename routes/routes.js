@@ -29,5 +29,7 @@ objects.route('/import-products/power')
   .put(importWobjectsController.setVotingPower);
 objects.route('/asins-not-published')
   .post(importWobjectsController.getNotPublished);
+objects.route('/gpt-query')
+  .post(importWobjectsController.gptQuery);
 
 module.exports = routes;

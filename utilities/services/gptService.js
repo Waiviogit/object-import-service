@@ -114,6 +114,8 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
+
 module.exports = {
   makeDescription,
   makeAuthorDescription,
@@ -121,4 +123,5 @@ module.exports = {
   makeProductDescription,
   gptCreateCompletion,
   gptCreateCompletionBot,
+  restGptQuery,
 };
