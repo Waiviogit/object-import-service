@@ -10,6 +10,7 @@ exports.importDatafinityObjectsSchema = Joi.object().keys({
   translate: Joi.boolean().default(false),
   useGPT: Joi.boolean().default(false),
   forceImport: Joi.boolean().default(false),
+  addDatafinityData: Joi.boolean().default(false),
 });
 
 exports.importStatisticsSchema = Joi.object().keys({

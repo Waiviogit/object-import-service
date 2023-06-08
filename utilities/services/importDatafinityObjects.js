@@ -28,6 +28,7 @@ const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 const { redisGetter } = require('../redis');
 const { makeAuthorDescription } = require('./gptService');
 const { sendUpdateImportForUser } = require('./socketClient');
+const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
@@ -82,7 +83,7 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale, translate, useGPT, forceImport,
+  file, user, objectType, authority, locale, translate, useGPT, forceImport, addDatafinityData,
 }) => {
   const products = bufferToArray(file.buffer);
 
@@ -97,6 +98,10 @@ const importObjects = async ({
   const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
 
   const status = recovering ? IMPORT_STATUS.WAITING_RECOVER : IMPORT_STATUS.ACTIVE;
+
+  if (addDatafinityData) {
+    await addDatafinityDataToProducts(uniqueProducts);
+  }
 
   await ImportStatusModel.create({
     importId,
