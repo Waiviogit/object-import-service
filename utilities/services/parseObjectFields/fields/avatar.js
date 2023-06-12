@@ -51,8 +51,32 @@ const checkForDuplicates = async (urls = []) => {
 };
 
 module.exports = async (object) => {
+  const fields = [];
+  let loadAvatar = true;
+  if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
+    const validImage = await isProperResolution(object.primaryImageURLs[0]);
+    if (validImage) {
+      const { result } = await loadImageByUrl(
+        object.primaryImageURLs[0],
+        IMAGE_SIZE.CONTAIN,
+      );
+      if (result) {
+        fields.push(formField({
+          fieldName: OBJECT_FIELDS.AVATAR,
+          locale: object.locale,
+          user: object.user,
+          body: result,
+        }));
+        loadAvatar = false;
+      }
+    }
+  }
+
   const imagesWithOkResolution = [];
-  for (const element of _.uniq(_.concat(object.primaryImageURLs, object.imageURLs))) {
+  const elementsToCheck = object.imageURLs;
+  if (loadAvatar) elementsToCheck.push(...object.primaryImageURLs);
+
+  for (const element of _.uniq(elementsToCheck)) {
     const validImage = await isProperResolution(element);
     if (!validImage) continue;
     imagesWithOkResolution.push(element);
@@ -63,10 +87,11 @@ module.exports = async (object) => {
   if (_.isEmpty(images)) {
     images.push(...imagesWithOkResolution);
   }
-  const fields = [];
+
   let sliceStart = 1;
 
   for (const [index, image] of images.entries()) {
+    if (!loadAvatar) break;
     const { result, error } = await loadImageByUrl(image, IMAGE_SIZE.CONTAIN);
     if (error) {
       await new Promise((r) => setTimeout(r, 3000));
