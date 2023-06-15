@@ -81,7 +81,7 @@ module.exports = async (object) => {
     if (!validImage) continue;
     imagesWithOkResolution.push(element);
   }
-  if (_.isEmpty(imagesWithOkResolution)) return;
+  if (_.isEmpty(imagesWithOkResolution)) return fields.length ? fields : null;
 
   const images = await checkForDuplicates(imagesWithOkResolution);
   if (_.isEmpty(images)) {
