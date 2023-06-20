@@ -10,7 +10,12 @@ const getStatistic = async ({ user, history = false }) => {
       status: {
         $in: history
           ? [IMPORT_STATUS.FINISHED, IMPORT_STATUS.DELETED]
-          : [IMPORT_STATUS.ACTIVE, IMPORT_STATUS.ON_HOLD, IMPORT_STATUS.WAITING_RECOVER],
+          : [
+            IMPORT_STATUS.ACTIVE,
+            IMPORT_STATUS.WAITING_RECOVER,
+            IMPORT_STATUS.PENDING,
+            IMPORT_STATUS.ON_HOLD,
+          ],
       },
     },
     options: {
@@ -33,10 +38,15 @@ const getStatistic = async ({ user, history = false }) => {
 const updateImport = async ({
   user, status, importId,
 }) => {
+  const pending = await redisGetter.get({ key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}` });
   const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
 
   if (recovering && status === IMPORT_STATUS.ACTIVE) {
     status = IMPORT_STATUS.WAITING_RECOVER;
+  }
+
+  if (pending && status === IMPORT_STATUS.ACTIVE) {
+    status = IMPORT_STATUS.PENDING;
   }
 
   const { result, error } = await ImportStatusModel.findOneAndUpdate({

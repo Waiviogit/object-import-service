@@ -9,6 +9,7 @@ const uploadPath = 'uploads/';
 const uploadName = 'wobjects.json';
 
 const IMPORT_STATUS = {
+  PENDING: 'pending',
   ACTIVE: 'active',
   ON_HOLD: 'onHold',
   FINISHED: 'finished',
@@ -20,6 +21,7 @@ const IMPORT_REDIS_KEYS = {
   CONTINUE: 'continue',
   MIN_POWER: 'min_power',
   STOP_FOR_RECOVER: 'stop_for_recover',
+  PENDING: 'pending',
 };
 
 const IMPORT_GLOBAL_SETTINGS = {
