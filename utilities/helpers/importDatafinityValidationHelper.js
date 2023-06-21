@@ -63,7 +63,6 @@ const checkImportActiveStatus = async (importId) => {
 const validateImportToRun = async ({ datafinityObject, user, authorPermlink }) => {
   const activeStatus = await checkImportActiveStatus(datafinityObject.importId);
   if (!activeStatus) return;
-
   const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
   const validVotePower = await votePowerValidation(
     { account: user, importId: datafinityObject.importId },
@@ -79,4 +78,5 @@ const validateImportToRun = async ({ datafinityObject, user, authorPermlink }) =
 
 module.exports = {
   validateImportToRun,
+  checkImportActiveStatus,
 };

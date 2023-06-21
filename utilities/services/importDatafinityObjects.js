@@ -23,9 +23,9 @@ const {
   getProductRating,
   checkRatingFields,
 } = require('../helpers/importDatafinityHelper');
-const { validateImportToRun } = require('../helpers/importDatafinityValidationHelper');
+const { validateImportToRun, checkImportActiveStatus } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
-const { redisGetter } = require('../redis');
+const { redisGetter, redisSetter } = require('../redis');
 const { makeAuthorDescription } = require('./gptService');
 const { sendUpdateImportForUser } = require('./socketClient');
 const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
@@ -33,6 +33,11 @@ const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
 }) => {
+  await redisSetter.set({
+    key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}`,
+    value: user,
+  });
+
   for (const product of products) {
     product.importId = importId;
     product.user = user;
@@ -61,6 +66,16 @@ const saveObjects = async ({
     });
     await sendUpdateImportForUser({ account: user });
   }
+
+  const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
+  const status = recovering ? IMPORT_STATUS.WAITING_RECOVER : IMPORT_STATUS.ACTIVE;
+
+  await redisSetter.delImportWobjData(`${IMPORT_REDIS_KEYS.PENDING}:${importId}`);
+
+  await ImportStatusModel.updateOne({
+    filter: { importId },
+    update: { status },
+  });
 
   emitStart({
     user,
@@ -95,10 +110,6 @@ const importObjects = async ({
   if (filterError && !forceImport) return { error: filterError };
   if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
 
-  const recovering = await redisGetter.get({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
-
-  const status = recovering ? IMPORT_STATUS.WAITING_RECOVER : IMPORT_STATUS.ACTIVE;
-
   if (addDatafinityData) {
     await addDatafinityDataToProducts(uniqueProducts);
   }
@@ -109,7 +120,7 @@ const importObjects = async ({
     objectsCount: 0,
     objectType,
     authority,
-    status,
+    status: IMPORT_STATUS.PENDING,
   });
 
   saveObjects({
@@ -151,6 +162,11 @@ const updateImportedObjectsList = async ({ datafinityObject, user, authorPermlin
 const startObjectImport = async ({
   user, authorPermlink = null, importId, createdId,
 }) => {
+  if (importId) {
+    const activeStatus = await checkImportActiveStatus(importId);
+    if (!activeStatus) return;
+  }
+
   const { datafinityObject, error } = await DatafinityObject.getOne({
     user,
     ...(importId && { importId }),
