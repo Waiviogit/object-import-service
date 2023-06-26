@@ -73,8 +73,9 @@ module.exports = async (object) => {
   }
 
   const imagesWithOkResolution = [];
-  const elementsToCheck = object.imageURLs;
+  const elementsToCheck = [];
   if (loadAvatar) elementsToCheck.push(...object.primaryImageURLs);
+  elementsToCheck.push(...object.imageURLs);
 
   for (const element of _.uniq(elementsToCheck)) {
     const validImage = await isProperResolution(element);
