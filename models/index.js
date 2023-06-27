@@ -5,4 +5,6 @@ module.exports = {
   ImportStatusModel: require('./ImportStatusModel'),
   DepartmentModel: require('./DepartmentModel'),
   AppModel: require('./AppModel'),
+  AuthorityStatusModel: require('./AuthorityStatusModel'),
+  AuthorityObjectModel: require('./AuthorityObjectModel'),
 };

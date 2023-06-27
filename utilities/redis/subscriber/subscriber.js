@@ -2,6 +2,7 @@ const redis = require('redis');
 const config = require('../../../config');
 const { startObjectImport } = require('../../services/importDatafinityObjects');
 const { IMPORT_REDIS_KEYS } = require('../../../constants/appData');
+const claimProcess = require('../../services/authority/claimProcess');
 
 const subscriber = redis.createClient({ db: config.redis.lastBlock });
 
@@ -28,6 +29,12 @@ const subscribeVoteRenew = async (channel, message) => {
         ...(commands[2] !== 'undefined' && { authorPermlink: commands[2] }),
       };
       await startObjectImport(params);
+      break;
+    case IMPORT_REDIS_KEYS.CONTINUE_AUTHORITY:
+      claimProcess({
+        user: commands[1],
+        importId: commands[2],
+      });
       break;
     default: break;
   }

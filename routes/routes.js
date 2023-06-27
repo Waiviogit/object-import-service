@@ -1,5 +1,5 @@
 const express = require('express');
-const { importWobjectsController } = require('../controllers');
+const { importWobjectsController, authorityController } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
 const routes = express.Router();
@@ -31,5 +31,18 @@ objects.route('/asins-not-published')
   .post(importWobjectsController.getNotPublished);
 objects.route('/gpt-query')
   .post(importWobjectsController.gptQuery);
+
+objects.route('/authority')
+  .post(authorityController.claimAuthority)
+  .get(authorityController.getImportStatistic)
+  .put(authorityController.changeImportDetails)
+  .delete(authorityController.deleteImport);
+objects.route('/authority/objects')
+  .post(authorityController.getObjectDetails);
+objects.route('/authority/power')
+  .get(authorityController.getVotingPower)
+  .put(authorityController.setVotingPower);
+objects.route('/authority/history')
+  .get(authorityController.getImportHistory);
 
 module.exports = routes;

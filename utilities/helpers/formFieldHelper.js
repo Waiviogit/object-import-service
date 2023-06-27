@@ -4,7 +4,7 @@ exports.formField = ({
   fieldName, user, body, categoryItem = false, id, locale, tagCategory,
 }) => ({
   weight: 1,
-  locale,
+  locale: locale || 'en-US',
   creator: user,
   permlink: permlinkGenerator(user),
   name: fieldName,
