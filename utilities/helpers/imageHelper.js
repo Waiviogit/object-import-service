@@ -50,7 +50,7 @@ const sizeOfReadImage = async ({ imageUrl, timeoutMs }) => {
 };
 
 const isProperResolution = async (imageUrl) => {
-  const minResolution = 250;
+  const minResolution = 200;
   const { result, error } = await sizeOfReadImage({ imageUrl, timeoutMs: 5000 });
   if (error) {
     return;
