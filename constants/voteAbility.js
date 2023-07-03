@@ -22,6 +22,7 @@ exports.WHITE_LIST = [
   'kingofreviews',
   'coffee.time',
   'fitness.gifts',
+  'coffeegifts',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
