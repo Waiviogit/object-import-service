@@ -72,6 +72,7 @@ const claimAuthority = async ({
     const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
     const { result: links, error } = await getListObjectsFromArr({ authorPermlinks });
     if (error) return { error };
+    links.push(object.author_permlink);
     const { result, error: createError } = await createClaimTask({
       links,
       user,
