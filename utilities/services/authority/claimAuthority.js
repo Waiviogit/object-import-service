@@ -16,7 +16,7 @@ const getListObjectsFromArr = async ({ authorPermlinks }) => {
 };
 
 const createClaimTask = async ({
-  links, user, authority,
+  links, user, authority, lists,
 }) => {
   const importId = uuid.v4();
 
@@ -34,6 +34,7 @@ const createClaimTask = async ({
     user,
     authority,
     objectsCount: links.length,
+    lists,
   });
   if (error) return { error };
   return { result: result.toObject() };
@@ -60,6 +61,7 @@ const claimAuthority = async ({
       links,
       user,
       authority,
+      lists: [object.author_permlink],
     });
     if (createError) return { error: createError };
     claimProcess({
@@ -77,6 +79,7 @@ const claimAuthority = async ({
       links,
       user,
       authority,
+      lists: authorPermlinks,
     });
     if (createError) return { error: createError };
     claimProcess({

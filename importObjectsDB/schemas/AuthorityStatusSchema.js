@@ -9,6 +9,7 @@ const AuthorityStatusSchema = new Schema({
   user: { type: String, required: true },
   importId: { type: String, required: true, index: true },
   objectsCount: { type: Number, required: true },
+  lists: { type: [String], default: [] },
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
