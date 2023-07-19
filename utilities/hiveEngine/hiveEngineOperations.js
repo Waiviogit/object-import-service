@@ -13,9 +13,8 @@ exports.calculateHiveEngineVote = async ({
   const smtPool = await redisGetter
     .getHashAll(`smt_pool:${symbol}`, lastBlockCLient);
   const rewards = parseFloat(smtPool?.rewardPool) / parseFloat(smtPool?.pendingClaims);
-
+  const votingPowers = await commentContract.getVotingPower({ rewardPoolId: poolId, account });
   const requests = await Promise.all([
-    commentContract.getVotingPower({ rewardPoolId: poolId, account }),
     marketPools.getMarketPools({ query: { _id: dieselPoolId } }),
     tokensContract.getTokenBalances({ query: { symbol, account }, hostUrl: HIVE_ENGINE_NODES[1] }),
     redisGetter.getHashAll('current_price_info', lastBlockCLient),
@@ -28,9 +27,15 @@ exports.calculateHiveEngineVote = async ({
       };
     }
   }
-  const [votingPowers, dieselPools, balances, hiveCurrency] = requests;
+  const [dieselPools, balances, hiveCurrency] = requests;
   const { stake, delegationsIn } = balances[0];
-  const { votingPower } = this.calculateMana(votingPowers[0]);
+  const { votingPower } = this.calculateMana(
+    votingPowers[0] || {
+      votingPower: VOTE_EVALUATION.WEIGHT,
+      downvotingPower: VOTE_EVALUATION.WEIGHT,
+      lastVoteTimestamp: Date.now(),
+    },
+  );
   const { quotePrice } = dieselPools[0];
 
   const finalRshares = parseFloat(stake) + parseFloat(delegationsIn);
