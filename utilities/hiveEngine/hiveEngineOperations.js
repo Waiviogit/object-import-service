@@ -77,5 +77,9 @@ exports.getVotingPowers = async ({ account }) => {
     rewardPoolId: VOTE_EVALUATION.POOL_ID,
     method: 'findOne',
   });
-  return this.calculateMana(powers);
+  return this.calculateMana(powers || {
+    votingPower: VOTE_EVALUATION.WEIGHT,
+    downvotingPower: VOTE_EVALUATION.WEIGHT,
+    lastVoteTimestamp: Date.now(),
+  });
 };
