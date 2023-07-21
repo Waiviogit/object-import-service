@@ -11,6 +11,7 @@ exports.OBJECT_TYPES = {
   PERSON: 'person',
   RESTAURANT: 'restaurant',
   PRODUCT: 'product',
+  LIST: 'list',
 };
 
 exports.DATAFINITY_IDS = 'keys';
@@ -69,6 +70,7 @@ exports.OBJECT_FIELDS = {
   DESCRIPTION: 'description',
   GROUP_ID: 'groupId',
   RATING: 'rating',
+  MENU_ITEM: 'menuItem',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {

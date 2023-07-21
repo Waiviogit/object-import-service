@@ -19,7 +19,9 @@ const IMPORT_STATUS = {
 
 const IMPORT_REDIS_KEYS = {
   CONTINUE: 'continue',
+  CONTINUE_AUTHORITY: 'continue_authority',
   MIN_POWER: 'min_power',
+  MIN_POWER_AUTHORITY: 'min_power_authority',
   STOP_FOR_RECOVER: 'stop_for_recover',
   PENDING: 'pending',
 };

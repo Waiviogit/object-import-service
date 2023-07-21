@@ -79,4 +79,5 @@ const validateImportToRun = async ({ datafinityObject, user, authorPermlink }) =
 module.exports = {
   validateImportToRun,
   checkImportActiveStatus,
+  getTtlTime,
 };

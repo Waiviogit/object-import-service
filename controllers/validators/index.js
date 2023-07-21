@@ -1,4 +1,5 @@
 exports.importWobjects = require('./importWobjectsValidator');
+exports.authority = require('./authorityValidator');
 
 exports.validate = (data, schema, next) => {
   const result = schema.validate(data, { abortEarly: false });

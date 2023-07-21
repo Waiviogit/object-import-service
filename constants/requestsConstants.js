@@ -22,3 +22,24 @@ exports.NODE_URLS = [
 ];
 
 exports.AMAZON_HOST = 'https://www.amazon.com';
+
+exports.WAIVIO_API = {
+  production: {
+    HOST: 'https://www.waivio.com',
+    BASE_URL: '/api',
+    WOBJECTS: '/wobjects',
+    LIST_ITEM_LINKS: '/list-item-links',
+  },
+  staging: {
+    HOST: 'https://waiviodev.com',
+    BASE_URL: '/api',
+    WOBJECTS: '/wobjects',
+    LIST_ITEM_LINKS: '/list-item-links',
+  },
+  development: {
+    HOST: 'http://localhost:3000',
+    BASE_URL: '/api',
+    WOBJECTS: '/wobjects',
+    LIST_ITEM_LINKS: '/list-item-links',
+  },
+};
