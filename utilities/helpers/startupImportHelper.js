@@ -13,8 +13,6 @@ module.exports = async () => {
     filter: { status: IMPORT_STATUS.ACTIVE },
   });
 
-  if (_.isEmpty(result)) return;
-
   for (const resultElement of result) {
     const { user, importId } = resultElement;
     await startObjectImport({ user, importId });

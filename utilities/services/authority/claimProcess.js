@@ -72,7 +72,14 @@ const claimProcess = async ({ user, importId }) => {
     return;
   }
 
-  const { wobject } = await Wobj.getOne({ author_permlink: nextObject.authorPermlink });
+  const { wobject, error } = await Wobj.getOne({ author_permlink: nextObject.authorPermlink });
+  if (error) {
+    await incrObjectsCount({
+      user, importId, authorPermlink: nextObject.authorPermlink,
+    });
+    claimProcess({ user, importId });
+    return;
+  }
   const authority = getAuthorityField({
     fields: wobject?.fields ?? [], user, authority: importStatus.authority,
   });
