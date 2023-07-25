@@ -5,10 +5,12 @@ const waivioApi = require('../../waivioApi');
 const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
 
-const getListObjectsFromArr = async ({ authorPermlinks }) => {
+const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
   for (const authorPermlink of authorPermlinks) {
-    const { result: listItems, error } = await waivioApi.getListItemLinks({ authorPermlink });
+    const { result: listItems, error } = await waivioApi.getListItemLinks({
+      authorPermlink, scanEmbedded,
+    });
     if (error) return { error };
     result.push(...listItems);
   }
@@ -47,7 +49,7 @@ const getListItemsFromMenu = ({ fields }) => fields
   .map((el) => el.linkToObject);
 
 const claimAuthority = async ({
-  user, authorPermlink, authority,
+  user, authorPermlink, authority, scanEmbedded,
 }) => {
   const { result: object } = await Wobj.findOne({
     filter: { author_permlink: authorPermlink },
@@ -55,7 +57,8 @@ const claimAuthority = async ({
   if (!object) return { error: { status: 404, message: 'Not Found' } };
 
   if (object.object_type === OBJECT_TYPES.LIST) {
-    const { result: links, error } = await waivioApi.getListItemLinks({ authorPermlink });
+    const { result: links, error } = await waivioApi
+      .getListItemLinks({ authorPermlink, scanEmbedded });
     if (error) return { error };
     const { result, error: createError } = await createClaimTask({
       links,
@@ -72,7 +75,7 @@ const claimAuthority = async ({
   }
   if (object.object_type === OBJECT_TYPES.BUSINESS) {
     const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
-    const { result: links, error } = await getListObjectsFromArr({ authorPermlinks });
+    const { result: links, error } = await getListObjectsFromArr({ authorPermlinks, scanEmbedded });
     if (error) return { error };
     links.push(object.author_permlink);
     const { result, error: createError } = await createClaimTask({

@@ -4,6 +4,7 @@ const { AUTHORITY_FIELD_OPTIONS } = require('../../constants/objectTypes');
 exports.authorityClaimSchema = Joi.object().keys({
   user: Joi.string().required(),
   authorPermlink: Joi.string().required(),
+  scanEmbedded: Joi.boolean().default(true),
   authority: Joi.string().valid(...Object.values(AUTHORITY_FIELD_OPTIONS))
     .default(AUTHORITY_FIELD_OPTIONS.ADMINISTRATIVE),
 
