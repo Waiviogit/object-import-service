@@ -24,6 +24,7 @@ exports.WHITE_LIST = [
   'fitness.gifts',
   'coffeegifts',
   'gmamba13',
+  'waivio.affiliate',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
