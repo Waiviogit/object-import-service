@@ -6,7 +6,9 @@ const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData
 const { redisGetter } = require('../../redis');
 const claimProcess = require('./claimProcess');
 
-const getStatistic = async ({ user, history = false }) => {
+const getStatistic = async ({
+  user, history = false, skip, limit,
+}) => {
   const { result, error } = await AuthorityStatusModel.find({
     filter: {
       user,
@@ -22,12 +24,16 @@ const getStatistic = async ({ user, history = false }) => {
       },
     },
     options: {
-      sort: { createdAt: -1 },
+      sort: history ? { createdAt: -1 } : { finishedAt: -1 },
+      skip,
+      limit,
     },
   });
   if (error) return { error };
 
-  return { result };
+  return {
+    result,
+  };
 };
 
 const getObjectDetails = async ({
