@@ -16,7 +16,7 @@ exports.importDatafinityObjectsSchema = Joi.object().keys({
 exports.importStatisticsSchema = Joi.object().keys({
   user: Joi.string().required(),
   skip: Joi.number().integer().min(0).default(0),
-  limit: Joi.number().integer().min(1).default(10),
+  limit: Joi.number().integer().min(1).default(200),
 });
 
 exports.importStatusSchema = Joi.object().keys({

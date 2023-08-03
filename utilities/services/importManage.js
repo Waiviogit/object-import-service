@@ -24,7 +24,7 @@ const getStatistic = async ({
     options: {
       sort: history ? { createdAt: -1 } : { finishedAt: -1 },
       skip,
-      limit: limit + 1,
+      limit,
     },
   });
   if (error) return { error };
@@ -38,8 +38,7 @@ const getStatistic = async ({
   }
 
   return {
-    result: _.take(result, limit),
-    hasMore: result.length > limit,
+    result,
   };
 };
 
