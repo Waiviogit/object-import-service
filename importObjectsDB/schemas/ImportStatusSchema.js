@@ -21,6 +21,8 @@ const ImportStatusSchema = new Schema({
 }, { timestamps: true, versionKey: false });
 
 ImportStatusSchema.index({ user: 1, importId: 1 }, { unique: true });
+ImportStatusSchema.index({ user: 1, status: 1, finishedAt: -1 });
+ImportStatusSchema.index({ user: 1, status: 1, createdAt: -1 });
 
 const ImportStatusModel = db.model('import_status', ImportStatusSchema);
 

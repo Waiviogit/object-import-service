@@ -1,9 +1,12 @@
+const _ = require('lodash');
 const { ImportStatusModel, DatafinityObject } = require('../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
 const { startObjectImport } = require('./importDatafinityObjects');
 const { redisGetter } = require('../redis');
 
-const getStatistic = async ({ user, history = false }) => {
+const getStatistic = async ({
+  user, history = false, skip, limit,
+}) => {
   const { result, error } = await ImportStatusModel.find({
     filter: {
       user,
@@ -19,7 +22,9 @@ const getStatistic = async ({ user, history = false }) => {
       },
     },
     options: {
-      sort: { createdAt: -1 },
+      sort: history ? { createdAt: -1 } : { finishedAt: -1 },
+      skip,
+      limit: limit + 1,
     },
   });
   if (error) return { error };
@@ -32,7 +37,10 @@ const getStatistic = async ({ user, history = false }) => {
     resultElement.objectsPosted = resultElement.objectsCount - counter;
   }
 
-  return { result };
+  return {
+    result: _.take(result, limit),
+    hasMore: result.length > limit,
+  };
 };
 
 const updateImport = async ({

@@ -75,9 +75,10 @@ const getImportHistory = async (req, res, next) => {
     next,
   );
   if (!value) return;
-  const { result, error } = await claimAuthorityManage.getStatistic({ ...value, history: true });
+  const { result, hasMore, error } = await claimAuthorityManage
+    .getStatistic({ ...value, history: true });
   if (error) return next(error);
-  res.status(200).json(result);
+  res.status(200).json({ result, hasMore });
 };
 const getImportStatistic = async (req, res, next) => {
   const value = validators.validate(
@@ -86,9 +87,9 @@ const getImportStatistic = async (req, res, next) => {
     next,
   );
   if (!value) return;
-  const { result, error } = await claimAuthorityManage.getStatistic(value);
+  const { result, hasMore, error } = await claimAuthorityManage.getStatistic(value);
   if (error) return next(error);
-  res.status(200).json(result);
+  res.status(200).json({ result, hasMore });
 };
 
 const getObjectDetails = async (req, res, next) => {

@@ -83,9 +83,9 @@ const getImportStatistic = async (req, res, next) => {
     next,
   );
   if (!value) return;
-  const { result, error } = await importManage.getStatistic(value);
+  const { result, hasMore, error } = await importManage.getStatistic(value);
   if (error) return next(error);
-  res.status(200).json(result);
+  res.status(200).json({ result, hasMore });
 };
 
 const getImportHistory = async (req, res, next) => {
@@ -95,9 +95,9 @@ const getImportHistory = async (req, res, next) => {
     next,
   );
   if (!value) return;
-  const { result, error } = await importManage.getStatistic({ ...value, history: true });
+  const { result, hasMore, error } = await importManage.getStatistic({ ...value, history: true });
   if (error) return next(error);
-  res.status(200).json(result);
+  res.status(200).json({ result, hasMore });
 };
 
 const changeImportDetails = async (req, res, next) => {

@@ -20,6 +20,8 @@ const AuthorityStatusSchema = new Schema({
 }, { timestamps: true, versionKey: false });
 
 AuthorityStatusSchema.index({ user: 1, importId: 1 }, { unique: true });
+AuthorityStatusSchema.index({ user: 1, status: 1, finishedAt: -1 });
+AuthorityStatusSchema.index({ user: 1, status: 1, createdAt: -1 });
 
 const AuthorityStatusModel = db.model('authority_status', AuthorityStatusSchema);
 
