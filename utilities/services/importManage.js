@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const { ImportStatusModel, DatafinityObject } = require('../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
 const { startObjectImport } = require('./importDatafinityObjects');
