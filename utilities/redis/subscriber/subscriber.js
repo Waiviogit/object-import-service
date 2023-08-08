@@ -23,10 +23,11 @@ const subscribeVoteRenew = async (channel, message) => {
   const commands = message.split(':');
   switch (commands[0]) {
     case IMPORT_REDIS_KEYS.CONTINUE:
+      const conditionAddPermlink = commands[2] !== 'undefined' && commands[2] !== 'null';
       const params = {
         user: commands[1],
         importId: commands[3],
-        ...(commands[2] !== 'undefined' && { authorPermlink: commands[2] }),
+        ...(conditionAddPermlink && { authorPermlink: commands[2] }),
       };
       await startObjectImport(params);
       break;
