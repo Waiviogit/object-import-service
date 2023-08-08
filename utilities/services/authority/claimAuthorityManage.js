@@ -24,7 +24,7 @@ const getStatistic = async ({
       },
     },
     options: {
-      sort: history ? { _id: -1 } : { finishedAt: -1 },
+      sort: history ? { finishedAt: -1 } : { createdAt: -1 },
       skip,
       limit,
     },
