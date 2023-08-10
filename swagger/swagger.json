@@ -15,6 +15,10 @@
     {
       "name": "authority",
       "description": "claim authority"
+    },
+    {
+      "name": "departments",
+      "description": "import departments"
     }
   ],
   "schemes": [
@@ -22,297 +26,6 @@
     "http"
   ],
   "paths": {
-    "/import-objects-service/authority" : {
-      "post": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "starts new authority claim process",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "params",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/authority-post-params"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/authority-status"
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "get active import",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "user",
-            "in": "query",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/authority-status"
-              }
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "update import",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "params",
-            "description": "update import details",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/import-products-in-put"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/authority-status"
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "delete claim job",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "params",
-            "description": "delete import",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/import-products-in-delete"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/authority-status"
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/import-objects-service/authority/history": {
-      "get": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "get history",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "user",
-            "in": "query",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/authority-status"
-              }
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/import-objects-service/authority/power": {
-      "get": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "get import power",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "user",
-            "in": "query",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/import-products-power"
-              }
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "update minVotingPower",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "params",
-            "description": "update import minVotingPower",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/import-products-power"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/import-products-power"
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/import-objects-service/authority/objects": {
-      "post": {
-        "tags": [
-          "authority"
-        ],
-        "summary": "get objects of chosen import",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "params",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/authority-objects-params"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/authority-object"
-                  }
-                },
-                "hasMore": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-
-    },
     "/import-objects-service/import-products": {
       "post": {
         "tags": [
@@ -626,6 +339,586 @@
           }
         }
       }
+    },
+    "/import-objects-service/authority" : {
+      "post": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "starts new authority claim process",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authority-post-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/authority-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "get active import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/authority-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "update import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-put"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/authority-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "delete claim job",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "delete import",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-delete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/authority-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/authority/history": {
+      "get": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "get history",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/authority-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/authority/power": {
+      "get": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "get import power",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/import-products-power"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "update minVotingPower",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/authority/objects": {
+      "post": {
+        "tags": [
+          "authority"
+        ],
+        "summary": "get objects of chosen import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authority-objects-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/authority-object"
+                  }
+                },
+                "hasMore": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/departments" : {
+      "post": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "starts new process import departments",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/departments-post-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "get active import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/departments-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "update import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-put"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "delete claim job",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "delete import",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-delete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/departments/history": {
+      "get": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "get history",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/departments-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/departments/power": {
+      "get": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "get import power",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/import-products-power"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "update minVotingPower",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/departments/objects": {
+      "post": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "get objects of chosen import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/departments-objects-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/departments-object"
+                  }
+                },
+                "hasMore": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -797,6 +1090,77 @@
         },
         "updatedAt": {
           "type": "string"
+        }
+      }
+    },
+    "departments-post-params" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "scanEmbedded": {
+          "type": "boolean"
+        },
+        "authorPermlink": {
+          "type": "string"
+        }
+      }
+    },
+    "departments-status": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "importId": {
+          "type": "string"
+        },
+        "objectsCount": {
+          "type": "number"
+        },
+        "objectsClaimed": {
+          "type": "number"
+        },
+        "fieldsVoted": {
+          "type": "number"
+        }
+      }
+    },
+    "departments-objects-params" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "importId": {
+          "type": "string"
+        },
+        "skip": {
+          "type": "number"
+        },
+        "limit": {
+          "type": "number"
+        }
+      }
+    },
+    "departments-object" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "importId": {
+          "type": "string"
+        },
+        "authorPermlink": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        },
+        "claim": {
+          "type": "boolean"
         }
       }
     }

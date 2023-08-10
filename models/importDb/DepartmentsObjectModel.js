@@ -1,8 +1,8 @@
-const { AuthorityObject } = require('../importObjectsDB').models;
+const { DepartmentsObject } = require('../../importObjectsDB').models;
 
 const insertMany = async (docs) => {
   try {
-    const result = await AuthorityObject.insertMany(docs);
+    const result = await DepartmentsObject.insertMany(docs);
     return { result };
   } catch (error) {
     return { error };
@@ -11,7 +11,7 @@ const insertMany = async (docs) => {
 
 const findOne = async ({ filter, projection, options }) => {
   try {
-    const result = await AuthorityObject.findOne(filter, projection, options).lean();
+    const result = await DepartmentsObject.findOne(filter, projection, options).lean();
     return { result };
   } catch (error) {
     return { error };
@@ -20,7 +20,7 @@ const findOne = async ({ filter, projection, options }) => {
 
 const find = async ({ filter, projection, options }) => {
   try {
-    const result = await AuthorityObject.find(filter, projection, options).lean();
+    const result = await DepartmentsObject.find(filter, projection, options).lean();
     return { result };
   } catch (error) {
     return { error };
@@ -29,7 +29,7 @@ const find = async ({ filter, projection, options }) => {
 
 const updateOne = async ({ filter, update, options }) => {
   try {
-    const result = await AuthorityObject.updateOne(filter, update, options);
+    const result = await DepartmentsObject.updateOne(filter, update, options);
     return { result };
   } catch (error) {
     return { error };
@@ -44,9 +44,11 @@ const getNextObject = async ({ user, importId }) => {
   return result;
 };
 
-const updateToClaimedObject = async ({ user, importId, authorPermlink }) => {
+const updateToClaimedObject = async ({ user, importId, authorPermlink, department }) => {
   const { result } = await updateOne({
-    filter: { user, importId, authorPermlink },
+    filter: {
+      user, importId, authorPermlink, department,
+    },
     update: { claim: true },
   });
 
@@ -55,7 +57,16 @@ const updateToClaimedObject = async ({ user, importId, authorPermlink }) => {
 
 const deleteMany = async ({ filter, options }) => {
   try {
-    const result = await AuthorityObject.deleteMany(filter, options);
+    const result = await DepartmentsObject.deleteMany(filter, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const count = async ({ filter, options }) => {
+  try {
+    const result = await DepartmentsObject.count(filter, options);
     return { result };
   } catch (error) {
     return { error };
@@ -70,4 +81,5 @@ module.exports = {
   updateToClaimedObject,
   find,
   deleteMany,
+  count,
 };

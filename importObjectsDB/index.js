@@ -4,5 +4,7 @@ module.exports = {
     ImportStatus: require('./schemas/ImportStatusSchema'),
     AuthorityStatus: require('./schemas/AuthorityStatusSchema'),
     AuthorityObject: require('./schemas/AuthorityObjectSchema'),
+    DepartmentsStatus: require('./schemas/DepartmentsStatusSchema'),
+    DepartmentsObject: require('./schemas/DepartmentsObjectSchema'),
   },
 };

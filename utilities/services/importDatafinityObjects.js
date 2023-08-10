@@ -9,7 +9,9 @@ const {
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS } = require('../../constants/appData');
+const {
+  IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS, IMPORT_TYPES,
+} = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
   filterImportObjects,
@@ -23,12 +25,13 @@ const {
   getProductRating,
   checkRatingFields,
 } = require('../helpers/importDatafinityHelper');
-const { validateImportToRun, checkImportActiveStatus } = require('../helpers/importDatafinityValidationHelper');
+const { checkImportActiveStatus } = require('../helpers/importDatafinityValidationHelper');
 const { parseFields } = require('./parseObjectFields/mainFieldsParser');
 const { redisGetter, redisSetter } = require('../redis');
 const { makeAuthorDescription } = require('./gptService');
 const { sendUpdateImportForUser } = require('./socketClient');
 const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
+const { validateImportToRun } = require('../../validators/accountValidator');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
@@ -190,10 +193,17 @@ const startObjectImport = async ({
     console.error(error.message);
     return;
   }
+  // need to check twice
+  if (!importId) {
+    const activeStatus = await checkImportActiveStatus(datafinityObject.importId);
+    if (!activeStatus) return;
+  }
 
   const createNew = !datafinityObject.author_permlink;
 
-  const runImport = await validateImportToRun({ datafinityObject, user, authorPermlink });
+  const runImport = await validateImportToRun({
+    user, authorPermlink, importId: datafinityObject.importId, type: IMPORT_TYPES.OBJECTS,
+  });
   if (!runImport) return;
 
   if (createNew) {

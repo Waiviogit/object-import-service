@@ -1,15 +1,15 @@
 const _ = require('lodash');
 const {
-  AuthorityStatusModel, AuthorityObjectModel,
+  DepartmentsStatusModel, DepartmentsObjectModel,
 } = require('../../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const { redisGetter } = require('../../redis');
-const claimProcess = require('./claimProcess');
+const importDepartments = require('./importDepartments');
 
 const getStatistic = async ({
   user, history = false, skip, limit,
 }) => {
-  const { result, error } = await AuthorityStatusModel.find({
+  const { result, error } = await DepartmentsStatusModel.find({
     filter: {
       user,
       status: {
@@ -39,7 +39,7 @@ const getStatistic = async ({
 const getObjectDetails = async ({
   user, importId, skip, limit,
 }) => {
-  const { result, error } = await AuthorityObjectModel.find({
+  const { result, error } = await DepartmentsObjectModel.find({
     filter: {
       user,
       importId,
@@ -67,7 +67,7 @@ const updateImport = async ({
     status = IMPORT_STATUS.WAITING_RECOVER;
   }
 
-  const { result, error } = await AuthorityStatusModel.findOneAndUpdate({
+  const { result, error } = await DepartmentsStatusModel.findOneAndUpdate({
     filter: { user, importId },
     update: {
       status,
@@ -78,7 +78,7 @@ const updateImport = async ({
   if (error) return { error };
 
   if (status === IMPORT_STATUS.ACTIVE) {
-    claimProcess({ user, importId });
+    importDepartments({ user, importId });
   }
 
   return {
@@ -87,14 +87,14 @@ const updateImport = async ({
 };
 
 const deleteImport = async ({ user, importId }) => {
-  const { result, error } = await AuthorityStatusModel.findOneAndUpdate({
+  const { result, error } = await DepartmentsStatusModel.findOneAndUpdate({
     filter: { user, importId },
     update: { status: IMPORT_STATUS.DELETED, finishedAt: new Date() },
     options: { new: true },
   });
 
   if (error) return { error };
-  await AuthorityObjectModel.deleteMany({
+  await DepartmentsObjectModel.deleteMany({
     filter: { user, importId, claim: false },
   });
 

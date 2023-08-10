@@ -41,5 +41,6 @@ exports.WAIVIO_API = {
     BASE_URL: '/api',
     WOBJECTS: '/wobjects',
     LIST_ITEM_LINKS: '/list-item-links',
+    LIST_ITEM_DEPARTMENTS: '/list-item-departments',
   },
 };

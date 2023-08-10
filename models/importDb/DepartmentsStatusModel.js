@@ -1,9 +1,9 @@
-const { IMPORT_STATUS } = require('../constants/appData');
-const { AuthorityStatus } = require('../importObjectsDB').models;
+const { IMPORT_STATUS } = require('../../constants/appData');
+const { DepartmentsStatus } = require('../../importObjectsDB').models;
 
 const create = async (doc) => {
   try {
-    const result = await AuthorityStatus.create(doc);
+    const result = await DepartmentsStatus.create(doc);
     return { result };
   } catch (error) {
     return { error };
@@ -12,7 +12,7 @@ const create = async (doc) => {
 
 const findOne = async ({ filter, projection, options }) => {
   try {
-    const result = await AuthorityStatus.findOne(filter, projection, options).lean();
+    const result = await DepartmentsStatus.findOne(filter, projection, options).lean();
     return { result };
   } catch (error) {
     return { error };
@@ -21,7 +21,7 @@ const findOne = async ({ filter, projection, options }) => {
 
 const find = async ({ filter, projection, options }) => {
   try {
-    const result = await AuthorityStatus.find(filter, projection, options).lean();
+    const result = await DepartmentsStatus.find(filter, projection, options).lean();
     return { result };
   } catch (error) {
     return { error };
@@ -30,7 +30,7 @@ const find = async ({ filter, projection, options }) => {
 
 const findOneAndUpdate = async ({ filter, update, options }) => {
   try {
-    const result = await AuthorityStatus.findOneAndUpdate(filter, update, options).lean();
+    const result = await DepartmentsStatus.findOneAndUpdate(filter, update, options).lean();
     return { result };
   } catch (error) {
     return { error };
@@ -39,7 +39,7 @@ const findOneAndUpdate = async ({ filter, update, options }) => {
 
 const updateOne = async ({ filter, update, options }) => {
   try {
-    const result = await AuthorityStatus.updateOne(filter, update, options);
+    const result = await DepartmentsStatus.updateOne(filter, update, options);
     return { result };
   } catch (error) {
     return { error };
@@ -48,7 +48,7 @@ const updateOne = async ({ filter, update, options }) => {
 
 const updateMany = async ({ filter, update, options }) => {
   try {
-    const result = await AuthorityStatus.updateMany(filter, update, options);
+    const result = await DepartmentsStatus.updateMany(filter, update, options);
     return { result };
   } catch (error) {
     return { error };
@@ -77,7 +77,12 @@ const updateClaimedCount = async ({
 }) => {
   const { result } = await updateOne({
     filter: { user, importId },
-    update: { $inc: { objectsClaimed, fieldsVoted } },
+    update: {
+      $inc: {
+        ...(objectsClaimed && { objectsClaimed }),
+        fieldsVoted,
+      },
+    },
   });
 
   return !!result?.nModified;

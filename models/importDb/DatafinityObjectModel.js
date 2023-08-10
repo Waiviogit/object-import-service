@@ -1,4 +1,4 @@
-const { DatafinityObject } = require('../importObjectsDB').models;
+const { DatafinityObject } = require('../../importObjectsDB').models;
 
 const insertMany = async (docs) => {
   try {

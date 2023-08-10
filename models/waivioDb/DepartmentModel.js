@@ -1,4 +1,4 @@
-const { Department } = require('../database').models;
+const { Department } = require('../../database').models;
 
 const find = async ({ filter, projection = {}, options = {} }) => {
   try {
