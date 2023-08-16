@@ -87,7 +87,7 @@ const createDepartmentsList = async ({ user, authorPermlink, scanEmbedded }) => 
   if (error) return { error: new NotAcceptableError('Save docs Error') };
 
   importDepartments({ user, importId });
-  return result;
+  return { result };
 };
 
 module.exports = createDepartmentsList;
