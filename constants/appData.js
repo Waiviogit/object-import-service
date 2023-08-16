@@ -20,8 +20,10 @@ const IMPORT_STATUS = {
 const IMPORT_REDIS_KEYS = {
   CONTINUE: 'continue',
   CONTINUE_AUTHORITY: 'continue_authority',
+  CONTINUE_DEPARTMENTS: 'continue_departments',
   MIN_POWER: 'min_power',
   MIN_POWER_AUTHORITY: 'min_power_authority',
+  MIN_POWER_DEPARTMENTS: 'min_power_departments',
   STOP_FOR_RECOVER: 'stop_for_recover',
   PENDING: 'pending',
 };
@@ -85,6 +87,12 @@ const notificationsApi = {
   },
 };
 
+const IMPORT_TYPES = {
+  OBJECTS: 'objects',
+  AUTHORITY: 'authority',
+  DEPARTMENTS: 'departments',
+};
+
 module.exports = {
   appData,
   uploadPath,
@@ -97,4 +105,5 @@ module.exports = {
   OBJECT_BOT_ROLE,
   notificationsApi: notificationsApi[process.env.NODE_ENV || 'development'],
   AMAZON_ASINS,
+  IMPORT_TYPES,
 };

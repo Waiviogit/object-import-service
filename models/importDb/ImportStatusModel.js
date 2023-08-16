@@ -1,4 +1,4 @@
-const { ImportStatus } = require('../importObjectsDB').models;
+const { ImportStatus } = require('../../importObjectsDB').models;
 
 const create = async (doc) => {
   try {

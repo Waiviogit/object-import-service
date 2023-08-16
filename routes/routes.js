@@ -1,5 +1,5 @@
 const express = require('express');
-const { importWobjectsController, authorityController } = require('../controllers');
+const { importWobjectsController, authorityController, importDepartmentsController } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
 const routes = express.Router();
@@ -44,5 +44,18 @@ objects.route('/authority/power')
   .put(authorityController.setVotingPower);
 objects.route('/authority/history')
   .get(authorityController.getImportHistory);
+
+objects.route('/departments')
+  .post(importDepartmentsController.importDepartments)
+  .get(importDepartmentsController.getImportStatistic)
+  .put(importDepartmentsController.changeImportDetails)
+  .delete(importDepartmentsController.deleteImport);
+objects.route('/departments/objects')
+  .post(importDepartmentsController.getObjectDetails);
+objects.route('/departments/power')
+  .get(importDepartmentsController.getVotingPower)
+  .put(importDepartmentsController.setVotingPower);
+objects.route('/departments/history')
+  .get(importDepartmentsController.getImportHistory);
 
 module.exports = routes;

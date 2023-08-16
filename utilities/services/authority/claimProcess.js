@@ -1,16 +1,12 @@
 const {
   Wobj, AuthorityStatusModel, AuthorityObjectModel,
 } = require('../../../models');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../../../constants/appData');
+const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { OBJECT_FIELDS, AUTHORITY_FIELD_OPTIONS } = require('../../../constants/objectTypes');
 const { addField } = require('../importObjectsService');
 const { formField } = require('../../helpers/formFieldHelper');
 const { sendUpdateImportForUser } = require('../socketClient');
-const { importAccountValidator, votePowerValidation, validateRc } = require('../../../validators/accountValidator');
-const { getVoteCost } = require('../../helpers/importDatafinityHelper');
-const { getVotingPowers } = require('../../hiveEngine/hiveEngineOperations');
-const { redisSetter, redisGetter } = require('../../redis');
-const { getTtlTime } = require('../../helpers/importDatafinityValidationHelper');
+const { validateImportToRun } = require('../../../validators/accountValidator');
 
 const getAuthorityField = ({ fields = [], user, authority }) => fields
   .find((el) => el.name === OBJECT_FIELDS.AUTHORITY
@@ -26,43 +22,12 @@ const incrObjectsCount = async ({ user, importId, authorPermlink }) => {
   });
 };
 
-const setTtlToContinue = async ({ user, importId }) => {
-  const keyPower = `${IMPORT_REDIS_KEYS.MIN_POWER_AUTHORITY}:${user}`;
-  const power = await redisGetter.get({ key: keyPower });
-  const minVotingPower = power ? Number(power) : DEFAULT_VOTE_POWER_IMPORT;
-
-  const { votingPower } = await getVotingPowers({ account: user });
-  const ttl = await getTtlTime({
-    votingPower,
-    minVotingPower,
-    account: user,
-  });
-
-  const key = `${IMPORT_REDIS_KEYS.CONTINUE_AUTHORITY}:${user}:${importId}`;
-  await redisSetter.set({ key, value: '' });
-  await redisSetter.expire({ key, ttl });
-};
-
-const validateImportToRun = async ({ user, importId }) => {
-  const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
-  const validVotePower = await votePowerValidation(
-    { account: user },
-  );
-  const validRc = await validateRc({ account: user });
-
-  if (!validVotePower || !validAcc || !validRc) {
-    await setTtlToContinue({ user, importId });
-    return;
-  }
-  return true;
-};
-
 const claimProcess = async ({ user, importId }) => {
   const importStatus = await AuthorityStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;
 
-  const validImport = await validateImportToRun({ user, importId });
+  const validImport = await validateImportToRun({ user, importId, type: IMPORT_TYPES.AUTHORITY });
   if (!validImport) return;
 
   const nextObject = await AuthorityObjectModel.getNextObject({ user, importId });

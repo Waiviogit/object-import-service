@@ -1,4 +1,4 @@
-const WObjectModel = require('../database').models.WObject;
+const WObjectModel = require('../../database').models.WObject;
 
 const getOne = async ({ author_permlink }) => {
   try {
