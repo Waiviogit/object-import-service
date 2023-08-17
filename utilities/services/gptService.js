@@ -116,6 +116,21 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
 
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
 
+const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
+  try {
+    const response = await openaiBot.createImage({
+      prompt, n, size,
+    }, {
+      timeout: 60000,
+    });
+    const result = _.get(response, 'data.choices[0].message.content', '');
+    // todo result must be a string
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   makeDescription,
   makeAuthorDescription,
@@ -124,4 +139,5 @@ module.exports = {
   gptCreateCompletion,
   gptCreateCompletionBot,
   restGptQuery,
+  gptCreateImage,
 };

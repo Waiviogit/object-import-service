@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { gptCreateCompletionBot } = require('../gptService');
+const { gptCreateCompletionBot, gptCreateImage } = require('../gptService');
 
 const token = process.env.CHAT_BOT_TOKEN;
 
@@ -26,4 +26,19 @@ const handleMessage = async (msg) => {
   await sendMessage({ chatId, message });
 };
 
+const sendPicture = async (msg) => {
+  const { text, from, chat } = msg;
+  const chatId = chat.id;
+  if (!text) return;
+  if (from?.is_bot) return;
+  const { result, error } = await gptCreateImage({
+    prompt: text,
+  });
+  if (error) return sendMessage({ chatId, message: error.message });
+
+  await bot.sendPhoto(chatId, result);
+};
+
 bot.on('message', handleMessage);
+
+bot.onText(/\/img/, sendPicture);
