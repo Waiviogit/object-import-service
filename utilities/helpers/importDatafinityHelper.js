@@ -12,6 +12,7 @@ const { broadcastJson } = require('../hiveApi/broadcastUtil');
 const { GPT_CRAFTED } = require('../../constants/openai');
 
 const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
+const SET_UNIQ_FIELDS_AUTHORITY = ['name', 'body', 'locale', 'creator'];
 
 const getVoteCost = (account) => {
   if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
@@ -265,12 +266,16 @@ const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
 const validateSameFieldDefault = ({ fieldData, foundedFields }) => !!foundedFields
   .find((field) => _.isEqual(field, _.pick(fieldData, SET_UNIQ_FIELDS)));
 
+const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFields
+  .find((field) => _.isEqual(field, _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
+
 const validateSameFields = ({ fieldData, wobject }) => {
   const foundedFields = _.map(wobject.fields, (field) => _.pick(field, SET_UNIQ_FIELDS));
   const validation = {
     [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
     [OBJECT_FIELDS.AVATAR]: () => !!foundedFields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
+    [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
     default: validateSameFieldDefault,
   };
 

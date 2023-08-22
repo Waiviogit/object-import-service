@@ -7,6 +7,7 @@ const { OBJECT_FIELDS } = require('../../../constants/objectTypes');
 const { addField } = require('../importObjectsService');
 const { formField } = require('../../helpers/formFieldHelper');
 const { validateImportToRun } = require('../../../validators/accountValidator');
+const { validateSameFields } = require('../../helpers/importDatafinityHelper');
 
 const incrObjectsCount = async ({
   user, importId, authorPermlink, department,
@@ -48,22 +49,27 @@ const importDepartments = async ({ user, importId }) => {
     importDepartments({ user, importId });
     return;
   }
+  const fieldData = formField({
+    fieldName: OBJECT_FIELDS.DEPARTMENTS,
+    body: department,
+    user,
+  });
 
-  await addField({
-    field: formField({
-      fieldName: OBJECT_FIELDS.DEPARTMENTS,
-      body: department,
-      user,
-    }),
-    wobject,
-    importingAccount: user,
-    importId,
-  });
-  await incrObjectsCount({
-    user, importId, authorPermlink, department,
-  });
-  await sendUpdateImportForUser({ account: user });
-  await new Promise((resolve) => setTimeout(resolve, 4000));
+  const sameField = validateSameFields({ fieldData, wobject });
+
+  if (!sameField) {
+    await addField({
+      field: fieldData,
+      wobject,
+      importingAccount: user,
+      importId,
+    });
+    await incrObjectsCount({
+      user, importId, authorPermlink, department,
+    });
+    await sendUpdateImportForUser({ account: user });
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+  }
 
   importDepartments({ user, importId });
 };
