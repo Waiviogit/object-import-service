@@ -64,12 +64,13 @@ const importDepartments = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
-    await incrObjectsCount({
-      user, importId, authorPermlink, department,
-    });
-    await sendUpdateImportForUser({ account: user });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
   }
+
+  await incrObjectsCount({
+    user, importId, authorPermlink, department,
+  });
+  await sendUpdateImportForUser({ account: user });
+  await new Promise((resolve) => setTimeout(resolve, 4000));
 
   importDepartments({ user, importId });
 };
