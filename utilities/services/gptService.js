@@ -130,13 +130,6 @@ const gptCreateImage = async ({ prompt = '', n = 4, size = '1024x1024' }) => {
   }
 };
 
-(async () => {
-  const { result, error } = await gptCreateImage({
-    prompt: 'A painting of a cat sitting on a chair',
-  });
-  console.log()
-})()
-
 module.exports = {
   makeDescription,
   makeAuthorDescription,
