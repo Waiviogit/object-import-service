@@ -7,6 +7,7 @@ const { addField } = require('../importObjectsService');
 const { formField } = require('../../helpers/formFieldHelper');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { validateImportToRun } = require('../../../validators/accountValidator');
+const { validateSameFields } = require('../../helpers/importDatafinityHelper');
 
 const getAuthorityField = ({ fields = [], user, authority }) => fields
   .find((el) => el.name === OBJECT_FIELDS.AUTHORITY
@@ -55,17 +56,23 @@ const claimProcess = async ({ user, importId }) => {
     claimProcess({ user, importId });
     return;
   }
-
-  await addField({
-    field: formField({
-      fieldName: OBJECT_FIELDS.AUTHORITY,
-      body: importStatus.authority,
-      user,
-    }),
-    wobject,
-    importingAccount: user,
-    importId,
+  const fieldData = formField({
+    fieldName: OBJECT_FIELDS.AUTHORITY,
+    body: importStatus.authority,
+    user,
   });
+
+  const sameField = validateSameFields({ fieldData, wobject });
+
+  if (!sameField) {
+    await addField({
+      field: fieldData,
+      wobject,
+      importingAccount: user,
+      importId,
+    });
+  }
+
   await incrObjectsCount({
     user, importId, authorPermlink: nextObject.authorPermlink,
   });

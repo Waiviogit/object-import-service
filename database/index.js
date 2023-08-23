@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const config = require('../config');
 const importDb = require('../importObjectsDB/importObjects_Connection');
 
-const URI = `mongodb://${config.db.host}:${config.db.port}/${config.db.database}`;
+const URI = process.env.MONGO_URI_WAIVIO
+  ? process.env.MONGO_URI_WAIVIO
+  : `mongodb://${config.db.host}:${config.db.port}/${config.db.database}`;
 
 mongoose.connect(URI, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connection successful!'))
