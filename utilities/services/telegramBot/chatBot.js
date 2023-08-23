@@ -5,6 +5,10 @@ const token = process.env.CHAT_BOT_TOKEN;
 
 const bot = new TelegramBot(token, { polling: true });
 
+const BOT_ROUTES = {
+  IMAGE: /^\/img/,
+};
+
 const sendMessage = async ({ chatId, message = '' }) => {
   try {
     await bot.sendMessage(chatId, message);
@@ -17,6 +21,7 @@ const handleMessage = async (msg) => {
   if (process.env.NODE_ENV !== 'production') return;
   const { text, from, chat } = msg;
   if (!text) return;
+  if (text.match(BOT_ROUTES.IMAGE)) return;
   if (from?.is_bot) return;
   const chatId = chat.id;
 
@@ -28,6 +33,7 @@ const handleMessage = async (msg) => {
 
 const sendPicture = async (msg) => {
   if (process.env.NODE_ENV !== 'production') return;
+
   const { text, from, chat } = msg;
   const chatId = chat.id;
   if (!text) return;
@@ -46,4 +52,4 @@ const sendPicture = async (msg) => {
 
 bot.on('message', handleMessage);
 
-bot.onText(/\/img/, sendPicture);
+bot.onText(BOT_ROUTES.IMAGE, sendPicture);
