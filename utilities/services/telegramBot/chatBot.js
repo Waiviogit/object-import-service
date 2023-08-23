@@ -27,6 +27,7 @@ const handleMessage = async (msg) => {
 };
 
 const sendPicture = async (msg) => {
+  if (process.env.NODE_ENV !== 'production') return;
   const { text, from, chat } = msg;
   const chatId = chat.id;
   if (!text) return;
@@ -36,7 +37,11 @@ const sendPicture = async (msg) => {
   });
   if (error) return sendMessage({ chatId, message: error.message });
 
-  await bot.sendPhoto(chatId, result);
+  const images = result.map((image) => image?.url);
+  if (!images.length) return sendMessage({ chatId, message: 'No images found' });
+  for (const image of images) {
+    await bot.sendPhoto(chatId, image);
+  }
 };
 
 bot.on('message', handleMessage);

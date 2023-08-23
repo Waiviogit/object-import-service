@@ -116,20 +116,26 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
 
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
 
-const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
+const gptCreateImage = async ({ prompt = '', n = 4, size = '1024x1024' }) => {
   try {
     const response = await openaiBot.createImage({
       prompt, n, size,
     }, {
       timeout: 60000,
     });
-    const result = _.get(response, 'data.choices[0].message.content', '');
-    // todo result must be a string
+    const result = _.get(response, 'data.data', []);
     return { result };
   } catch (error) {
     return { error };
   }
 };
+
+(async () => {
+  const { result, error } = await gptCreateImage({
+    prompt: 'A painting of a cat sitting on a chair',
+  });
+  console.log()
+})()
 
 module.exports = {
   makeDescription,
