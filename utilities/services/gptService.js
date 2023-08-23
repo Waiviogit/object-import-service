@@ -116,7 +116,7 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
 
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
 
-const gptCreateImage = async ({ prompt = '', n = 4, size = '1024x1024' }) => {
+const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
   try {
     const response = await openaiBot.createImage({
       prompt, n, size,
