@@ -26,6 +26,7 @@ exports.WHITE_LIST = [
   'gmamba13',
   'waivio.affiliate',
   'cryptodive',
+  'organicvibes',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
