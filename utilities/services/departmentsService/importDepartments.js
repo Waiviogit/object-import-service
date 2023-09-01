@@ -8,6 +8,7 @@ const { addField } = require('../importObjectsService');
 const { formField } = require('../../helpers/formFieldHelper');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { validateSameFields } = require('../../helpers/importDatafinityHelper');
+const { voteForField } = require('../../objectBotApi');
 
 const incrObjectsCount = async ({
   user, importId, authorPermlink, department,
@@ -64,6 +65,19 @@ const importDepartments = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
+  } else {
+    const field = wobject.fields.find((f) => f.name === OBJECT_FIELDS.DEPARTMENTS
+        && f.body === department
+        && f.creator !== user);
+    if (field) {
+      await voteForField.send({
+        voter: user,
+        authorPermlink: wobject.author_permlink,
+        author: field.author,
+        permlink: field.permlink,
+        fieldType: OBJECT_FIELDS.DEPARTMENTS,
+      });
+    }
   }
 
   await incrObjectsCount({
