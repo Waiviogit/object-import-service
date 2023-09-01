@@ -27,6 +27,7 @@ exports.WHITE_LIST = [
   'waivio.affiliate',
   'cryptodive',
   'organicvibes',
+  'rusn',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
