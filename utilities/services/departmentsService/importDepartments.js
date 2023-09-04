@@ -70,13 +70,16 @@ const importDepartments = async ({ user, importId }) => {
         && f.body === department
         && f.creator !== user);
     if (field) {
-      await voteForField.send({
-        voter: user,
-        authorPermlink: wobject.author_permlink,
-        author: field.author,
-        permlink: field.permlink,
-        fieldType: OBJECT_FIELDS.DEPARTMENTS,
-      });
+      const voted = field.active_votes.find((v) => v.voter === user);
+      if (!voted) {
+        await voteForField.send({
+          voter: user,
+          authorPermlink: wobject.author_permlink,
+          author: field.author,
+          permlink: field.permlink,
+          fieldType: OBJECT_FIELDS.DEPARTMENTS,
+        });
+      }
     }
   }
 
