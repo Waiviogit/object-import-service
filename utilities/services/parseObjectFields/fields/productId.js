@@ -49,6 +49,21 @@ const addSpecialId = (object) => {
 
 module.exports = (object) => {
   const fields = [];
+
+  if (object?.waivio_product_ids && object.waivio_product_ids.length) {
+    for (const waivioProductId of object.waivio_product_ids) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.PRODUCT_ID,
+        locale: object.locale,
+        user: object.user,
+        body: JSON.stringify({
+          productId: waivioProductId.value,
+          productIdType: waivioProductId.key,
+        }),
+      }));
+    }
+  }
+
   const specialIds = addSpecialId(object);
   if (!_.isEmpty(specialIds)) fields.push(...specialIds);
 
