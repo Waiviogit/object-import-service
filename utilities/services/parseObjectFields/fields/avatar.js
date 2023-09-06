@@ -54,20 +54,30 @@ module.exports = async (object) => {
   const fields = [];
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
-    const validImage = await isProperResolution(object.primaryImageURLs[0]);
-    if (validImage) {
-      const { result } = await loadImageByUrl(
-        object.primaryImageURLs[0],
-        IMAGE_SIZE.CONTAIN,
-      );
-      if (result) {
-        fields.push(formField({
-          fieldName: OBJECT_FIELDS.AVATAR,
-          locale: object.locale,
-          user: object.user,
-          body: result,
-        }));
-        loadAvatar = false;
+    const sephoraImage = /sephora.com/.test(object.primaryImageURLs[0]);
+    if (sephoraImage) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.AVATAR,
+        locale: object.locale,
+        user: object.user,
+        body: object.primaryImageURLs[0],
+      }));
+    } else {
+      const validImage = await isProperResolution(object.primaryImageURLs[0]);
+      if (validImage) {
+        const { result } = await loadImageByUrl(
+          object.primaryImageURLs[0],
+          IMAGE_SIZE.CONTAIN,
+        );
+        if (result) {
+          fields.push(formField({
+            fieldName: OBJECT_FIELDS.AVATAR,
+            locale: object.locale,
+            user: object.user,
+            body: result,
+          }));
+          loadAvatar = false;
+        }
       }
     }
   }
@@ -78,10 +88,17 @@ module.exports = async (object) => {
   elementsToCheck.push(...object.imageURLs);
 
   for (const element of _.uniq(elementsToCheck)) {
+    const sephoraImage = /sephora.com/.test(element);
+    if (sephoraImage) {
+      imagesWithOkResolution.push(element);
+      continue;
+    }
+
     const validImage = await isProperResolution(element);
     if (!validImage) continue;
     imagesWithOkResolution.push(element);
   }
+
   if (_.isEmpty(imagesWithOkResolution)) return fields.length ? fields : null;
 
   const images = await checkForDuplicates(imagesWithOkResolution);
