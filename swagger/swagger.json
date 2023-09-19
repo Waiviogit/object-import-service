@@ -19,6 +19,10 @@
     {
       "name": "departments",
       "description": "import departments"
+    },
+    {
+      "name": "duplication",
+      "description": "list duplication"
     }
   ],
   "schemes": [
@@ -35,7 +39,9 @@
         "produces": [
           "application/json"
         ],
-        "consumes": ["multipart/form-data"],
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "access-token",
@@ -60,13 +66,18 @@
             "type": "string",
             "name": "objectType",
             "required": true,
-            "enum": ["book"]
+            "enum": [
+              "book"
+            ]
           },
           {
             "in": "formData",
             "type": "string",
             "name": "authority",
-            "enum": ["administrative", "ownership"]
+            "enum": [
+              "administrative",
+              "ownership"
+            ]
           },
           {
             "in": "formData",
@@ -150,7 +161,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-                "$ref": "#/definitions/importStatistic"
+              "$ref": "#/definitions/importStatistic"
             }
           },
           "422": {
@@ -340,7 +351,7 @@
         }
       }
     },
-    "/import-objects-service/authority" : {
+    "/import-objects-service/authority": {
       "post": {
         "tags": [
           "authority"
@@ -630,7 +641,7 @@
         }
       }
     },
-    "/import-objects-service/departments" : {
+    "/import-objects-service/departments": {
       "post": {
         "tags": [
           "departments"
@@ -876,6 +887,296 @@
       "post": {
         "tags": [
           "departments"
+        ],
+        "summary": "get objects of chosen import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/departments-objects-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/departments-object"
+                  }
+                },
+                "hasMore": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/duplicate-list": {
+      "post": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "starts new process import departments",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/departments-post-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "get active import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/departments-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "update import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-put"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "delete claim job",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "delete import",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-delete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/departments-status"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/duplicate-list/history": {
+      "get": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "get history",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/departments-status"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/duplicate-list/power": {
+      "get": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "get import power",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/import-products-power"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "duplication"
+        ],
+        "summary": "update minVotingPower",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/import-products-power"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/duplicate-list/objects": {
+      "post": {
+        "tags": [
+          "duplication"
         ],
         "summary": "get objects of chosen import",
         "produces": [

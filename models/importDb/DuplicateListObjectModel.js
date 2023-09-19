@@ -30,10 +30,30 @@ const findOne = async ({ filter, projection, options }) => {
   }
 };
 
+
+const find = async ({ filter, projection, options }) => {
+  try {
+    const result = await DuplicateListObject.find(filter, projection, options);
+
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const updateOne = async ({ filter, update, options }) => {
   try {
     const result = await DuplicateListObject.updateOne(filter, update, options);
 
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const deleteMany = async ({ filter, options }) => {
+  try {
+    const result = await DuplicateListObject.deleteMany(filter, options);
     return { result };
   } catch (error) {
     return { error };
@@ -45,4 +65,6 @@ module.exports = {
   insertMany,
   count,
   updateOne,
+  deleteMany,
+  find,
 };

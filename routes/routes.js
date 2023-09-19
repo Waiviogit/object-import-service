@@ -61,6 +61,16 @@ objects.route('/departments/history')
   .get(importDepartmentsController.getImportHistory);
 
 objects.route('/duplicate-list')
-  .post(duplicateListController.duplicateList);
+  .post(duplicateListController.duplicateList)
+  .get(duplicateListController.getImportStatistic)
+  .put(duplicateListController.changeImportDetails)
+  .delete(duplicateListController.deleteImport);
+objects.route('/duplicate-list/objects')
+  .post(duplicateListController.getObjectDetails);
+objects.route('/duplicate-list/power')
+  .get(duplicateListController.getVotingPower)
+  .put(duplicateListController.setVotingPower);
+objects.route('/duplicate-list/history')
+  .get(duplicateListController.getImportHistory);
 
 module.exports = routes;

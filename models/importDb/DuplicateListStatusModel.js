@@ -45,10 +45,20 @@ const find = async ({ filter, projection, options }) => {
   }
 };
 
+const findOneAndUpdate = async ({ filter, update, options }) => {
+  try {
+    const result = await DuplicateListStatus.findOneAndUpdate(filter, update, options).lean();
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   create,
   updateOne,
   findOne,
   updateMany,
   find,
+  findOneAndUpdate,
 };
