@@ -4,12 +4,16 @@ const { startObjectImport } = require('../../services/importDatafinityObjects');
 const { IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const claimProcess = require('../../services/authority/claimProcess');
 const importDepartments = require('../../services/departmentsService/importDepartments');
+const duplicateProcess = require('../../services/listDuplication/duplicateProcess');
 
 const subscriber = redis.createClient({ db: config.redis.lastBlock });
 
 subscriber.on('message', async (channel, message) => {
   try {
-    const { user, author_permlink } = JSON.parse(message);
+    const { user, author_permlink, importId } = JSON.parse(message);
+    if (importId) {
+      return duplicateProcess({ user, importId });
+    }
 
     await startObjectImport({
       user, authorPermlink: author_permlink,
@@ -40,6 +44,13 @@ const subscribeVoteRenew = async (channel, message) => {
       break;
     case IMPORT_REDIS_KEYS.CONTINUE_DEPARTMENTS:
       importDepartments({
+        user: commands[1],
+        importId: commands[2],
+      });
+      break;
+
+    case IMPORT_REDIS_KEYS.CONTINUE_DUPLICATE:
+      duplicateProcess({
         user: commands[1],
         importId: commands[2],
       });

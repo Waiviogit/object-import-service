@@ -14,13 +14,34 @@ const DuplicateListObjectSchema = new Schema({
   fieldsVoted: { type: Number, default: 0 },
   duplicateCreated: { type: Boolean, default: false },
   processed: { type: Boolean, default: false },
+  fields: {
+    type: [
+      {
+        weight: Number,
+        locale: String,
+        creator: String,
+        permlink: String,
+        name: String,
+        body: String,
+        id: String,
+        asin: String,
+        connectedObject: Boolean,
+        bookName: String,
+      },
+    ],
+    default: [],
+  },
 }, { timestamps: false, versionKey: false });
 
-DuplicateListObjectSchema.index({ importId: 1, authorPermlink: 1, processed: 1 });
+DuplicateListObjectSchema.index({ importId: 1, type: 1, processed: 1 });
 DuplicateListObjectSchema.index({
   importId: 1,
   type: 1,
   duplicateCreated: 1,
+});
+DuplicateListObjectSchema.index({
+  importId: 1,
+  linkToDuplicate: 1,
 });
 
 const DuplicateListObjectModel = db.model('duplicate_list_object', DuplicateListObjectSchema);

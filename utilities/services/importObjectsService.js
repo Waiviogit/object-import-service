@@ -220,6 +220,7 @@ const addWobject = async ({ wobject, existObjType, addData = true }) => {
       parentAuthor: existObjType ? existObjType.author : '',
       parentPermlink: existObjType ? existObjType.permlink : '',
       ...wobject.datafinityObject && { datafinityObject: wobject.datafinityObject },
+      ...wobject.importId && { importId: wobject.importId },
     };
 
     if (addData) {

@@ -9,7 +9,6 @@ const create = async (doc) => {
   }
 };
 
-
 const updateOne = async ({ filter, update, options }) => {
   try {
     const result = await DuplicateListStatus.updateOne(filter, update, options);
@@ -19,7 +18,37 @@ const updateOne = async ({ filter, update, options }) => {
   }
 };
 
+const updateMany = async ({ filter, update, options }) => {
+  try {
+    const result = await DuplicateListStatus.updateMany(filter, update, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const findOne = async ({ filter, projection, options }) => {
+  try {
+    const result = await DuplicateListStatus.findOne(filter, projection, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const find = async ({ filter, projection, options }) => {
+  try {
+    const result = await DuplicateListStatus.find(filter, projection, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   create,
   updateOne,
+  findOne,
+  updateMany,
+  find,
 };

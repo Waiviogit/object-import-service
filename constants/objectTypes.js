@@ -295,3 +295,35 @@ exports.DOMAINS = {
   TARGET: 'www.target.com',
   WALMART: 'www.walmart.com',
 };
+
+exports.ARRAY_FIELDS = [
+  'categoryItem',
+  'listItem',
+  'tagCategory',
+  'galleryItem',
+  'galleryAlbum',
+  'rating',
+  'button',
+  'phone',
+  'blog',
+  'form',
+  'newsFilter',
+  'companyId',
+  'productId',
+  'options',
+  'authors',
+  'departments',
+  'features',
+  'authority',
+  'groupId',
+  'pin',
+  'remove',
+  'menuItem',
+  'related',
+  'addOn',
+  'similar',
+  'affiliateGeoArea',
+  'affiliateProductIdTypes',
+];
+
+exports.ARRAY_FIELDS_BODY = ['remove', 'groupId', 'affiliateGeoArea', 'affiliateProductIdTypes'];
