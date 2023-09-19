@@ -1,18 +1,24 @@
 const mongoose = require('mongoose');
 const db = require('../importObjects_Connection');
 const { IMPORT_STATUS } = require('../../constants/appData');
+const { AUTHORITY_FIELD_OPTIONS } = require('../../constants/objectTypes');
 
 const { Schema } = mongoose;
 
 const DuplicateListStatusSchema = new Schema({
   user: { type: String, required: true },
   importId: { type: String, required: true, index: true },
-  objectsCount: { type: Number, required: true },
+  authority: {
+    type: String,
+    enum: Object.values(AUTHORITY_FIELD_OPTIONS),
+    default: AUTHORITY_FIELD_OPTIONS.ADMINISTRATIVE,
+  },
   rootObject: { type: String, required: true },
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
-  objectsClaimed: { type: Number, default: 0 },
+  objectsCount: { type: Number, required: true },
+  objectsCreated: { type: Number, default: 0 },
   fieldsCreated: { type: Number, default: 0 },
   fieldsVoted: { type: Number, default: 0 },
   finishedAt: { type: Date },

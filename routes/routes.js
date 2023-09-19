@@ -1,5 +1,7 @@
 const express = require('express');
-const { importWobjectsController, authorityController, importDepartmentsController } = require('../controllers');
+const {
+  importWobjectsController, authorityController, importDepartmentsController, duplicateListController,
+} = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
 const routes = express.Router();
@@ -57,5 +59,8 @@ objects.route('/departments/power')
   .put(importDepartmentsController.setVotingPower);
 objects.route('/departments/history')
   .get(importDepartmentsController.getImportHistory);
+
+objects.route('/duplicate-list')
+  .post(duplicateListController.duplicateList);
 
 module.exports = routes;

@@ -4,7 +4,7 @@ const { OBJECT_TYPES, OBJECT_FIELDS } = require('../../../constants/objectTypes'
 const waivioApi = require('../../waivioApi');
 const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
-const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
+const { NotFoundError} = require('../../../constants/httpErrors');
 
 const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
