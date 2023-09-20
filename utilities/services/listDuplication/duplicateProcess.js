@@ -13,7 +13,7 @@ const { parseJson } = require('../../helpers/jsonHelper');
 const { voteForField } = require('../../objectBotApi');
 const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { validateImportToRun } = require('../../../validators/accountValidator');
-const {sendUpdateImportForUser} = require("../socketClient");
+const { sendUpdateImportForUser } = require('../socketClient');
 
 const checkObjectsToCreate = async ({ importId }) => {
   const { count } = await DuplicateListObjectModel.count({
@@ -110,7 +110,7 @@ const checkFieldsToVote = async ({ importId }) => {
     filter: {
       importId,
       type: { $ne: OBJECT_TYPES.LIST },
-      processed: false,
+      voted: false,
     },
   });
 
@@ -269,6 +269,7 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId }) => {
   const fields = [];
 
   for (const field of original.fields) {
+    if (field.name === OBJECT_FIELDS.AUTHORITY) continue;
     const { author, permlink } = field;
     const processed = originalProcessed[field.name] === field.body;
     if (processed) {
@@ -279,7 +280,7 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId }) => {
       if (item) {
         fields.push({ author, permlink });
       }
-      if (field.name === 'options') {
+      if (field.name === OBJECT_FIELDS.OPTIONS) {
         for (const option in originalProcessed.options) {
           const el = originalProcessed.options[option]
             ?.find((f) => f.author === field.author && f.permlink === field.permlink);
@@ -320,7 +321,7 @@ const voteForFields = async ({ importId, user }) => {
     filter: {
       importId,
       type: { $ne: OBJECT_TYPES.LIST },
-      processed: false,
+      voted: false,
     },
   });
   if (!result) return;
@@ -370,6 +371,73 @@ const voteForFields = async ({ importId, user }) => {
   duplicateProcess({ importId, user });
 };
 
+const checkAuthorityFields = async ({ importId }) => {
+  const { count } = await DuplicateListObjectModel.count({
+    filter: {
+      importId,
+      type: { $ne: OBJECT_TYPES.LIST },
+      processed: false,
+    },
+  });
+
+  return !!count;
+};
+
+const createAuthorityFields = async ({ importId, user }) => {
+  const { result } = await DuplicateListObjectModel.findOne({
+    filter: {
+      importId,
+      type: { $ne: OBJECT_TYPES.LIST },
+      processed: false,
+    },
+  });
+  if (!result) return;
+
+  const { result: wobject } = await Wobj.findOne({
+    filter: { author_permlink: result.linkToDuplicate },
+  });
+
+  const authority = wobject.fields.find((f) => f.name === OBJECT_FIELDS.AUTHORITY && f.creator === user);
+  if (!authority) {
+    await addField({
+      field: formField({
+        fieldName: 'authority',
+        body: 'administrative',
+        user,
+        locale: 'en-US',
+      }),
+      wobject,
+      importingAccount: user,
+      importId,
+    });
+  }
+
+  await DuplicateListStatusModel.updateOne({
+    filter: { importId },
+    update: {
+      $inc: {
+        fieldsCreated: 1,
+        fieldsVoted: 1,
+      },
+    },
+  });
+  await DuplicateListObjectModel.updateOne({
+    filter: { _id: result._id },
+    update: {
+      $inc: {
+        fieldsCreated: 1,
+        fieldsVoted: 1,
+      },
+      processed: true,
+    },
+  });
+
+  await sendUpdateImportForUser({ account: user });
+  await new Promise((resolve) => setTimeout(resolve, 4000));
+
+  duplicateProcess({ importId, user });
+};
+
 const duplicateProcess = async ({ importId, user }) => {
   const importStatus = await DepartmentsStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
@@ -389,6 +457,12 @@ const duplicateProcess = async ({ importId, user }) => {
   if (createFields) {
     return createDuplicateFields({ importId, user });
   }
+
+  const authorityFields = await checkAuthorityFields({ importId });
+  if (authorityFields) {
+    return createAuthorityFields({ importId, user });
+  }
+
   const fieldsToVote = await checkFieldsToVote({ importId });
   if (fieldsToVote) {
     return voteForFields({ importId, user });

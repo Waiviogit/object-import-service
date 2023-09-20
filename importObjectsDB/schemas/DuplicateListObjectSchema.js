@@ -14,6 +14,7 @@ const DuplicateListObjectSchema = new Schema({
   fieldsVoted: { type: Number, default: 0 },
   duplicateCreated: { type: Boolean, default: false },
   processed: { type: Boolean, default: false },
+  voted: { type: Boolean, default: false },
   fields: {
     type: [
       {
