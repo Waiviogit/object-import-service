@@ -6,7 +6,7 @@ const waivioApi = require('../../waivioApi');
 const duplicateProcess = require('./duplicateProcess');
 
 const createDuplicateTask = async ({
-  user, authorPermlink, authority, scanEmbedded,
+  user, authorPermlink, scanEmbedded,
 }) => {
   const importId = uuid.v4();
   const { result: object } = await Wobj.findOne({
@@ -38,7 +38,6 @@ const createDuplicateTask = async ({
     rootObject: authorPermlink,
     objectsCount: links.length,
     objectsListCount: objectsList.length,
-    authority,
   });
 
   const duplicateObjects = objects.map((el) => ({

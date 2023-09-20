@@ -959,7 +959,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/departments-status"
+              "$ref": "#/definitions/duplicate-status"
             }
           },
           "422": {
@@ -981,6 +981,18 @@
             "in": "query",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
@@ -989,7 +1001,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/departments-status"
+                "$ref": "#/definitions/duplicate-status"
               }
             }
           },
@@ -1086,6 +1098,18 @@
             "in": "query",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
@@ -1094,7 +1118,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/departments-status"
+                "$ref": "#/definitions/duplicate-status"
               }
             }
           },
@@ -1206,7 +1230,7 @@
                 "result": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/departments-object"
+                    "$ref": "#/definitions/duplicate-object"
                   }
                 },
                 "hasMore": {
@@ -1461,6 +1485,79 @@
           "type": "string"
         },
         "claim": {
+          "type": "boolean"
+        }
+      }
+    },
+    "duplicate-status" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "importId": {
+          "type": "string"
+        },
+        "rootObject": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "lists": {
+          "type": "array"
+        },
+        "objectsCount": {
+          "type": "number"
+        },
+        "objectsListCount": {
+          "type": "number"
+        },
+        "objectsCreated": {
+          "type": "number"
+        },
+        "fieldsCreated": {
+          "type": "number"
+        },
+        "fieldsVoted": {
+          "type": "number"
+        }
+      }
+    },
+    "duplicate-object" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "importId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "linkToDuplicate": {
+          "type": "string"
+        },
+        "authorPermlink": {
+          "type": "string"
+        },
+        "fieldsCreated": {
+          "type": "number"
+        },
+        "fieldsVoted": {
+          "type": "number"
+        },
+        "duplicateCreated": {
+          "type": "boolean"
+        },
+        "processed": {
+          "type": "boolean"
+        },
+        "voted": {
           "type": "boolean"
         }
       }

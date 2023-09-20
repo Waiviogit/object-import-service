@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const {
-  DuplicateListObjectModel, ObjectType, DuplicateListStatusModel, Wobj, DatafinityObject, DepartmentsStatusModel,
+  DuplicateListObjectModel, ObjectType, DuplicateListStatusModel, Wobj, DepartmentsStatusModel,
 } = require('../../../models');
 const {
   OBJECT_TYPES, OBJECT_FIELDS, ARRAY_FIELDS, ARRAY_FIELDS_BODY,
@@ -250,7 +250,7 @@ const createDuplicateFields = async ({ importId, user }) => {
         fieldsCreated: 1,
         fieldsVoted: 1,
       },
-      ...(result.fields.length === 1 && { processed: true }),
+      ...(result.fields.length === 1 && { processed: true, voted: true }),
     },
   });
   await sendUpdateImportForUser({ account: user });
