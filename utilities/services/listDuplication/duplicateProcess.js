@@ -13,6 +13,7 @@ const { parseJson } = require('../../helpers/jsonHelper');
 const { voteForField } = require('../../objectBotApi');
 const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { validateImportToRun } = require('../../../validators/accountValidator');
+const {sendUpdateImportForUser} = require("../socketClient");
 
 const checkObjectsToCreate = async ({ importId }) => {
   const { count } = await DuplicateListObjectModel.count({
@@ -27,13 +28,25 @@ const checkObjectsToCreate = async ({ importId }) => {
 };
 
 const createDuplicateObject = async ({ importId, user }) => {
-  const { result } = await DuplicateListObjectModel.findOne({
-    filter: {
+  const { result: status } = await DuplicateListStatusModel.findOne({
+    importId, user,
+  });
+
+  let filter = {
+    importId,
+    type: OBJECT_TYPES.LIST,
+    duplicateCreated: false,
+  };
+  if (!status.lists.length) {
+    filter = {
       importId,
       type: OBJECT_TYPES.LIST,
+      linkToDuplicate: status.rootObject,
       duplicateCreated: false,
-    },
-  });
+    };
+  }
+
+  const { result } = await DuplicateListObjectModel.findOne({ filter });
   if (!result) return;
 
   const wobject = await prepareObjectForImport({
@@ -62,12 +75,22 @@ const createDuplicateObject = async ({ importId, user }) => {
     },
   });
 
+  let statusUpdate = {
+    $inc: { objectsCreated: 1 },
+  };
+
+  if (!status.lists.length) {
+    statusUpdate = {
+      $inc: { objectsCreated: 1 },
+      lists: [wobject.author_permlink],
+    };
+  }
+
   await DuplicateListStatusModel.updateOne({
     filter: { importId },
-    update: {
-      $inc: { objectsCreated: 1 },
-    },
+    update: statusUpdate,
   });
+  await sendUpdateImportForUser({ account: user });
 };
 
 const checkFieldsToCreate = async ({ importId }) => {
@@ -137,10 +160,15 @@ const prepareFields = async ({
             linkToDuplicate: field.body,
           },
         });
-        if (listDb && listDb.authorPermlink) {
+
+        if (listDb) {
+          const body = listDb.type === OBJECT_TYPES.LIST
+            ? listDb.authorPermlink
+            : listDb.linkToDuplicate;
+
           fields.push(formField({
             fieldName: field.name,
-            body: listDb.authorPermlink,
+            body,
             user,
             locale: field.locale,
           }));
@@ -225,6 +253,7 @@ const createDuplicateFields = async ({ importId, user }) => {
       ...(result.fields.length === 1 && { processed: true }),
     },
   });
+  await sendUpdateImportForUser({ account: user });
   await new Promise((resolve) => setTimeout(resolve, 4000));
 
   duplicateProcess({ importId, user });
@@ -335,6 +364,7 @@ const voteForFields = async ({ importId, user }) => {
       ...(result.fields.length === 1 && { processed: true }),
     },
   });
+  await sendUpdateImportForUser({ account: user });
   await new Promise((resolve) => setTimeout(resolve, 4000));
 
   duplicateProcess({ importId, user });
@@ -372,6 +402,7 @@ const duplicateProcess = async ({ importId, user }) => {
       status: IMPORT_STATUS.FINISHED,
     },
   });
+  await sendUpdateImportForUser({ account: user });
 };
 
 module.exports = duplicateProcess;

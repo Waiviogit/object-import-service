@@ -17,7 +17,9 @@ const DuplicateListStatusSchema = new Schema({
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
+  lists: { type: [String], default: [] },
   objectsCount: { type: Number, required: true },
+  objectsListCount: { type: Number, required: true },
   objectsCreated: { type: Number, default: 0 },
   fieldsCreated: { type: Number, default: 0 },
   fieldsVoted: { type: Number, default: 0 },

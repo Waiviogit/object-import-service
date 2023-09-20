@@ -22,20 +22,23 @@ const createDuplicateTask = async ({
 
   if (!links.length) return { error: new NotFoundError('List not found') };
 
-  const { result: task } = await DuplicateListStatusModel.create({
-    user,
-    importId,
-    rootObject: authorPermlink,
-    objectsCount: links.length,
-    authority,
-  });
-
   const { result: objects } = await Wobj.find({
     filter: { author_permlink: { $in: links } },
     projection: {
       author_permlink: 1,
       object_type: 1,
     },
+  });
+
+  const objectsList = objects.filter((o) => o.object_type === OBJECT_TYPES.LIST);
+
+  const { result: task } = await DuplicateListStatusModel.create({
+    user,
+    importId,
+    rootObject: authorPermlink,
+    objectsCount: links.length,
+    objectsListCount: objectsList.length,
+    authority,
   });
 
   const duplicateObjects = objects.map((el) => ({
