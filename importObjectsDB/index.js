@@ -6,5 +6,7 @@ module.exports = {
     AuthorityObject: require('./schemas/AuthorityObjectSchema'),
     DepartmentsStatus: require('./schemas/DepartmentsStatusSchema'),
     DepartmentsObject: require('./schemas/DepartmentsObjectSchema'),
+    DuplicateListObject: require('./schemas/DuplicateListObjectSchema'),
+    DuplicateListStatus: require('./schemas/DuplicateListStatusSchema'),
   },
 };

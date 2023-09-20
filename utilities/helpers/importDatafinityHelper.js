@@ -169,10 +169,10 @@ const prepareObjectForImport = async (datafinityObject) => {
     author_permlink: permlink,
     creator: datafinityObject.user,
     default_name: datafinityObject.name,
-    locale: datafinityObject.locale,
+    locale: datafinityObject.locale || 'en-US',
     is_extending_open: true,
     is_posting_open: true,
-    fields: datafinityObject.fields,
+    fields: datafinityObject.fields || [],
     datafinityObject: true,
   };
 };

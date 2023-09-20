@@ -38,6 +38,7 @@ const votePowerValidation = async ({ account, type }) => {
     [IMPORT_TYPES.OBJECTS]: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
     [IMPORT_TYPES.AUTHORITY]: `${IMPORT_REDIS_KEYS.MIN_POWER_AUTHORITY}:${account}`,
     [IMPORT_TYPES.DEPARTMENTS]: `${IMPORT_REDIS_KEYS.MIN_POWER_DEPARTMENTS}:${account}`,
+    [IMPORT_TYPES.DUPLICATE]: `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${account}`,
     default: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
   };
 
@@ -90,6 +91,7 @@ const setTtlToContinue = async ({
     [IMPORT_TYPES.OBJECTS]: `${IMPORT_REDIS_KEYS.MIN_POWER}:${user}`,
     [IMPORT_TYPES.AUTHORITY]: `${IMPORT_REDIS_KEYS.MIN_POWER_AUTHORITY}:${user}`,
     [IMPORT_TYPES.DEPARTMENTS]: `${IMPORT_REDIS_KEYS.MIN_POWER_DEPARTMENTS}:${user}`,
+    [IMPORT_TYPES.DUPLICATE]: `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${user}`,
     default: `${IMPORT_REDIS_KEYS.MIN_POWER}:${user}`,
   };
 
@@ -108,6 +110,7 @@ const setTtlToContinue = async ({
     [IMPORT_TYPES.OBJECTS]: `${IMPORT_REDIS_KEYS.CONTINUE}:${user}:${authorPermlink}:${importId}`,
     [IMPORT_TYPES.AUTHORITY]: `${IMPORT_REDIS_KEYS.CONTINUE_AUTHORITY}:${user}:${importId}`,
     [IMPORT_TYPES.DEPARTMENTS]: `${IMPORT_REDIS_KEYS.CONTINUE_DEPARTMENTS}:${user}:${importId}`,
+    [IMPORT_TYPES.DUPLICATE]: `${IMPORT_REDIS_KEYS.CONTINUE_DUPLICATE}:${user}:${importId}`,
     default: `${IMPORT_REDIS_KEYS.CONTINUE}:${user}:${authorPermlink}:${importId}`,
   };
 

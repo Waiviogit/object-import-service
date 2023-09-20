@@ -2,7 +2,11 @@ const { CronJob } = require('cron');
 const _ = require('lodash');
 const { getAccountRC } = require('../utilities/hiveApi/userUtil');
 const {
-  ImportStatusModel, AppModel, AuthorityStatusModel, DepartmentsStatusModel,
+  ImportStatusModel,
+  AppModel,
+  AuthorityStatusModel,
+  DepartmentsStatusModel,
+  DuplicateListStatusModel,
 } = require('../models');
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
@@ -12,6 +16,7 @@ const { redisSetter, redisGetter } = require('../utilities/redis');
 const config = require('../config');
 const claimProcess = require('../utilities/services/authority/claimProcess');
 const importDepartments = require('../utilities/services/departmentsService/importDepartments');
+const duplicateProcess = require('../utilities/services/listDuplication/duplicateProcess');
 
 const stopImports = async () => {
   const { result } = await ImportStatusModel.findOne({
@@ -23,9 +28,14 @@ const stopImports = async () => {
   const { result: department } = await DepartmentsStatusModel.findOne({
     filter: { status: IMPORT_STATUS.ACTIVE },
   });
+
+  const { result: duplicate } = await DuplicateListStatusModel.findOne({
+    filter: { status: IMPORT_STATUS.ACTIVE },
+  });
+
   await redisSetter
     .set({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER, value: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
-  if (!result && !authority && !department) return;
+  if (!result && !authority && !department && !duplicate) return;
 
   await ImportStatusModel.updateMany({
     filter: { status: IMPORT_STATUS.ACTIVE },
@@ -36,6 +46,11 @@ const stopImports = async () => {
     update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
   });
   await DepartmentsStatusModel.updateMany({
+    filter: { status: IMPORT_STATUS.ACTIVE },
+    update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
+  });
+
+  await DuplicateListStatusModel.updateMany({
     filter: { status: IMPORT_STATUS.ACTIVE },
     update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
   });
@@ -108,10 +123,33 @@ const startDepartmentImports = async () => {
   }
 };
 
+const startDuplicateImports = async () => {
+  const { result } = await DuplicateListStatusModel.findOne({
+    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+  });
+  if (!result) return;
+
+  const { result: stoppedImports } = await DuplicateListStatusModel.find({
+    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+  });
+  if (_.isEmpty(stoppedImports)) return;
+
+  await DuplicateListStatusModel.updateMany({
+    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+    update: { $set: { status: IMPORT_STATUS.ACTIVE } },
+  });
+
+  for (const resultElement of stoppedImports) {
+    const { user, importId } = resultElement;
+    duplicateProcess({ user, importId });
+  }
+};
+
 const startImports = async () => {
   await startObjectImports();
   await startAuthorityImports();
   await startDepartmentImports();
+  await startDuplicateImports();
 };
 
 const getAverageRc = async () => {

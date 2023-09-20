@@ -1,9 +1,11 @@
-const _ = require('lodash');
-const { ImportStatusModel, AuthorityStatusModel, DepartmentsStatusModel } = require('../../models');
+const {
+  ImportStatusModel, AuthorityStatusModel, DepartmentsStatusModel, DuplicateListStatusModel,
+} = require('../../models');
 const { startObjectImport } = require('../services/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
 const claimProcess = require('../services/authority/claimProcess');
 const importDepartments = require('../services/departmentsService/importDepartments');
+const duplicateProcess = require('../services/listDuplication/duplicateProcess');
 
 module.exports = async () => {
   const { result } = await ImportStatusModel.find({
@@ -15,6 +17,10 @@ module.exports = async () => {
   });
 
   const { result: departmentImports } = await DepartmentsStatusModel.find({
+    filter: { status: IMPORT_STATUS.ACTIVE },
+  });
+
+  const { result: duplicateImports } = await DuplicateListStatusModel.find({
     filter: { status: IMPORT_STATUS.ACTIVE },
   });
 
@@ -31,5 +37,10 @@ module.exports = async () => {
   for (const departmentImport of departmentImports) {
     const { user, importId } = departmentImport;
     importDepartments({ user, importId });
+  }
+
+  for (const duplicateImport of duplicateImports) {
+    const { user, importId } = duplicateImport;
+    duplicateProcess({ user, importId });
   }
 };
