@@ -66,10 +66,7 @@ const createDuplicateObject = async ({ importId, user }) => {
   await addWobject({ wobject, existObjType, addData: false });
 
   await DuplicateListObjectModel.updateOne({
-    filter: {
-      importId,
-      type: OBJECT_TYPES.LIST,
-    },
+    filter: { _id: result._id },
     update: {
       $set: {
         duplicateCreated: true,
