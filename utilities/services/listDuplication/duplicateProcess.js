@@ -326,10 +326,10 @@ const voteForFields = async ({ importId, user }) => {
   if (!result) return;
 
   const { result: wobject } = await Wobj.findOne({
-    filter: { author_permlink: result.authorPermlink },
+    filter: { author_permlink: result.linkToDuplicate },
   });
 
-  if (!result) return;
+  if (!wobject) return;
   if (!result?.fields?.length) {
     await prepareFieldsForVote({ linkToDuplicate: result.linkToDuplicate, importId });
     duplicateProcess({ importId, user });
@@ -361,7 +361,7 @@ const voteForFields = async ({ importId, user }) => {
       $inc: {
         fieldsVoted: 1,
       },
-      ...(result.fields.length === 1 && { processed: true }),
+      ...(result.fields.length === 1 && { voted: true }),
     },
   });
   await sendUpdateImportForUser({ account: user });
