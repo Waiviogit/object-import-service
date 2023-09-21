@@ -54,6 +54,14 @@ const findOneAndUpdate = async ({ filter, update, options }) => {
   }
 };
 
+const getUserImport = async ({ user, importId }) => {
+  const { result, error } = await findOne({
+    filter: { user, importId },
+  });
+  if (!result || error) return;
+  return result;
+};
+
 module.exports = {
   create,
   updateOne,
@@ -61,4 +69,5 @@ module.exports = {
   updateMany,
   find,
   findOneAndUpdate,
+  getUserImport,
 };

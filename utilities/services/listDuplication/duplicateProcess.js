@@ -1,6 +1,9 @@
 const _ = require('lodash');
 const {
-  DuplicateListObjectModel, ObjectType, DuplicateListStatusModel, Wobj, DepartmentsStatusModel,
+  DuplicateListObjectModel,
+  ObjectType,
+  DuplicateListStatusModel,
+  Wobj,
 } = require('../../../models');
 const {
   OBJECT_TYPES, OBJECT_FIELDS, ARRAY_FIELDS, ARRAY_FIELDS_BODY,
@@ -439,7 +442,7 @@ const createAuthorityFields = async ({ importId, user }) => {
 };
 
 const duplicateProcess = async ({ importId, user }) => {
-  const importStatus = await DepartmentsStatusModel.getUserImport({ user, importId });
+  const importStatus = await DuplicateListStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;
 
@@ -467,7 +470,7 @@ const duplicateProcess = async ({ importId, user }) => {
   if (fieldsToVote) {
     return voteForFields({ importId, user });
   }
-  await DepartmentsStatusModel.updateOne({
+  await DuplicateListStatusModel.updateOne({
     filter: {
       user,
       importId,
