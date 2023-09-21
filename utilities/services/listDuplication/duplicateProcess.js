@@ -258,7 +258,7 @@ const createDuplicateFields = async ({ importId, user }) => {
   duplicateProcess({ importId, user });
 };
 
-const prepareFieldsForVote = async ({ linkToDuplicate, importId }) => {
+const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
   const { result: original } = await Wobj.findOne({
     filter: { author_permlink: linkToDuplicate },
   });
@@ -269,6 +269,9 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId }) => {
 
   for (const field of original.fields) {
     if (field.name === OBJECT_FIELDS.AUTHORITY) continue;
+    const positiveVote = field?.active_votes?.find((v) => v.voter === user && v.percent > 0);
+    if (positiveVote) continue;
+
     const { author, permlink } = field;
     const processed = originalProcessed[field.name] === field.body;
     if (processed) {
@@ -331,7 +334,11 @@ const voteForFields = async ({ importId, user }) => {
 
   if (!wobject) return;
   if (!result?.fields?.length) {
-    await prepareFieldsForVote({ linkToDuplicate: result.linkToDuplicate, importId });
+    await prepareFieldsForVote({
+      linkToDuplicate: result.linkToDuplicate,
+      importId,
+      user,
+    });
     duplicateProcess({ importId, user });
     return;
   }
@@ -473,6 +480,7 @@ const duplicateProcess = async ({ importId, user }) => {
     },
     update: {
       status: IMPORT_STATUS.FINISHED,
+      finishedAt: new Date(),
     },
   });
   await sendUpdateImportForUser({ account: user });
