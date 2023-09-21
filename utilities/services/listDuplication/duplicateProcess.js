@@ -188,14 +188,13 @@ const prepareFields = async ({
     }
   }
 
-  fields.push(
-    fields.push(formField({
-      fieldName: 'authority',
-      body: 'administrative',
-      user,
-      locale: 'en-US',
-    })),
-  );
+  fields.push(formField({
+    fieldName: 'authority',
+    body: 'administrative',
+    user,
+    locale: 'en-US',
+  }));
+
   await DuplicateListObjectModel.updateOne({
     filter: {
       importId,
