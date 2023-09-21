@@ -42,7 +42,7 @@ const setVotingPower = async (req, res, next) => {
 
   if (!value) return;
   await redisSetter.set({
-    key: `${IMPORT_REDIS_KEYS.MIN_POWER_DEPARTMENTS}:${value.user}`,
+    key: `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${value.user}`,
     value: value.minVotingPower,
   });
 
