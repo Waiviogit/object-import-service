@@ -27,6 +27,7 @@ const createDuplicateTask = async ({
     projection: {
       author_permlink: 1,
       object_type: 1,
+      default_name: 1,
     },
   });
 
