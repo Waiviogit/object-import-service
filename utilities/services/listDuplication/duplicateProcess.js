@@ -32,7 +32,7 @@ const checkObjectsToCreate = async ({ importId }) => {
 
 const createDuplicateObject = async ({ importId, user }) => {
   const { result: status } = await DuplicateListStatusModel.findOne({
-    importId, user,
+    filter: { importId, user },
   });
 
   let filter = {
