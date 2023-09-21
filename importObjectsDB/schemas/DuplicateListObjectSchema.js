@@ -21,6 +21,7 @@ const DuplicateListObjectSchema = new Schema({
         weight: Number,
         locale: String,
         creator: String,
+        author: String,
         permlink: String,
         name: String,
         body: String,
