@@ -137,6 +137,7 @@ const prepareFields = async ({
         user,
         locale: field.locale,
       }));
+      continue;
     }
     if (['pin', 'remove'].includes(field.name)) {
       const pinOrRemove = originalProcessed[field.name]
@@ -149,6 +150,7 @@ const prepareFields = async ({
           locale: field.locale,
         }));
       }
+      continue;
     }
     if (field.name === 'listItem') {
       const list = originalProcessed[field.name]
@@ -174,6 +176,7 @@ const prepareFields = async ({
           }));
         }
       }
+      continue;
     }
     if (field.name === 'sortCustom') {
       const json = parseJson(field.body);
@@ -183,6 +186,62 @@ const prepareFields = async ({
           body: field.body,
           user,
           locale: field.locale,
+        }));
+      }
+      continue;
+    }
+    if (field.name === 'parent') {
+      const sameParent = originalProcessed?.parent?.author_permlink === field.body;
+      if (sameParent) {
+        const { result } = await DuplicateListObjectModel.findOne({
+          filter: {
+            importId,
+            linkToDuplicate: field.body,
+          },
+        });
+
+        const body = result?.authorPermlink
+          ? result?.authorPermlink
+          : field.body;
+
+        fields.push(formField({
+          fieldName: field.name,
+          body,
+          user,
+          locale: field.locale,
+        }));
+      }
+      continue;
+    }
+
+    if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
+      const hasMatchingItem = (originalProcessed?.tagCategory ?? [])
+        .some((item) => item.items
+          .some((subItem) => subItem.author === field.author
+              && subItem.permlink === field.permlink));
+      if (hasMatchingItem) {
+        fields.push(formField({
+          fieldName: field.name,
+          body: field.body,
+          user,
+          locale: field.locale,
+          id: field.id,
+        }));
+      }
+      continue;
+    }
+
+    if (ARRAY_FIELDS.includes(field.name)) {
+      const arrItem = originalProcessed[field.name]?.find(
+        (f) => f.author === field.author && f.permlink === field.permlink,
+      );
+      if (arrItem) {
+        fields.push(formField({
+          fieldName: field.name,
+          body: field.body,
+          user,
+          locale: field.locale,
+          ...(field.name === OBJECT_FIELDS.TAG_CATEGORY && { id: field.id }),
         }));
       }
     }
@@ -304,6 +363,11 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
       if (_.isEqual(json, originalProcessed?.sortCustom)) {
         fields.push({ author, permlink });
       }
+    }
+
+    if (field.name === 'parent') {
+      const sameParent = originalProcessed?.parent?.author_permlink === field.body;
+      if (sameParent) fields.push({ author, permlink });
     }
   }
 
