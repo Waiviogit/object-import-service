@@ -370,6 +370,18 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
       if (sameParent) fields.push({ author, permlink });
     }
   }
+  if (!fields.length) {
+    await DuplicateListObjectModel.updateOne({
+      filter: {
+        importId,
+        linkToDuplicate,
+      },
+      update: {
+        voted: true,
+      },
+    });
+    duplicateProcess({ importId, user });
+  }
 
   await DuplicateListObjectModel.updateOne({
     filter: {
