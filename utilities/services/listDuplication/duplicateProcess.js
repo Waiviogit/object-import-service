@@ -335,27 +335,34 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
     const processed = originalProcessed[field.name] === field.body;
     if (processed) {
       fields.push({ author, permlink });
+      continue;
     }
-    if (ARRAY_FIELDS.includes(field.name)) {
-      const item = originalProcessed[field.name]?.find((f) => f.author === field.author && f.permlink === field.permlink);
-      if (item) {
-        fields.push({ author, permlink });
-      }
-      if (field.name === OBJECT_FIELDS.OPTIONS) {
-        for (const option in originalProcessed.options) {
-          const el = originalProcessed.options[option]
-            ?.find((f) => f.author === field.author && f.permlink === field.permlink);
-          if (el) {
-            fields.push({ author, permlink });
-          }
-        }
-      }
-      if (ARRAY_FIELDS_BODY.includes(field.name)) {
-        const el = originalProcessed[field.name]?.find((f) => f === field.body);
+    if (field.name === OBJECT_FIELDS.OPTIONS) {
+      for (const option in originalProcessed.options) {
+        const el = originalProcessed.options[option]
+          ?.find((f) => f.author === field.author && f.permlink === field.permlink);
         if (el) {
           fields.push({ author, permlink });
         }
       }
+      continue;
+    }
+
+    if (ARRAY_FIELDS_BODY.includes(field.name)) {
+      const el = originalProcessed[field.name]?.find((f) => f === field.body);
+      if (el) {
+        fields.push({ author, permlink });
+      }
+      continue;
+    }
+    if (ARRAY_FIELDS.includes(field.name)) {
+      const item = originalProcessed
+        ?.[field.name]
+        ?.find((f) => f.author === field.author && f.permlink === field.permlink);
+      if (item) {
+        fields.push({ author, permlink });
+      }
+      continue;
     }
 
     if (field.name === 'sortCustom') {
@@ -363,6 +370,7 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
       if (_.isEqual(json, originalProcessed?.sortCustom)) {
         fields.push({ author, permlink });
       }
+      continue;
     }
 
     if (field.name === 'parent') {
