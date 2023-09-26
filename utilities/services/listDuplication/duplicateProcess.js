@@ -347,7 +347,16 @@ const prepareFieldsForVote = async ({ linkToDuplicate, importId, user }) => {
       }
       continue;
     }
-
+    if (field.name === OBJECT_FIELDS.CATEGORY_ITEM) {
+      const hasMatchingItem = (originalProcessed?.tagCategory ?? [])
+        .some((item) => item.items
+          .some((subItem) => subItem.author === field.author
+                  && subItem.permlink === field.permlink));
+      if (hasMatchingItem) {
+        fields.push({ author, permlink });
+      }
+      continue;
+    }
     if (ARRAY_FIELDS_BODY.includes(field.name)) {
       const el = originalProcessed[field.name]?.find((f) => f === field.body);
       if (el) {
