@@ -28,6 +28,9 @@ exports.WHITE_LIST = [
   'cryptodive',
   'organicvibes',
   'rusn',
+  'picmylife',
+  'misslasvegas',
+  'purewellness',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
