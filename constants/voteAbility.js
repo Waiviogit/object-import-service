@@ -31,6 +31,7 @@ exports.WHITE_LIST = [
   'picmylife',
   'misslasvegas',
   'purewellness',
+  'talismaan',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
