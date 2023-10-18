@@ -32,6 +32,7 @@ exports.WHITE_LIST = [
   'misslasvegas',
   'purewellness',
   'talismaan',
+  'seanglife',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
