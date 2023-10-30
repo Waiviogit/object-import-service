@@ -71,6 +71,7 @@ exports.OBJECT_FIELDS = {
   GROUP_ID: 'groupId',
   RATING: 'rating',
   MENU_ITEM: 'menuItem',
+  TITLE: 'title',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -327,3 +328,9 @@ exports.ARRAY_FIELDS = [
 ];
 
 exports.ARRAY_FIELDS_BODY = ['remove', 'groupId', 'affiliateGeoArea', 'affiliateProductIdTypes'];
+
+exports.FIELDS_TO_REWRITE_GPT = [
+  this.OBJECT_FIELDS.NAME,
+  this.OBJECT_FIELDS.TITLE,
+  this.OBJECT_FIELDS.DESCRIPTION,
+];

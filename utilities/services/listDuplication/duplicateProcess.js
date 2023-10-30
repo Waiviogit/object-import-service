@@ -6,7 +6,7 @@ const {
   Wobj,
 } = require('../../../models');
 const {
-  OBJECT_TYPES, OBJECT_FIELDS, ARRAY_FIELDS, ARRAY_FIELDS_BODY,
+  OBJECT_TYPES, OBJECT_FIELDS, ARRAY_FIELDS, ARRAY_FIELDS_BODY, FIELDS_TO_REWRITE_GPT,
 } = require('../../../constants/objectTypes');
 const { prepareObjectForImport } = require('../../helpers/importDatafinityHelper');
 const { addWobject, addField } = require('../importObjectsService');
@@ -17,6 +17,7 @@ const { voteForField } = require('../../objectBotApi');
 const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
+const { gptCreateCompletion } = require('../gptService');
 
 const checkObjectsToCreate = async ({ importId }) => {
   const { count } = await DuplicateListObjectModel.count({
@@ -117,6 +118,32 @@ const checkFieldsToVote = async ({ importId }) => {
   return !!count;
 };
 
+const promptsByFieldName = {
+  name: 'rewrite name of a product:',
+  title: 'rewrite title :',
+  description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
+};
+
+const rewriteBodyWithGpt = async ({ objectType, field }) => {
+  if (!FIELDS_TO_REWRITE_GPT.includes(field.name)) return field.body;
+
+  if (objectType === OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.NAME) {
+    return field.body;
+  }
+  if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
+    return field.body;
+  }
+  const prompt = promptsByFieldName[objectType];
+
+  const { result, error } = await gptCreateCompletion({
+    content: prompt,
+  });
+
+  if (!result || error) return field.body;
+
+  return result;
+};
+
 const prepareFields = async ({
   linkToDuplicate, importId, user,
 }) => {
@@ -131,9 +158,14 @@ const prepareFields = async ({
   for (const field of original.fields) {
     const processed = originalProcessed[field.name] === field.body;
     if (processed) {
+      const fieldBody = await rewriteBodyWithGpt({
+        objectType: original.object_type,
+        field,
+      });
+
       fields.push(formField({
         fieldName: field.name,
-        body: field.body,
+        body: fieldBody,
         user,
         locale: field.locale,
       }));
