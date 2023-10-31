@@ -120,7 +120,7 @@ const checkFieldsToVote = async ({ importId }) => {
 
 const promptsByFieldName = {
   name: 'rewrite name of a product',
-  title: 'rewrite title',
+  title: 'rewrite title, 500 symbols max',
   description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
 
