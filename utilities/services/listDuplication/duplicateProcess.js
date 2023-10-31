@@ -119,8 +119,8 @@ const checkFieldsToVote = async ({ importId }) => {
 };
 
 const promptsByFieldName = {
-  name: 'rewrite name of a product:',
-  title: 'rewrite title :',
+  name: 'rewrite name of a product',
+  title: 'rewrite title',
   description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
 
@@ -133,7 +133,7 @@ const rewriteBodyWithGpt = async ({ objectType, field }) => {
   if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
     return field.body;
   }
-  const prompt = promptsByFieldName[objectType];
+  const prompt = `${promptsByFieldName[objectType]}: ${field.body}`;
 
   const { result, error } = await gptCreateCompletion({
     content: prompt,
