@@ -5,6 +5,7 @@ const { importAccountValidator } = require('../validators/accountValidator');
 const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
+const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 
 const importDepartments = async (req, res, next) => {
   const value = validators.validate(
@@ -14,8 +15,10 @@ const importDepartments = async (req, res, next) => {
   );
   if (!value) return;
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   const { result: validAcc, error: accError } = await importAccountValidator(
@@ -36,8 +39,10 @@ const setVotingPower = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;
@@ -118,8 +123,10 @@ const changeImportDetails = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;
@@ -138,8 +145,10 @@ const deleteImport = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;
