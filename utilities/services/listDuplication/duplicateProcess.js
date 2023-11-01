@@ -18,6 +18,7 @@ const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { gptCreateCompletion } = require('../gptService');
+const { removeQuotes } = require('../../helpers/stringFormatHelper');
 
 const checkObjectsToCreate = async ({ importId }) => {
   const { count } = await DuplicateListObjectModel.count({
@@ -141,7 +142,7 @@ const rewriteBodyWithGpt = async ({ objectType, field }) => {
 
   if (!result || error) return field.body;
 
-  return result;
+  return removeQuotes(result);
 };
 
 const prepareFields = async ({
