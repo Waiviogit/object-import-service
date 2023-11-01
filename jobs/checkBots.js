@@ -7,6 +7,7 @@ const {
   AuthorityStatusModel,
   DepartmentsStatusModel,
   DuplicateListStatusModel,
+  DescriptionStatusModel,
 } = require('../models');
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
@@ -17,139 +18,77 @@ const config = require('../config');
 const claimProcess = require('../utilities/services/authority/claimProcess');
 const importDepartments = require('../utilities/services/departmentsService/importDepartments');
 const duplicateProcess = require('../utilities/services/listDuplication/duplicateProcess');
+const rewriteDescription = require('../utilities/services/descriptionBot/rewriteDescription');
+
+const processes = [
+  {
+    model: ImportStatusModel,
+    processStarter: startObjectImport,
+  },
+  {
+    model: AuthorityStatusModel,
+    processStarter: claimProcess,
+  },
+  {
+    model: DepartmentsStatusModel,
+    processStarter: importDepartments,
+  },
+
+  {
+    model: DuplicateListStatusModel,
+    processStarter: duplicateProcess,
+  },
+  {
+    model: DescriptionStatusModel,
+    processStarter: rewriteDescription,
+  },
+];
 
 const stopImports = async () => {
-  const { result } = await ImportStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-  });
-  const { result: authority } = await AuthorityStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-  });
-  const { result: department } = await DepartmentsStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-  });
-
-  const { result: duplicate } = await DuplicateListStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-  });
-
+  let activeImport = false;
+  for (const process of processes) {
+    const { result } = await process.model.findOne({
+      filter: { status: IMPORT_STATUS.ACTIVE },
+    });
+    if (result) {
+      activeImport = true;
+      break;
+    }
+  }
   await redisSetter
     .set({ key: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER, value: IMPORT_REDIS_KEYS.STOP_FOR_RECOVER });
-  if (!result && !authority && !department && !duplicate) return;
+  if (!activeImport) return;
 
-  await ImportStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-    update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
-  });
-  await AuthorityStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-    update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
-  });
-  await DepartmentsStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-    update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
-  });
-
-  await DuplicateListStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.ACTIVE },
-    update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
-  });
-};
-
-const startObjectImports = async () => {
-  const { result } = await ImportStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  await redisSetter.delImportWobjData(IMPORT_REDIS_KEYS.STOP_FOR_RECOVER);
-  if (!result) return;
-
-  const { result: stoppedImports } = await ImportStatusModel.find({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (_.isEmpty(stoppedImports)) return;
-
-  await ImportStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-    update: { $set: { status: IMPORT_STATUS.ACTIVE } },
-  });
-
-  for (const resultElement of stoppedImports) {
-    const { user, importId } = resultElement;
-    await startObjectImport({ user, importId });
-  }
-};
-
-const startAuthorityImports = async () => {
-  const { result } = await AuthorityStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (!result) return;
-
-  const { result: stoppedImports } = await AuthorityStatusModel.find({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (_.isEmpty(stoppedImports)) return;
-
-  await AuthorityStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-    update: { $set: { status: IMPORT_STATUS.ACTIVE } },
-  });
-
-  for (const resultElement of stoppedImports) {
-    const { user, importId } = resultElement;
-    claimProcess({ user, importId });
-  }
-};
-
-const startDepartmentImports = async () => {
-  const { result } = await DepartmentsStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (!result) return;
-
-  const { result: stoppedImports } = await DepartmentsStatusModel.find({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (_.isEmpty(stoppedImports)) return;
-
-  await DepartmentsStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-    update: { $set: { status: IMPORT_STATUS.ACTIVE } },
-  });
-
-  for (const resultElement of stoppedImports) {
-    const { user, importId } = resultElement;
-    importDepartments({ user, importId });
-  }
-};
-
-const startDuplicateImports = async () => {
-  const { result } = await DuplicateListStatusModel.findOne({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (!result) return;
-
-  const { result: stoppedImports } = await DuplicateListStatusModel.find({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-  });
-  if (_.isEmpty(stoppedImports)) return;
-
-  await DuplicateListStatusModel.updateMany({
-    filter: { status: IMPORT_STATUS.WAITING_RECOVER },
-    update: { $set: { status: IMPORT_STATUS.ACTIVE } },
-  });
-
-  for (const resultElement of stoppedImports) {
-    const { user, importId } = resultElement;
-    duplicateProcess({ user, importId });
+  for (const process of processes) {
+    await process.model.updateMany({
+      filter: { status: IMPORT_STATUS.ACTIVE },
+      update: { $set: { status: IMPORT_STATUS.WAITING_RECOVER } },
+    });
   }
 };
 
 const startImports = async () => {
-  await startObjectImports();
-  await startAuthorityImports();
-  await startDepartmentImports();
-  await startDuplicateImports();
+  for (const process of processes) {
+    const { result } = await process.model.findOne({
+      filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+    });
+    if (!result) return;
+
+    const { result: stoppedImports } = await process.model.find({
+      filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+    });
+    if (_.isEmpty(stoppedImports)) return;
+
+    await process.model.updateMany({
+      filter: { status: IMPORT_STATUS.WAITING_RECOVER },
+      update: { $set: { status: IMPORT_STATUS.ACTIVE } },
+    });
+
+    for (const resultElement of stoppedImports) {
+      const { user, importId } = resultElement;
+      process.processStarter({ user, importId });
+    }
+  }
 };
 
 const getAverageRc = async () => {
