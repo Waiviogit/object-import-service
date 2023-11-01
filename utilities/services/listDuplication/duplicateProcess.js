@@ -120,7 +120,7 @@ const checkFieldsToVote = async ({ importId }) => {
 
 const promptsByFieldName = {
   name: 'rewrite name of a product',
-  title: 'Using your best SEO and copywriting skills, rephrase the title in 1 sentence',
+  title: 'rephrase following title in 1 sentence',
   description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
 
