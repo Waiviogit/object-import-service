@@ -1515,7 +1515,7 @@
         }
       }
     },
-    "/import-objects-service/ddescription-bot/objects": {
+    "/import-objects-service/description-bot/objects": {
       "post": {
         "tags": [
           "description"
