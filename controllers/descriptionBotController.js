@@ -57,7 +57,7 @@ const getVotingPower = async (req, res, next) => {
   );
   if (!value) return;
 
-  const key = `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${value.user}`;
+  const key = `${IMPORT_REDIS_KEYS.MIN_POWER_DESCRIPTION}:${value.user}`;
   const power = await redisGetter.get({ key });
   if (power) {
     return res.status(200).json({ minVotingPower: Number(power), user: value.user });
