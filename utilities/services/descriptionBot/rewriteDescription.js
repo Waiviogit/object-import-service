@@ -20,7 +20,6 @@ const checkFieldsToCreate = async ({ importId }) => {
   const { count } = await DescriptionObjectModel.count({
     filter: {
       importId,
-      type: OBJECT_TYPES.LIST,
       processed: false,
     },
   });
