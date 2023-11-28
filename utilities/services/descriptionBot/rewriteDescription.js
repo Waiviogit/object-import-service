@@ -142,10 +142,7 @@ const rewriteFields = async ({ importId, user }) => {
     await DescriptionStatusModel.updateOne({
       filter: { importId },
       update: {
-        $inc: {
-          fieldsCreated: 1,
-          fieldsVoted: 1,
-        },
+        $inc: { objectsUpdated: 1 },
       },
     });
     await sendUpdateImportForUser({ account: user });
