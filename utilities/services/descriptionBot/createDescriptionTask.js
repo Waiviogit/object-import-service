@@ -3,6 +3,7 @@ const { Wobj, DescriptionObjectModel, DescriptionStatusModel } = require('../../
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
 const { NotFoundError, NotAcceptableError, ServiceUnavailableError } = require('../../../constants/httpErrors');
 const waivioApi = require('../../waivioApi');
+const rewriteDescription = require('./rewriteDescription');
 
 const createDuplicateTask = async ({
   user, authorPermlink, scanEmbedded,
@@ -46,6 +47,8 @@ const createDuplicateTask = async ({
   }));
 
   await DescriptionObjectModel.insertMany(duplicateObjects);
+
+  rewriteDescription({ importId, user });
 
   return {
     result: task,
