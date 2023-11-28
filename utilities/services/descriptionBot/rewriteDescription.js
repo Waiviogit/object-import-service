@@ -128,7 +128,7 @@ const rewriteFields = async ({ importId, user }) => {
     });
   }
 
-  const conditionForProcessed = result.fields.length === 1 || result.fields.length;
+  const conditionForProcessed = result.fields.length === 1 || !result.fields.length;
 
   await DescriptionObjectModel.updateOne({
     filter: { _id: result._id },
