@@ -72,12 +72,12 @@ const startImports = async () => {
     const { result } = await process.model.findOne({
       filter: { status: IMPORT_STATUS.WAITING_RECOVER },
     });
-    if (!result) return;
+    if (!result) continue;
 
     const { result: stoppedImports } = await process.model.find({
       filter: { status: IMPORT_STATUS.WAITING_RECOVER },
     });
-    if (_.isEmpty(stoppedImports)) return;
+    if (_.isEmpty(stoppedImports)) continue;
 
     await process.model.updateMany({
       filter: { status: IMPORT_STATUS.WAITING_RECOVER },
