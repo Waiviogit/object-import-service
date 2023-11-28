@@ -119,12 +119,14 @@ const rewriteFields = async ({ importId, user }) => {
     filter: { author_permlink: result.authorPermlink },
   });
 
-  await addField({
-    field: result.fields[0],
-    wobject,
-    importingAccount: user,
-    importId,
-  });
+  if (result.fields[0]) {
+    await addField({
+      field: result.fields[0],
+      wobject,
+      importingAccount: user,
+      importId,
+    });
+  }
 
   const conditionForProcessed = result.fields.length === 1 || result.fields.length;
 
