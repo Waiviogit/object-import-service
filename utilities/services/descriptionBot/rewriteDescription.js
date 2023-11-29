@@ -68,7 +68,7 @@ const prepareFields = async ({
 
   const fields = [];
 
-  const fieldsCreatedByUser = originalFields.filter((el) => el.created === user);
+  const fieldsCreatedByUser = originalFields.filter((el) => el.creator === user);
 
   for (const field of originalFields) {
     const processed = originalProcessed[field.name] === field.body;
