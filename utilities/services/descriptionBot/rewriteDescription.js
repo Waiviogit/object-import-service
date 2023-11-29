@@ -68,14 +68,20 @@ const prepareFields = async ({
 
   const fields = [];
 
+  const fieldsCreatedByUser = originalFields.filter((el) => el.created === user);
+
   for (const field of originalFields) {
     const processed = originalProcessed[field.name] === field.body;
+
     if (processed) {
-      if (field.creator === user) continue;
+      const userExistField = fieldsCreatedByUser.find((el) => el.name === field.name);
+      if (userExistField) continue;
+
       const fieldBody = await rewriteBodyWithGpt({
         objectType: original.object_type,
         field,
       });
+
       if (!fieldBody) continue;
 
       fields.push(formField({
