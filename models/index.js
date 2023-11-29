@@ -11,4 +11,6 @@ module.exports = {
   DepartmentsObjectModel: require('./importDb/DepartmentsObjectModel'),
   DuplicateListStatusModel: require('./importDb/DuplicateListStatusModel'),
   DuplicateListObjectModel: require('./importDb/DuplicateListObjectModel'),
+  DescriptionObjectModel: require('./importDb/DescriptionObjectModel'),
+  DescriptionStatusModel: require('./importDb/DescriptionStatusModel'),
 };

@@ -22,10 +22,12 @@ const IMPORT_REDIS_KEYS = {
   CONTINUE_AUTHORITY: 'continue_authority',
   CONTINUE_DEPARTMENTS: 'continue_departments',
   CONTINUE_DUPLICATE: 'continue_duplicate',
+  CONTINUE_DESCRIPTION: 'continue_description',
   MIN_POWER: 'min_power',
   MIN_POWER_AUTHORITY: 'min_power_authority',
   MIN_POWER_DEPARTMENTS: 'min_power_departments',
   MIN_POWER_DUPLICATE: 'min_power_duplicate',
+  MIN_POWER_DESCRIPTION: 'min_power_description',
   STOP_FOR_RECOVER: 'stop_for_recover',
   PENDING: 'pending',
 };
@@ -94,6 +96,7 @@ const IMPORT_TYPES = {
   AUTHORITY: 'authority',
   DEPARTMENTS: 'departments',
   DUPLICATE: 'duplicate',
+  DESCRIPTION: 'description',
 };
 
 module.exports = {
