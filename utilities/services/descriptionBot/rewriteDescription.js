@@ -39,6 +39,9 @@ const rewriteBodyWithGpt = async ({ objectType, field }) => {
   if (objectType === OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.NAME) {
     return '';
   }
+  if (objectType === OBJECT_TYPES.BOOK && field.name === OBJECT_FIELDS.NAME) {
+    return '';
+  }
   if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
     return '';
   }
