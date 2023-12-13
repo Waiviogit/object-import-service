@@ -28,7 +28,7 @@ const checkFieldsToCreate = async ({ importId }) => {
 };
 
 const promptsByFieldName = {
-  name: 'rewrite name of a product. Provide a concise and clear product name, avoiding any additional phrases or prefixes',
+  name: 'rewrite name of a product, avoiding any not related phrases in response',
   title: 'Using your best SEO and copywriting skills, help me formulate an engaging title, max 250 symbols. Here\'s the original for reference',
   description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
