@@ -4,28 +4,8 @@ const { formField } = require('../../../helpers/formFieldHelper');
 const { getAuthorsData } = require('../../../helpers/amazonParseHelper');
 const { AMAZON_HOST } = require('../../../../constants/requestsConstants');
 
-module.exports = async (object) => {
+const getAuthorFieldsFromPage = async ({ object, priceDataWithUrl, merchant }) => {
   const fields = [];
-  const merchant = 'amazon';
-  const priceDataWithUrl = _.find(object.prices,
-    (el) => _.includes(_.get(el, 'merchant'), merchant));
-
-  if (!priceDataWithUrl) {
-    const authorsFeature = _.find(object.features, (f) => f.key === FEATURES_KEYS.AUTHORS);
-
-    if (!authorsFeature) return;
-    const authorsFeatureValue = _.uniq(authorsFeature.value);
-    for (const authorsFeatureValueElement of authorsFeatureValue) {
-      fields.push(formField({
-        fieldName: OBJECT_FIELDS.AUTHORS,
-        body: JSON.stringify({ name: authorsFeatureValueElement }),
-        user: object.user,
-        locale: object.locale,
-      }));
-    }
-    if (fields.length) return fields;
-    return;
-  }
   let url = _.find(_.get(priceDataWithUrl, 'sourceURLs'), (el) => el.includes(merchant));
   if (!url) {
     if (!object.asins) return;
@@ -51,4 +31,39 @@ module.exports = async (object) => {
     });
   }
   if (fields.length) return fields;
+};
+
+module.exports = async (object) => {
+  const fields = [];
+  const merchant = 'amazon';
+  const priceDataWithUrl = _.find(
+    object.prices,
+    (el) => _.includes(_.get(el, 'merchant'), merchant),
+  );
+
+  if (!priceDataWithUrl) {
+    const fieldsFromPage = await getAuthorFieldsFromPage({
+      object, merchant, priceDataWithUrl,
+    });
+    if (fieldsFromPage && fieldsFromPage.length) {
+      return fieldsFromPage;
+    }
+
+    const authorsFeature = _.find(object.features, (f) => f.key === FEATURES_KEYS.AUTHORS);
+    if (!authorsFeature) return;
+    const authorsFeatureValue = _.uniq(authorsFeature.value);
+    for (const authorsFeatureValueElement of authorsFeatureValue) {
+      fields.push(formField({
+        fieldName: OBJECT_FIELDS.AUTHORS,
+        body: JSON.stringify({ name: authorsFeatureValueElement }),
+        user: object.user,
+        locale: object.locale,
+      }));
+    }
+
+    if (fields.length) return fields;
+    return;
+  }
+
+  return getAuthorFieldsFromPage({ object, merchant, priceDataWithUrl });
 };
