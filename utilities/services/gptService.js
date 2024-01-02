@@ -72,7 +72,7 @@ const makeProductDescription = async (product = '') => {
   if (!positiveAnswer) return '';
 
   const { result, error } = await gptCreateCompletion({
-    content: `${BASIC_PROMPT} ${product}, try not to use name of the product`,
+    content: `${BASIC_PROMPT} ${product}`,
   });
 
   if (!result || error) return '';
