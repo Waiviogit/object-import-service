@@ -127,6 +127,8 @@ const rewriteFields = async ({ importId, user }) => {
     filter: { author_permlink: result.authorPermlink },
   });
 
+  const alreadyProcessed = result?.fieldsCreated && !result.fields.length;
+
   if (result.fields[0]) {
     await addField({
       field: result.fields[0],
@@ -146,7 +148,7 @@ const rewriteFields = async ({ importId, user }) => {
     },
   });
 
-  if (conditionForProcessed) {
+  if (conditionForProcessed && !alreadyProcessed) {
     await DescriptionStatusModel.updateOne({
       filter: { importId },
       update: {
@@ -156,7 +158,9 @@ const rewriteFields = async ({ importId, user }) => {
     await sendUpdateImportForUser({ account: user });
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 4000));
+  if (!alreadyProcessed) {
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+  }
 
   rewriteDescription({ importId, user });
 };
