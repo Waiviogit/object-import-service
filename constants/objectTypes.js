@@ -72,6 +72,8 @@ exports.OBJECT_FIELDS = {
   RATING: 'rating',
   MENU_ITEM: 'menuItem',
   TITLE: 'title',
+  LINK: 'link',
+  PHONE: 'phone',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -90,6 +92,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
   ],
   business: [
     this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.ADDRESS,
     this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,

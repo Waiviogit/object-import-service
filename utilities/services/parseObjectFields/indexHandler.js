@@ -26,4 +26,6 @@ module.exports = {
   price: require('./fields/price'),
   description: require('./fields/description'),
   groupId: require('./fields/groupId'),
+  link: require('./fields/link'),
+  phone: require('./fields/phone'),
 };

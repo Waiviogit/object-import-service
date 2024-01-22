@@ -27,6 +27,7 @@ const DatafinityObjectSchema = new Schema({
         asin: String,
         connectedObject: Boolean,
         bookName: String,
+        number: String,
       },
     ],
     default: [],
