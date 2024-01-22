@@ -80,6 +80,23 @@ const makeProductDescription = async (product = '') => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const makeBusinessDescription = async (business = {}) => {
+  const { result: firstResponse, error: answerError } = await gptCreateCompletion({
+    content: `${QUESTION_PROMPT} ${business.name}, ${business.address ? `located at ${business.address},` : ''} answer only yes or no`,
+  });
+  if (answerError) return '';
+  const positiveAnswer = checkForPositiveAnswer(firstResponse);
+  if (!positiveAnswer) return '';
+
+  const { result, error } = await gptCreateCompletion({
+    content: `${BASIC_PROMPT} ${business.name}, ${business.address ? `located at ${business.address},` : ''}`,
+  });
+
+  if (!result || error) return '';
+  if (checkAiResponse(result)) return '';
+  return `${result}${GPT_CRAFTED}`;
+};
+
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
   const { result: firstResponse, error: answerError } = await gptCreateCompletion({
     content: `${QUESTION_PROMPT} ${author}, the author of ${book}, answer only yes or no`,
@@ -139,4 +156,5 @@ module.exports = {
   gptCreateCompletionBot,
   restGptQuery,
   gptCreateImage,
+  makeBusinessDescription,
 };

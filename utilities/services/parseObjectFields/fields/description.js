@@ -1,7 +1,9 @@
 const _ = require('lodash');
 const { FEATURES_KEYS, OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
-const { makeDescription, makeBookDescription, makeProductDescription } = require('../../gptService');
+const {
+  makeDescription, makeBookDescription, makeProductDescription, makeBusinessDescription,
+} = require('../../gptService');
 const { parseJson } = require('../../../helpers/jsonHelper');
 
 const getBodyFromFeatures = (object) => {
@@ -76,7 +78,25 @@ const getDescriptionFromBook = async ({ object, allFields = [] }) => {
   return getDescriptionFromDatafinity(object);
 };
 
+const getDescriptionFromBusiness = async (object) => {
+  if (object.useGPT) {
+    const gptAnswer = await makeBusinessDescription(object);
+    if (gptAnswer) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: object.user,
+        body: gptAnswer,
+        locale: object.locale,
+      });
+    }
+  }
+};
+
 module.exports = async (object, allFields) => {
+  if ([OBJECT_TYPES.BUSINESS, OBJECT_TYPES.RESTAURANT].includes(object.object_type)) {
+    return getDescriptionFromBusiness(object);
+  }
+
   if (object.object_type === OBJECT_TYPES.BOOK) {
     return getDescriptionFromBook({ object, allFields });
   }
