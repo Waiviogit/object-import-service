@@ -34,6 +34,7 @@ exports.WHITE_LIST = [
   'talismaan',
   'seanglife',
   'campinghive',
+  'catshive',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
