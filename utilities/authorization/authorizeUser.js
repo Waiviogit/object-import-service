@@ -16,11 +16,12 @@ const decryptText = (ciphertext) => {
 
 exports.authorise = async ({ username, accessToken, hiveAuth }) => {
   let isValidToken;
-  if (accessToken) {
-    isValidToken = await authoriseUser(accessToken, username);
-  }
+
   if (hiveAuth) {
-    isValidToken = hiveAuthUser({ token: hiveAuth, username });
+    isValidToken = hiveAuthUser({ token: accessToken, username });
+  }
+  if (accessToken && !hiveAuth) {
+    isValidToken = await authoriseUser(accessToken, username);
   }
 
   if (isValidToken) return { isValid: true };
