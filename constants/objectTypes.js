@@ -72,6 +72,8 @@ exports.OBJECT_FIELDS = {
   RATING: 'rating',
   MENU_ITEM: 'menuItem',
   TITLE: 'title',
+  LINK: 'link',
+  PHONE: 'phone',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -87,15 +89,22 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.WORK_TIME,
     this.OBJECT_FIELDS.WEBSITE,
     this.OBJECT_FIELDS.COMPANY_ID,
+    this.OBJECT_FIELDS.PHONE,
+    this.OBJECT_FIELDS.LINK,
+    this.OBJECT_FIELDS.DESCRIPTION,
   ],
   business: [
     this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.ADDRESS,
     this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,
     this.OBJECT_FIELDS.WORK_TIME,
     this.OBJECT_FIELDS.WEBSITE,
     this.OBJECT_FIELDS.COMPANY_ID,
+    this.OBJECT_FIELDS.PHONE,
+    this.OBJECT_FIELDS.LINK,
+    this.OBJECT_FIELDS.DESCRIPTION,
   ],
   book: [
     this.OBJECT_FIELDS.NAME,

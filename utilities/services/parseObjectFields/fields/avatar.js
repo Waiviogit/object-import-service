@@ -85,7 +85,7 @@ module.exports = async (object) => {
   const imagesWithOkResolution = [];
   const elementsToCheck = [];
   if (loadAvatar) elementsToCheck.push(...(object?.primaryImageURLs ?? []));
-  elementsToCheck.push(...object.imageURLs);
+  elementsToCheck.push(...object?.imageURLs ?? []);
 
   for (const element of _.uniq(elementsToCheck)) {
     const sephoraImage = /sephora.com/.test(element);

@@ -8,5 +8,7 @@ module.exports = {
     DepartmentsObject: require('./schemas/DepartmentsObjectSchema'),
     DuplicateListObject: require('./schemas/DuplicateListObjectSchema'),
     DuplicateListStatus: require('./schemas/DuplicateListStatusSchema'),
+    DescriptionStatus: require('./schemas/DescriptionStatusScema'),
+    DescriptionObject: require('./schemas/DescriptionObjectSchema'),
   },
 };

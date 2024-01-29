@@ -1,6 +1,10 @@
 const express = require('express');
 const {
-  importWobjectsController, authorityController, importDepartmentsController, duplicateListController,
+  importWobjectsController,
+  authorityController,
+  importDepartmentsController,
+  duplicateListController,
+  descriptionBotController,
 } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
@@ -72,5 +76,18 @@ objects.route('/duplicate-list/power')
   .put(duplicateListController.setVotingPower);
 objects.route('/duplicate-list/history')
   .get(duplicateListController.getImportHistory);
+
+objects.route('/description-bot')
+  .post(descriptionBotController.rewriteDescription)
+  .get(descriptionBotController.getImportStatistic)
+  .put(descriptionBotController.changeImportDetails)
+  .delete(descriptionBotController.deleteImport);
+objects.route('/description-bot/objects')
+  .post(descriptionBotController.getObjectDetails);
+objects.route('/description-bot/power')
+  .get(descriptionBotController.getVotingPower)
+  .put(descriptionBotController.setVotingPower);
+objects.route('/description-bot/history')
+  .get(descriptionBotController.getImportHistory);
 
 module.exports = routes;

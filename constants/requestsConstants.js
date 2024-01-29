@@ -7,11 +7,11 @@ exports.VOTE_EVALUATION = {
 };
 
 exports.HIVE_ENGINE_NODES = [
-  // 'https://api.hive-engine.com/rpc', // Germany
-  // 'https://api2.hive-engine.com/rpc', // Finland
-  'https://herpc.dtools.dev', // Miami
-  'https://us.engine.rishipanthee.com', // Finland
-  'https://ha.herpc.dtools.dev', // New Jersey
+  'https://herpc.dtools.dev',
+  'https://api.primersion.com',
+  'https://herpc.kanibot.com',
+  'https://engine.deathwing.me',
+  'https://he.sourov.dev',
 ];
 
 exports.NODE_URLS = [

@@ -3,4 +3,5 @@ module.exports = {
   authorityController: require('./authorityController'),
   importDepartmentsController: require('./importDepartmentsController'),
   duplicateListController: require('./duplicateListController'),
+  descriptionBotController: require('./descriptionBotController'),
 };
