@@ -1,6 +1,6 @@
 const getAccessTokensFromReq = (req) => {
   const accessToken = req.headers['access-token'];
-  const hiveAuth = req.headers['hive-auth'];
+  const hiveAuth = req.headers['hive-auth'] === 'true';
 
   return { accessToken, hiveAuth };
 };
