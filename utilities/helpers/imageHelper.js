@@ -55,6 +55,7 @@ const isProperResolution = async (imageUrl) => {
   if (error) {
     return;
   }
+  if (result?.type === 'svg') return true;
   const width = _.get(result, 'width');
   const height = _.get(result, 'height');
   if (width < minResolution || height < minResolution) return;
