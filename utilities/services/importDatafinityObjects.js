@@ -53,8 +53,9 @@ const saveObjects = async ({
     product.useGPT = useGPT;
     product.rating = getProductRating(product);
     product.fields = await parseFields(product);
-    const save = needToSaveObject(product);
-    if (!save) continue;
+
+    // const save = needToSaveObject(product);
+    // if (!save) continue;
 
     const { result, error } = await DatafinityObject.create(product);
     if (error) continue;
@@ -126,7 +127,7 @@ const importObjects = async ({
     status: IMPORT_STATUS.PENDING,
   });
 
-  saveObjects({
+  await saveObjects({
     products: uniqueProducts,
     user,
     objectType,
