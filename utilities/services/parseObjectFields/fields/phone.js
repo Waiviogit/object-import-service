@@ -9,7 +9,7 @@ const getPhone = (object) => {
       fieldName: OBJECT_FIELDS.PHONE,
       locale: object.locale,
       user: object.user,
-      body: 'phone',
+      body: '',
     }),
     number: object?.phone,
   };
