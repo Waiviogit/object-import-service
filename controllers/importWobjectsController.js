@@ -11,6 +11,7 @@ const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/a
 const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
 const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
 const { restGptQuery } = require('../utilities/services/gptService');
+const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -58,8 +59,10 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (!value) return;
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
 
   if (authError) return next(authError);
 
@@ -107,8 +110,10 @@ const changeImportDetails = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;
@@ -124,8 +129,10 @@ const deleteImport = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;
@@ -141,8 +148,10 @@ const setVotingPower = async (req, res, next) => {
     next,
   );
 
-  const accessToken = req.headers['access-token'];
-  const { error: authError } = await authorise(value.user, accessToken);
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
   if (authError) return next(authError);
 
   if (!value) return;

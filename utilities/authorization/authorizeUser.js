@@ -1,10 +1,39 @@
 const sc2 = require('sc2-sdk');
+const CryptoJS = require('crypto-js');
+const { parseJson } = require('../helpers/jsonHelper');
 
-exports.authorise = async (username, accessToken) => {
-  const isValidToken = await authoriseUser(accessToken, username);
+const secretKey = process.env.HIVE_AUTH;
+
+const decryptText = (ciphertext) => {
+  try {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, secretKey);
+    const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
+    return decryptedMessage;
+  } catch (error) {
+    return '';
+  }
+};
+
+exports.authorise = async ({ username, accessToken, hiveAuth }) => {
+  let isValidToken;
+
+  if (hiveAuth) {
+    isValidToken = hiveAuthUser({ token: accessToken, username });
+  }
+  if (accessToken && !hiveAuth) {
+    isValidToken = await authoriseUser(accessToken, username);
+  }
+
   if (isValidToken) return { isValid: true };
 
   return { error: { status: 401, message: 'Token not valid!' } };
+};
+
+const hiveAuthUser = ({ token, username }) => {
+  const message = decryptText(token);
+  const json = parseJson(message);
+
+  return json.username === username && json.expire > Date.now();
 };
 
 const authoriseUser = async (token = '', username = '') => {

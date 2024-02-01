@@ -105,8 +105,6 @@ const groupByAsins = (products, objectType) => {
 
 const filterImportRestaurants = (restaurants) => {
   const uniqueProducts = _.reduce(restaurants, (acc, el) => {
-    const someRestaurants = _.some(el.categories, (category) => category.toLocaleLowerCase().includes('restaurant'));
-    if (!someRestaurants) return acc;
     if (el.isClosed === 'true') return acc;
     const duplicate = _.find(
       acc,
