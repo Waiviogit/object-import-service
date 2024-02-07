@@ -28,5 +28,6 @@ module.exports = {
     ObjectType: require('./schemas/ObjectTypeSchema'),
     Department: require('./schemas/DepartmentSchema'),
     App: require('./schemas/AppSchema'),
+    GuestMana: require('./schemas/GuestManaSchema'),
   },
 };

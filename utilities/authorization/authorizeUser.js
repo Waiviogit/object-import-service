@@ -1,5 +1,6 @@
 const sc2 = require('sc2-sdk');
 const CryptoJS = require('crypto-js');
+const waivioAuthorise = require('./waivioAuth/authorise');
 const { parseJson } = require('../helpers/jsonHelper');
 
 const secretKey = process.env.HIVE_AUTH;
@@ -14,19 +15,31 @@ const decryptText = (ciphertext) => {
   }
 };
 
-exports.authorise = async ({ username, accessToken, hiveAuth }) => {
-  let isValidToken;
-
-  if (hiveAuth) {
-    isValidToken = hiveAuthUser({ token: accessToken, username });
-  }
-  if (accessToken && !hiveAuth) {
-    isValidToken = await authoriseUser(accessToken, username);
-  }
-
-  if (isValidToken) return { isValid: true };
+const authoriseResponse = (valid = false) => {
+  if (valid) return { isValid: true };
 
   return { error: { status: 401, message: 'Token not valid!' } };
+};
+
+exports.authorise = async ({
+  username, accessToken, hiveAuth, waivioAuth,
+}) => {
+  if (waivioAuth) {
+    const isValidToken = await waivioAuthorise.authorise(username, accessToken);
+    return authoriseResponse(isValidToken);
+  }
+
+  if (hiveAuth) {
+    const isValidToken = hiveAuthUser({ token: accessToken, username });
+    return authoriseResponse(isValidToken);
+  }
+
+  if (accessToken) {
+    const isValidToken = await authoriseUser(accessToken, username);
+    return authoriseResponse(isValidToken);
+  }
+
+  return authoriseResponse();
 };
 
 const hiveAuthUser = ({ token, username }) => {

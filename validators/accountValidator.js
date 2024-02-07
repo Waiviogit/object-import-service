@@ -9,8 +9,16 @@ const {
 const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
+const { guestMana } = require('../utilities/guestUser');
+
+const isGuestAccount = (account = '') => account.includes('_');
 
 const importAccountValidator = async (user, voteCost) => {
+  if (isGuestAccount(user)) {
+    const result = await guestMana.validateMana({ account: user });
+    return { result };
+  }
+
   const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
   if (engineError) {
     return { result: false, error: { status: '409', message: 'Hive Engine facing problems. Please try again later.' } };
@@ -125,6 +133,10 @@ const setTtlToContinue = async ({
 const validateImportToRun = async ({
   user, importId, type, authorPermlink,
 }) => {
+  if (isGuestAccount(user)) {
+    return guestMana.validateMana({ account: user });
+  }
+
   const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
   const validVotePower = await votePowerValidation(
     { account: user, type },
