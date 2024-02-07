@@ -9,6 +9,7 @@ const { formField } = require('../../helpers/formFieldHelper');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { validateSameFields } = require('../../helpers/importDatafinityHelper');
 const { voteForField } = require('../../objectBotApi');
+const { guestMana } = require('../../guestUser');
 
 const incrObjectsCount = async ({
   user, importId, authorPermlink, department,
@@ -65,6 +66,7 @@ const importDepartments = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
+    await guestMana.consumeMana({ account: user });
   } else {
     const field = wobject.fields.find((f) => f.name === OBJECT_FIELDS.DEPARTMENTS
         && f.body === department

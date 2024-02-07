@@ -15,6 +15,7 @@ const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { gptCreateCompletion } = require('../gptService');
 const { removeQuotes } = require('../../helpers/stringFormatHelper');
+const { guestMana } = require('../../guestUser');
 
 const checkFieldsToCreate = async ({ importId }) => {
   const { count } = await DescriptionObjectModel.count({
@@ -136,6 +137,7 @@ const rewriteFields = async ({ importId, user }) => {
       importingAccount: user,
       importId,
     });
+    await guestMana.consumeMana({ account: user });
   }
 
   const conditionForProcessed = result.fields.length === 1 || !result.fields.length;

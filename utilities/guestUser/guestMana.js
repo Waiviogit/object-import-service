@@ -31,6 +31,8 @@ const calculateManaRegeneration = (lastUpdateTimestamp) => {
 };
 
 const getCurrentMana = async (account) => {
+  if (!account.includes('_')) return 0;
+
   const record = await getManaRecord(account);
   const { lastManaUpdate, mana } = record;
 
@@ -39,14 +41,15 @@ const getCurrentMana = async (account) => {
   return Math.min(maxMana, mana + regeneratedMana);
 };
 
-const consumeMana = async ({ account, cost = MANA_CONSUMPTION.FIELD }) => {
+const consumeMana = async ({ account = '', cost = MANA_CONSUMPTION.FIELD }) => {
+  if (!account.includes('_')) return;
+
   const currentMana = await getCurrentMana(account);
 
   if (currentMana >= cost) {
     await updateLastManaUpdateTimestamp({ account, cost });
     return true;
   }
-  return false;
 };
 
 const validateMana = async ({ account, cost = MANA_CONSUMPTION.FIELD_VOTE }) => {

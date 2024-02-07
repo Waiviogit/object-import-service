@@ -8,6 +8,7 @@ const { formField } = require('../../helpers/formFieldHelper');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { validateSameFields } = require('../../helpers/importDatafinityHelper');
+const { guestMana } = require('../../guestUser');
 
 const getAuthorityField = ({ fields = [], user, authority }) => fields
   .find((el) => el.name === OBJECT_FIELDS.AUTHORITY
@@ -71,13 +72,14 @@ const claimProcess = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
+    await guestMana.consumeMana({ account: user });
+    await new Promise((resolve) => setTimeout(resolve, 4000));
   }
 
   await incrObjectsCount({
     user, importId, authorPermlink: nextObject.authorPermlink,
   });
   await sendUpdateImportForUser({ account: user });
-  await new Promise((resolve) => setTimeout(resolve, 4000));
 
   claimProcess({ user, importId });
 };

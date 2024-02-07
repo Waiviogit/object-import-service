@@ -19,6 +19,7 @@ const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { gptCreateCompletion } = require('../gptService');
 const { removeQuotes } = require('../../helpers/stringFormatHelper');
+const { guestMana } = require('../../guestUser');
 
 const checkObjectsToCreate = async ({ importId }) => {
   const { count } = await DuplicateListObjectModel.count({
@@ -324,6 +325,7 @@ const createDuplicateFields = async ({ importId, user }) => {
     importingAccount: user,
     importId,
   });
+  await guestMana.consumeMana({ account: user });
   await DuplicateListStatusModel.updateOne({
     filter: { importId },
     update: {
@@ -542,6 +544,7 @@ const createAuthorityFields = async ({ importId, user }) => {
       importingAccount: user,
       importId,
     });
+    await guestMana.consumeMana({ account: user });
   }
 
   await DuplicateListStatusModel.updateOne({
