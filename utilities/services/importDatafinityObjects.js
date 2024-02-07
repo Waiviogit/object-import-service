@@ -127,7 +127,7 @@ const importObjects = async ({
     status: IMPORT_STATUS.PENDING,
   });
 
-  await saveObjects({
+  saveObjects({
     products: uniqueProducts,
     user,
     objectType,
