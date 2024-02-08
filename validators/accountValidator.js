@@ -13,11 +13,23 @@ const { guestMana } = require('../utilities/guestUser');
 
 const isGuestAccount = (account = '') => account.includes('_');
 
-const importAccountValidator = async (user, voteCost) => {
-  if (isGuestAccount(user)) {
-    const result = await guestMana.validateMana({ account: user });
-    return { result };
+const guestImportAccountValidator = async (account) => {
+  const abilityToVote = await guestMana.validateMana({ account });
+
+  if (!abilityToVote) return { result: false, error: { status: '409', message: 'Not enough vote power' } };
+
+  const manaRecord = await guestMana.getManaRecord(account);
+  const postingAuthorities = manaRecord.importAuthorization;
+
+  if (!postingAuthorities) {
+    return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
   }
+
+  return { result: true };
+};
+
+const importAccountValidator = async (user, voteCost) => {
+  if (isGuestAccount(user)) return guestImportAccountValidator(user);
 
   const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
   if (engineError) {
@@ -56,6 +68,29 @@ const votePowerValidation = async ({ account, type }) => {
   if (!power) power = DEFAULT_VOTE_POWER_IMPORT;
 
   const { votingPower } = await getVotingPowers({ account });
+
+  return BigNumber(votingPower).gt(power);
+};
+
+const guestVotePowerValidation = async ({ account, type }) => {
+  const typeToKey = {
+    [IMPORT_TYPES.OBJECTS]: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
+    [IMPORT_TYPES.AUTHORITY]: `${IMPORT_REDIS_KEYS.MIN_POWER_AUTHORITY}:${account}`,
+    [IMPORT_TYPES.DEPARTMENTS]: `${IMPORT_REDIS_KEYS.MIN_POWER_DEPARTMENTS}:${account}`,
+    [IMPORT_TYPES.DUPLICATE]: `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${account}`,
+    [IMPORT_TYPES.DESCRIPTION]: `${IMPORT_REDIS_KEYS.MIN_POWER_DESCRIPTION}:${account}`,
+    default: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
+  };
+
+  const key = typeToKey[type] || typeToKey.default;
+  let power = await redisGetter.get({ key });
+  if (!power) power = DEFAULT_VOTE_POWER_IMPORT;
+  // we need this as max mana 1000
+  const powerQuantifier = 10;
+
+  const record = await guestMana.getManaRecord(account);
+
+  const votingPower = powerQuantifier * record;
 
   return BigNumber(votingPower).gt(power);
 };
@@ -134,9 +169,10 @@ const validateGuestImportToRun = async ({
   user, type, importId, authorPermlink,
 }) => {
   const validMana = await guestMana.validateMana({ account: user });
+  const validPercent = await guestVotePowerValidation({ account: user, type });
 
-  const validPercent = '';
-  const authorizedImport = '';
+  const manaRecord = await guestMana.getManaRecord(user);
+  const authorizedImport = manaRecord.importAuthorization;
 
   if (!validMana || !validPercent || !authorizedImport) {
     await setTtlToContinue({
