@@ -88,9 +88,9 @@ const guestVotePowerValidation = async ({ account, type }) => {
   // we need this as max mana 1000
   const powerQuantifier = 10;
 
-  const record = await guestMana.getManaRecord(account);
+  const currentMana = await guestMana.getCurrentMana(account);
 
-  const votingPower = powerQuantifier * record;
+  const votingPower = powerQuantifier * currentMana;
 
   return BigNumber(votingPower).gt(power);
 };
