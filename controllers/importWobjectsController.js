@@ -12,6 +12,7 @@ const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHel
 const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
 const { restGptQuery } = require('../utilities/services/gptService');
 const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
+const { guestMana } = require('../utilities/guestUser');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -206,6 +207,44 @@ const gptQuery = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
+const authorizeGuestImport = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.authorizeGuestUser,
+    next,
+  );
+
+  const { error: authError } = await authorise({
+    username: value.account,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  if (!value) return;
+  const { result, error } = await guestMana.setImportStatus(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
+const authorizeGuestImportStatus = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.authorizeGuestUserStatus,
+    next,
+  );
+
+  const { error: authError } = await authorise({
+    username: value.account,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  if (!value) return;
+  const { result, error } = await guestMana.getImportStatus(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -219,4 +258,6 @@ module.exports = {
   getImportHistory,
   getNotPublished,
   gptQuery,
+  authorizeGuestImport,
+  authorizeGuestImportStatus,
 };

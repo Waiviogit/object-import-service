@@ -29,18 +29,12 @@ const findOneByName = async (account) => {
   }
 };
 
-const updateOneMana = async ({ account, lastManaUpdate, cost }) => {
+const updateOneStatus = async ({ account, importAuthorization }) => {
   try {
-    const result = await GuestMana.updateOne({
+    const result = await GuestMana.findOneAndUpdate({
       account,
     }, {
-      $inc: {
-        mana: -cost,
-      },
-      $min: {
-        mana: 0,
-      },
-      lastManaUpdate,
+      importAuthorization,
     });
     return { result };
   } catch (error) {
@@ -51,5 +45,5 @@ const updateOneMana = async ({ account, lastManaUpdate, cost }) => {
 module.exports = {
   create,
   findOneByName,
-  updateOneMana,
+  updateOneStatus,
 };
