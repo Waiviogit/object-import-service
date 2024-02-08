@@ -130,11 +130,30 @@ const setTtlToContinue = async ({
   await redisSetter.expire({ key, ttl });
 };
 
+const validateGuestImportToRun = async ({
+  user, type, importId, authorPermlink,
+}) => {
+  const validMana = await guestMana.validateMana({ account: user });
+
+  const validPercent = '';
+  const authorizedImport = '';
+
+  if (!validMana || !validPercent || !authorizedImport) {
+    await setTtlToContinue({
+      user, importId, type, authorPermlink,
+    });
+    return;
+  }
+  return true;
+};
+
 const validateImportToRun = async ({
   user, importId, type, authorPermlink,
 }) => {
   if (isGuestAccount(user)) {
-    return guestMana.validateMana({ account: user });
+    return validateGuestImportToRun({
+      user, importId, type, authorPermlink,
+    });
   }
 
   const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
