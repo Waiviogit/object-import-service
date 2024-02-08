@@ -32,7 +32,6 @@ const { makeAuthorDescription } = require('./gptService');
 const { sendUpdateImportForUser } = require('./socketClient');
 const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
 const { validateImportToRun } = require('../../validators/accountValidator');
-const { guestMana } = require('../guestUser');
 
 const saveObjects = async ({
   products, user, objectType, authority, locale, translate, importId, useGPT,
@@ -397,7 +396,6 @@ const processField = async ({ datafinityObject, wobject, user }) => {
         },
       },
     });
-    await guestMana.consumeMana({ account: user });
     await new Promise((resolve) => setTimeout(resolve, 4000));
   }
   if (sameField) console.error(`same field ${JSON.stringify(datafinityObject.fields[0])}`);

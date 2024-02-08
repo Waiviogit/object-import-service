@@ -8,17 +8,12 @@ const MANA_CONSUMPTION = {
 // if become global set to redis
 const maxMana = 1000;
 
-const regenerationRatePerSecond = 1 / (60 * 60); // 1 mana per hour
+const regenerationRatePerSecond = 42 / (60 * 60); // 1 mana per hour
 
 const getManaRecord = async (account) => {
   const { result } = await GuestManaModel.findOneByName(account);
   if (result) return result;
   return GuestManaModel.create({ account, mana: maxMana });
-};
-
-const updateLastManaUpdateTimestamp = async ({ account, cost }) => {
-  const lastManaUpdate = Date.now();
-  await GuestManaModel.updateOneMana({ account, cost, lastManaUpdate });
 };
 
 // Function to calculate mana regeneration
@@ -41,17 +36,6 @@ const getCurrentMana = async (account) => {
   return Math.min(maxMana, mana + regeneratedMana);
 };
 
-const consumeMana = async ({ account = '', cost = MANA_CONSUMPTION.FIELD }) => {
-  if (!account.includes('_')) return;
-
-  const currentMana = await getCurrentMana(account);
-
-  if (currentMana >= cost) {
-    await updateLastManaUpdateTimestamp({ account, cost });
-    return true;
-  }
-};
-
 const validateMana = async ({ account, cost = MANA_CONSUMPTION.FIELD_VOTE }) => {
   const currentMana = await getCurrentMana(account);
 
@@ -59,7 +43,6 @@ const validateMana = async ({ account, cost = MANA_CONSUMPTION.FIELD_VOTE }) => 
 };
 
 module.exports = {
-  consumeMana,
   getCurrentMana,
   validateMana,
 };
