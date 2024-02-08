@@ -59,6 +59,8 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (!value) return;
 
+  console.log(value.user, 'authorise...');
+
   const { error: authError } = await authorise({
     username: value.user,
     ...getAccessTokensFromReq(req),
@@ -66,12 +68,14 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   if (authError) return next(authError);
 
+  console.log(value.user, 'importAccountValidator...');
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
     getVoteCostInitial(value.user),
   );
   if (!validAcc) return next(accError);
 
+  console.log(value.user, 'importObjects...');
   const { result, error } = await importDatafinityObjects
     .importObjects({ file: req.file, ...value });
   if (error) return next(error);

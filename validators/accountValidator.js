@@ -11,6 +11,8 @@ const { getVoteCost } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 
 const importAccountValidator = async (user, voteCost) => {
+
+  console.log(user, 'checkVotePower...');
   const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
   if (engineError) {
     return { result: false, error: { status: '409', message: 'Hive Engine facing problems. Please try again later.' } };
@@ -19,7 +21,7 @@ const importAccountValidator = async (user, voteCost) => {
   if (!abilityToVote) {
     return { result: false, error: { status: '409', message: 'Not enough vote power' } };
   }
-
+  console.log(user, 'getAccount...');
   const { account, error } = await getAccount(user);
   if (error) return { result: false, error };
 
