@@ -13,4 +13,5 @@ module.exports = {
   DuplicateListObjectModel: require('./importDb/DuplicateListObjectModel'),
   DescriptionObjectModel: require('./importDb/DescriptionObjectModel'),
   DescriptionStatusModel: require('./importDb/DescriptionStatusModel'),
+  TelegramImportUsageModel: require('./importDb/TelegramImportUsageModel'),
 };
