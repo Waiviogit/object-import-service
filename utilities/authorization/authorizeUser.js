@@ -24,6 +24,7 @@ const authoriseResponse = (valid = false) => {
 exports.authorise = async ({
   username, accessToken, hiveAuth, waivioAuth,
 }) => {
+  console.log(username, accessToken, hiveAuth, waivioAuth);
   if (waivioAuth) {
     console.log('waivioAuth', username);
     const isValidToken = await waivioAuthorise.authorise(username, accessToken);
