@@ -1,5 +1,5 @@
-const sc2 = require('sc2-sdk');
 const CryptoJS = require('crypto-js');
+const axios = require('axios');
 const waivioAuthorise = require('./waivioAuth/authorise');
 const { parseJson } = require('../helpers/jsonHelper');
 
@@ -49,20 +49,28 @@ const hiveAuthUser = ({ token, username }) => {
   return json.username === username && json.expire > Date.now();
 };
 
+const authoriseRequestSigner = async (token) => {
+  try {
+    const response = await axios.get(
+      'https://hivesigner.com/api/me',
+      {
+        headers: {
+          Authorization: token,
+        },
+        timeout: 5000,
+      },
+    );
+
+    return response?.data?._id;
+  } catch (error) {
+    return '';
+  }
+};
+
 const authoriseUser = async (token = '', username = '') => {
   if (!token || token === '') return false;
 
-  const api = sc2.Initialize({
-    baseURL: 'https://hivesigner.com',
-    accessToken: token,
-  });
-  let user;
+  const user = await authoriseRequestSigner(token);
 
-  try {
-    user = await api.me();
-  } catch (error) {
-    return false;
-  }
-
-  return user._id === username;
+  return user === username;
 };

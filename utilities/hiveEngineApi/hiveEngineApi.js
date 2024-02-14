@@ -34,7 +34,7 @@ exports.engineProxy = async ({
 };
 
 exports.engineQuery = async ({
-  hostUrl = 'https://herpc.dtools.dev',
+  hostUrl = 'https://engine.deathwing.me',
   method = 'find',
   params,
   endpoint = '/contracts',
