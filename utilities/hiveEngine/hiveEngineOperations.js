@@ -4,7 +4,7 @@ const { lastBlockCLient } = require('../redis/redis');
 const commentContract = require('../hiveEngineApi/commentsContract');
 const marketPools = require('../hiveEngineApi/marketPoolsContract');
 const tokensContract = require('../hiveEngineApi/tokensContract');
-const { HIVE_ENGINE_NODES, VOTE_EVALUATION } = require('../../constants/requestsConstants');
+const { VOTE_EVALUATION } = require('../../constants/requestsConstants');
 const { getVotingPower } = require('../hiveEngineApi/commentsContract');
 
 exports.calculateHiveEngineVote = async ({
@@ -16,7 +16,7 @@ exports.calculateHiveEngineVote = async ({
   const votingPowers = await commentContract.getVotingPower({ rewardPoolId: poolId, account });
   const requests = await Promise.all([
     marketPools.getMarketPools({ query: { _id: dieselPoolId } }),
-    tokensContract.getTokenBalances({ query: { symbol, account }, hostUrl: HIVE_ENGINE_NODES[1] }),
+    tokensContract.getTokenBalances({ query: { symbol, account } }),
     redisGetter.getHashAll('current_price_info', lastBlockCLient),
   ]);
 

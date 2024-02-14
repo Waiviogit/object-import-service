@@ -34,7 +34,7 @@ exports.engineProxy = async ({
 };
 
 exports.engineQuery = async ({
-  hostUrl = 'https://engine.deathwing.me',
+  hostUrl = 'https://engine.waivio.com',
   method = 'find',
   params,
   endpoint = '/contracts',
