@@ -69,8 +69,9 @@ const authoriseRequestSigner = async (token) => {
 
 const authoriseUser = async (token = '', username = '') => {
   if (!token || token === '') return false;
-
+  console.log(username);
   const user = await authoriseRequestSigner(token);
+  console.log(user);
 
   return user === username;
 };
