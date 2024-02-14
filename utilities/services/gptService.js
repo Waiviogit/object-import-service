@@ -1,19 +1,15 @@
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
 const _ = require('lodash');
 const { GPT_CRAFTED, QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
 
-const configurationImport = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   organization: process.env.OPENAI_API_ORG,
 });
-
-const configurationBot = new Configuration({
+const openaiBot = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY_BOT,
   organization: process.env.OPENAI_API_ORG,
 });
-
-const openai = new OpenAIApi(configurationImport);
-const openaiBot = new OpenAIApi(configurationBot);
 
 const checkForPositiveAnswer = (answer = '') => answer.toLowerCase().includes('yes');
 
@@ -21,7 +17,7 @@ const checkAiResponse = (answer = '') => answer.toLowerCase().includes('as an ai
 
 const gptCreateCompletion = async ({ content = '' }) => {
   try {
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{
         role: 'user',
@@ -30,7 +26,7 @@ const gptCreateCompletion = async ({ content = '' }) => {
     }, {
       timeout: 60000,
     });
-    const result = _.get(response, 'data.choices[0].message.content', '');
+    const result = _.get(response, 'choices[0].message.content', '');
     return { result };
   } catch (error) {
     return { error };
@@ -39,8 +35,8 @@ const gptCreateCompletion = async ({ content = '' }) => {
 
 const gptCreateCompletionBot = async ({ content = '' }) => {
   try {
-    const response = await openaiBot.createChatCompletion({
-      model: 'gpt-3.5-turbo',
+    const response = await openaiBot.chat.completions.create({
+      model: 'gpt-4-1106-preview',
       messages: [{
         role: 'user',
         content,
@@ -48,7 +44,8 @@ const gptCreateCompletionBot = async ({ content = '' }) => {
     }, {
       timeout: 60000,
     });
-    const result = _.get(response, 'data.choices[0].message.content', '');
+
+    const result = _.get(response, 'choices[0].message.content', '');
     return { result };
   } catch (error) {
     return { error };
@@ -135,12 +132,18 @@ const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: quer
 
 const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
   try {
-    const response = await openaiBot.createImage({
-      prompt, n, size,
-    }, {
-      timeout: 60000,
-    });
-    const result = _.get(response, 'data.data', []);
+    const response = await openaiBot.images.generate(
+      {
+        prompt,
+        n,
+        size,
+        model: 'dall-e-3',
+      },
+      {
+        timeout: 60000,
+      },
+    );
+    const result = _.get(response, 'data', []);
     return { result };
   } catch (error) {
     return { error };

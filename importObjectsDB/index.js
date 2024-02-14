@@ -10,5 +10,6 @@ module.exports = {
     DuplicateListStatus: require('./schemas/DuplicateListStatusSchema'),
     DescriptionStatus: require('./schemas/DescriptionStatusScema'),
     DescriptionObject: require('./schemas/DescriptionObjectSchema'),
+    TelegramImportUsage: require('./schemas/TelegramImportUsageSchema'),
   },
 };
