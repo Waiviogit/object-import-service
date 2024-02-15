@@ -1,5 +1,5 @@
 async function fetchRequest({
-  url, method = 'GET', queryParams = {}, requestBody = {}, timeout = 5000,
+  url, method = 'GET', queryParams = {}, requestBody = {}, timeout = 5000, headers = {},
 }) {
   const searchParams = new URLSearchParams(queryParams);
   const requestURL = new URL(url);
@@ -7,7 +7,7 @@ async function fetchRequest({
 
   const requestOptions = {
     method,
-    headers: {},
+    headers,
   };
 
   if (method === 'POST') {

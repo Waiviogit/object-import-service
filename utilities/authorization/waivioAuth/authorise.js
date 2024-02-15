@@ -2,6 +2,7 @@ const _ = require('lodash');
 const axios = require('axios');
 // eslint-disable-next-line camelcase
 const { waivio_auth } = require('../../../config');
+const fetchRequest = require('../../helpers/fetchHelper');
 
 // eslint-disable-next-line camelcase
 const VALIDATE_TOKEN_URL = `https://${waivio_auth.host}/${waivio_auth.baseUrl}/${waivio_auth.validateTokenPath}`;
@@ -9,14 +10,13 @@ const VALIDATE_TOKEN_URL = `https://${waivio_auth.host}/${waivio_auth.baseUrl}/$
 const validateTokenRequest = async (token) => {
   try {
     console.log(VALIDATE_TOKEN_URL);
-    const { data: response } = await axios.post(
-      VALIDATE_TOKEN_URL,
-      {},
-      {
-        headers: { 'access-token': token },
-        timeout: 5000,
+    const response = await fetchRequest({
+      url: 'https://waiviodev.com/auth/validate_auth_token',
+      method: 'POST',
+      headers: {
+        'Access-Token': token,
       },
-    );
+    });
 
     if (response) return { response };
     return { error: { message: 'Not enough response data!' } };
