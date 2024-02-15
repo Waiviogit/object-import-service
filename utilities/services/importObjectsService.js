@@ -268,9 +268,11 @@ const addField = async ({
       };
 
       if (immediately) {
+        console.log('add field immediately');
         data.field = JSON.parse(data.field);
         appendObject.send(data);
       } else {
+        console.log('add field redis');
         await redisSetter.setImportWobjData(`append:${wobject.author_permlink}_${field.permlink}`, data);
         const { error: sendMessError } = await redisQueue.sendMessage({
           client: importRsmqClient,
