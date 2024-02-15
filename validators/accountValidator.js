@@ -44,7 +44,10 @@ const importAccountValidator = async (user, voteCost) => {
   }
   console.log(user, 'getAccount');
   const { account, error } = await getAccount(user);
-  if (error) return { result: false, error };
+  if (error) {
+    console.log(user, 'getAccount Error');
+    return { result: false, error };
+  }
 
   const accountAuths = _.get(account, 'posting.account_auths', []);
   const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);

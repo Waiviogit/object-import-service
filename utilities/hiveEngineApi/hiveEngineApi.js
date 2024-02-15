@@ -3,7 +3,7 @@ const axios = require('axios');
 const { HIVE_ENGINE_NODES } = require('../../constants/requestsConstants');
 
 exports.engineProxy = async ({
-  hostUrl,
+  hostUrl = _.sample(HIVE_ENGINE_NODES),
   method,
   params,
   endpoint,
@@ -19,7 +19,7 @@ exports.engineProxy = async ({
   });
   if (_.has(response, 'error')) {
     if (attempts <= 0) return response;
-    console.log('change node', attempts);
+    console.log('change node', attempts, hostUrl);
 
     return this.engineProxy({
       hostUrl: getNewNodeUrl(hostUrl),
@@ -35,7 +35,7 @@ exports.engineProxy = async ({
 };
 
 exports.engineQuery = async ({
-  hostUrl = _.sample(HIVE_ENGINE_NODES),
+  hostUrl,
   method = 'find',
   params,
   endpoint = '/contracts',
