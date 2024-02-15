@@ -31,7 +31,7 @@ async function fetchRequest({
       throw new Error('Request timed out');
     }
 
-    console.error('Error fetching data:', error);
+    console.error('Error fetching data');
     throw error;
   }
 }
