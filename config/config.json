@@ -1,7 +1,7 @@
 {
   "production": {
     "waivio_auth": {
-      "host": "www.waivio.com",
+      "host": "waiviodev.com",
       "baseUrl": "auth",
       "validateTokenPath": "validate_auth_token"
     },
