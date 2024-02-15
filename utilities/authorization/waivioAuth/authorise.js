@@ -8,6 +8,7 @@ const VALIDATE_TOKEN_URL = `https://${waivio_auth.host}/${waivio_auth.baseUrl}/$
 
 const validateTokenRequest = async (token) => {
   try {
+    console.log(VALIDATE_TOKEN_URL);
     const { data: response } = await axios.post(
       VALIDATE_TOKEN_URL,
       {},
