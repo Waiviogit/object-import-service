@@ -166,6 +166,8 @@ const rewriteFields = async ({ importId, user }) => {
 };
 
 const rewriteDescription = async ({ importId, user }) => {
+  console.log(user, 'rewriteDescription');
+
   const importStatus = await DescriptionStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;

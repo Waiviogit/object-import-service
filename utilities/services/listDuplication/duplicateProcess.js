@@ -571,6 +571,7 @@ const createAuthorityFields = async ({ importId, user }) => {
 };
 
 const duplicateProcess = async ({ importId, user }) => {
+  console.log(user, 'duplicateProcess');
   const importStatus = await DuplicateListStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;
