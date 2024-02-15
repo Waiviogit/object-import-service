@@ -1,6 +1,6 @@
 const _ = require('lodash');
-const axios = require('axios');
 const { HIVE_ENGINE_NODES } = require('../../constants/requestsConstants');
+const fetchRequest = require('../helpers/fetchHelper');
 
 exports.engineProxy = async ({
   hostUrl = _.sample(HIVE_ENGINE_NODES),
@@ -43,20 +43,20 @@ exports.engineQuery = async ({
   id = 'ssc-mainnet-hive',
 }) => {
   try {
-    const resp = await axios.post(
-      `${hostUrl}${endpoint}`,
-      {
+    const resp = await fetchRequest({
+      url: `${hostUrl}${endpoint}`,
+      method: 'POST',
+      requestBody: {
         jsonrpc: '2.0',
         method,
         params,
         id,
       },
-      {
-        timeout: 5000,
-      },
-    );
+      timeout: 5000,
 
-    return _.get(resp, 'data.result');
+    });
+
+    return _.get(resp, 'result');
   } catch (error) {
     return { error };
   }
