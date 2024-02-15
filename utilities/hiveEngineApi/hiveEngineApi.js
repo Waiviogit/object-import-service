@@ -19,6 +19,7 @@ exports.engineProxy = async ({
   });
   if (_.has(response, 'error')) {
     if (attempts <= 0) return response;
+    console.log('change node', attempts);
 
     return this.engineProxy({
       hostUrl: getNewNodeUrl(hostUrl),
