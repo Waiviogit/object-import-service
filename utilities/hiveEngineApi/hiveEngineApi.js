@@ -41,8 +41,7 @@ exports.engineQuery = async ({
   id = 'ssc-mainnet-hive',
 }) => {
   try {
-    const instance = axios.create();
-    const resp = await instance.post(
+    const resp = await axios.post(
       `${hostUrl}${endpoint}`,
       {
         jsonrpc: '2.0',

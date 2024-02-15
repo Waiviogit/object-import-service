@@ -13,11 +13,12 @@ exports.calculateHiveEngineVote = async ({
   const smtPool = await redisGetter
     .getHashAll(`smt_pool:${symbol}`, lastBlockCLient);
   const rewards = parseFloat(smtPool?.rewardPool) / parseFloat(smtPool?.pendingClaims);
-  const votingPowers = await commentContract.getVotingPower({ rewardPoolId: poolId, account });
+
   const requests = await Promise.all([
     marketPools.getMarketPools({ query: { _id: dieselPoolId } }),
     tokensContract.getTokenBalances({ query: { symbol, account } }),
     redisGetter.getHashAll('current_price_info', lastBlockCLient),
+    commentContract.getVotingPower({ rewardPoolId: poolId, account }),
   ]);
 
   for (const req of requests) {
@@ -27,7 +28,7 @@ exports.calculateHiveEngineVote = async ({
       };
     }
   }
-  const [dieselPools, balances, hiveCurrency] = requests;
+  const [dieselPools, balances, hiveCurrency, votingPowers] = requests;
   const { stake, delegationsIn } = balances[0];
   const { votingPower } = this.calculateMana(
     votingPowers[0] || {
