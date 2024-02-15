@@ -35,6 +35,8 @@ const updateOneStatus = async ({ account, importAuthorization }) => {
       account,
     }, {
       importAuthorization,
+    }, {
+      new: true,
     });
     return { result };
   } catch (error) {
