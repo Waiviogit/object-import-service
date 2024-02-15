@@ -61,7 +61,7 @@ const authoriseRequestSigner = async (token) => {
         headers: {
           Authorization: token,
         },
-        timeout: 15000,
+        timeout: 30000,
       },
     );
 
