@@ -42,19 +42,19 @@ const importAccountValidator = async (user, voteCost) => {
     console.log(user, 'Not enough vote power');
     return { result: false, error: { status: '409', message: 'Not enough vote power' } };
   }
-  console.log(user, 'getAccount');
-  const { account, error } = await getAccount(user);
-  if (error) {
-    console.log(user, 'getAccount Error');
-    return { result: false, error };
-  }
-
-  const accountAuths = _.get(account, 'posting.account_auths', []);
-  const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
-
-  if (!postingAuthorities) {
-    return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
-  }
+  // console.log(user, 'getAccount');
+  // const { account, error } = await getAccount(user);
+  // if (error) {
+  //   console.log(user, 'getAccount Error');
+  //   return { result: false, error };
+  // }
+  //
+  // const accountAuths = _.get(account, 'posting.account_auths', []);
+  // const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
+  //
+  // if (!postingAuthorities) {
+  //   return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
+  // }
 
   return { result: true };
 };
