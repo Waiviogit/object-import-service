@@ -79,6 +79,16 @@ const getDescriptionFromBook = async ({ object, allFields = [] }) => {
 };
 
 const getDescriptionFromBusiness = async (object) => {
+  const descriptionFromObject = getBodyFromDescriptions(object);
+
+  if (descriptionFromObject) {
+    return formField({
+      fieldName: OBJECT_FIELDS.DESCRIPTION,
+      user: object.user,
+      body: descriptionFromObject,
+      locale: object.locale,
+    });
+  }
   if (object.useGPT) {
     const gptAnswer = await makeBusinessDescription(object);
     if (gptAnswer) {
