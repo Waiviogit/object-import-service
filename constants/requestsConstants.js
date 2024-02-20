@@ -7,6 +7,7 @@ exports.VOTE_EVALUATION = {
 };
 
 exports.HIVE_ENGINE_NODES = [
+  'https://engine.waivio.com',
   'https://herpc.dtools.dev',
   'https://api.primersion.com',
   'https://herpc.kanibot.com',
@@ -15,8 +16,8 @@ exports.HIVE_ENGINE_NODES = [
 ];
 
 exports.NODE_URLS = [
+  'https://api.deathwing.me',
   'https://anyx.io',
-  'https://hive-api.arcange.eu',
   'https://api.hive.blog',
   'https://api.openhive.network',
 ];

@@ -1,5 +1,10 @@
 {
   "production": {
+    "waivio_auth": {
+      "host": "waiviodev.com",
+      "baseUrl": "auth",
+      "validateTokenPath": "validate_auth_token"
+    },
     "importDB": {
       "host": "localhost",
       "port": 27017,
@@ -29,6 +34,11 @@
     }
   },
   "staging": {
+    "waivio_auth": {
+      "host": "waiviodev.com",
+      "baseUrl": "auth",
+      "validateTokenPath": "validate_auth_token"
+    },
     "importDB": {
       "host": "localhost",
       "port": 27017,
@@ -58,6 +68,11 @@
     }
   },
   "development": {
+    "waivio_auth": {
+      "host": "waiviodev.com",
+      "baseUrl": "auth",
+      "validateTokenPath": "validate_auth_token"
+    },
     "importDB": {
       "host": "localhost",
       "port": 27017,
@@ -87,6 +102,11 @@
     }
   },
   "test": {
+    "waivio_auth": {
+      "host": "localhost:4500",
+      "baseUrl": "auth",
+      "validateTokenPath": "validate_auth_token"
+    },
     "importDB": {
       "host": "localhost",
       "port": 27017,

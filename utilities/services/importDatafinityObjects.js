@@ -166,6 +166,7 @@ const updateImportedObjectsList = async ({ datafinityObject, user, authorPermlin
 const startObjectImport = async ({
   user, authorPermlink = null, importId, createdId,
 }) => {
+  console.log(user, 'startObjectImport');
   if (importId) {
     const activeStatus = await checkImportActiveStatus(importId);
     if (!activeStatus) return;

@@ -1,9 +1,9 @@
 const _ = require('lodash');
-const axios = require('axios');
 const { HIVE_ENGINE_NODES } = require('../../constants/requestsConstants');
+const fetchRequest = require('../helpers/fetchHelper');
 
 exports.engineProxy = async ({
-  hostUrl,
+  hostUrl = _.sample(HIVE_ENGINE_NODES),
   method,
   params,
   endpoint,
@@ -19,6 +19,7 @@ exports.engineProxy = async ({
   });
   if (_.has(response, 'error')) {
     if (attempts <= 0) return response;
+    console.log('change node', attempts, hostUrl);
 
     return this.engineProxy({
       hostUrl: getNewNodeUrl(hostUrl),
@@ -34,28 +35,27 @@ exports.engineProxy = async ({
 };
 
 exports.engineQuery = async ({
-  hostUrl = 'https://herpc.dtools.dev',
+  hostUrl,
   method = 'find',
   params,
   endpoint = '/contracts',
   id = 'ssc-mainnet-hive',
 }) => {
   try {
-    const instance = axios.create();
-    const resp = await instance.post(
-      `${hostUrl}${endpoint}`,
-      {
+    const resp = await fetchRequest({
+      url: `${hostUrl}${endpoint}`,
+      method: 'POST',
+      requestBody: {
         jsonrpc: '2.0',
         method,
         params,
         id,
       },
-      {
-        timeout: 5000,
-      },
-    );
+      timeout: 5000,
 
-    return _.get(resp, 'data.result');
+    });
+
+    return _.get(resp, 'result');
   } catch (error) {
     return { error };
   }

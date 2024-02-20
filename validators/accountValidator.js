@@ -9,19 +9,45 @@ const {
 const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
+const { guestMana } = require('../utilities/guestUser');
+
+const isGuestAccount = (account = '') => account.includes('_');
+
+const guestImportAccountValidator = async (account) => {
+  const abilityToVote = await guestMana.validateMana({ account });
+
+  if (!abilityToVote) return { result: false, error: { status: '409', message: 'Not enough vote power' } };
+
+  const manaRecord = await guestMana.getManaRecord(account);
+  const postingAuthorities = manaRecord.importAuthorization;
+
+  if (!postingAuthorities) {
+    return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
+  }
+
+  return { result: true };
+};
 
 const importAccountValidator = async (user, voteCost) => {
+  if (isGuestAccount(user)) return guestImportAccountValidator(user);
+
+  console.log(user, 'checkVotePower');
   const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
   if (engineError) {
+    console.log(user, 'checkVotePower Error');
     return { result: false, error: { status: '409', message: 'Hive Engine facing problems. Please try again later.' } };
   }
 
   if (!abilityToVote) {
+    console.log(user, 'Not enough vote power');
     return { result: false, error: { status: '409', message: 'Not enough vote power' } };
   }
-
+  console.log(user, 'getAccount');
   const { account, error } = await getAccount(user);
-  if (error) return { result: false, error };
+  if (error) {
+    console.log(user, 'getAccount Error');
+    return { result: false, error };
+  }
 
   const accountAuths = _.get(account, 'posting.account_auths', []);
   const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
@@ -48,6 +74,29 @@ const votePowerValidation = async ({ account, type }) => {
   if (!power) power = DEFAULT_VOTE_POWER_IMPORT;
 
   const { votingPower } = await getVotingPowers({ account });
+
+  return BigNumber(votingPower).gt(power);
+};
+
+const guestVotePowerValidation = async ({ account, type }) => {
+  const typeToKey = {
+    [IMPORT_TYPES.OBJECTS]: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
+    [IMPORT_TYPES.AUTHORITY]: `${IMPORT_REDIS_KEYS.MIN_POWER_AUTHORITY}:${account}`,
+    [IMPORT_TYPES.DEPARTMENTS]: `${IMPORT_REDIS_KEYS.MIN_POWER_DEPARTMENTS}:${account}`,
+    [IMPORT_TYPES.DUPLICATE]: `${IMPORT_REDIS_KEYS.MIN_POWER_DUPLICATE}:${account}`,
+    [IMPORT_TYPES.DESCRIPTION]: `${IMPORT_REDIS_KEYS.MIN_POWER_DESCRIPTION}:${account}`,
+    default: `${IMPORT_REDIS_KEYS.MIN_POWER}:${account}`,
+  };
+
+  const key = typeToKey[type] || typeToKey.default;
+  let power = await redisGetter.get({ key });
+  if (!power) power = DEFAULT_VOTE_POWER_IMPORT;
+  // we need this as max mana 1000
+  const powerQuantifier = 10;
+
+  const currentMana = await guestMana.getCurrentMana(account);
+
+  const votingPower = powerQuantifier * currentMana;
 
   return BigNumber(votingPower).gt(power);
 };
@@ -122,9 +171,33 @@ const setTtlToContinue = async ({
   await redisSetter.expire({ key, ttl });
 };
 
+const validateGuestImportToRun = async ({
+  user, type, importId, authorPermlink,
+}) => {
+  const validMana = await guestMana.validateMana({ account: user });
+  const validPercent = await guestVotePowerValidation({ account: user, type });
+
+  const manaRecord = await guestMana.getManaRecord(user);
+  const authorizedImport = manaRecord.importAuthorization;
+
+  if (!validMana || !validPercent || !authorizedImport) {
+    await setTtlToContinue({
+      user, importId, type, authorPermlink,
+    });
+    return;
+  }
+  return true;
+};
+
 const validateImportToRun = async ({
   user, importId, type, authorPermlink,
 }) => {
+  if (isGuestAccount(user)) {
+    return validateGuestImportToRun({
+      user, importId, type, authorPermlink,
+    });
+  }
+
   const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
   const validVotePower = await votePowerValidation(
     { account: user, type },

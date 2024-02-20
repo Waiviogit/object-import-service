@@ -34,6 +34,71 @@
     "http"
   ],
   "paths": {
+    "/import-objects-service/guest/authorize-import": {
+      "post": {
+        "tags": [
+          "import"
+        ],
+        "summary": "set guest import active/inactive",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authorizeGuest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/authorizeGuest"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "import"
+        ],
+        "summary": "get guest import status",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/authorizeGuest"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
     "/import-objects-service/import-products": {
       "post": {
         "tags": [
@@ -1922,6 +1987,17 @@
           "type": "string"
         },
         "processed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "authorizeGuest": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "importAuthorization": {
           "type": "boolean"
         }
       }

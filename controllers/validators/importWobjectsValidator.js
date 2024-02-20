@@ -50,3 +50,12 @@ exports.getNotPublishedAsinsSchema = Joi.object().keys({
 exports.gptQuerySchema = Joi.object().keys({
   query: Joi.string().required(),
 });
+
+exports.authorizeGuestUser = Joi.object().keys({
+  account: Joi.string().required(),
+  importAuthorization: Joi.boolean().required(),
+});
+
+exports.authorizeGuestUserStatus = Joi.object().keys({
+  account: Joi.string().required(),
+});

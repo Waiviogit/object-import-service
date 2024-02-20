@@ -24,6 +24,7 @@ const incrObjectsCount = async ({ user, importId, authorPermlink }) => {
 };
 
 const claimProcess = async ({ user, importId }) => {
+  console.log(user, 'claim authority');
   const importStatus = await AuthorityStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;
@@ -71,13 +72,13 @@ const claimProcess = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
+    await new Promise((resolve) => setTimeout(resolve, 4000));
   }
 
   await incrObjectsCount({
     user, importId, authorPermlink: nextObject.authorPermlink,
   });
   await sendUpdateImportForUser({ account: user });
-  await new Promise((resolve) => setTimeout(resolve, 4000));
 
   claimProcess({ user, importId });
 };

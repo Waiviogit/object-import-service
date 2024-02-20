@@ -3,6 +3,7 @@ module.exports = {
   ObjectType: require('./waivioDb/ObjectTypeModel'),
   DepartmentModel: require('./waivioDb/DepartmentModel'),
   AppModel: require('./waivioDb/AppModel'),
+  GuestManaModel: require('./waivioDb/GuestManaModel'),
   DatafinityObject: require('./importDb/DatafinityObjectModel'),
   ImportStatusModel: require('./importDb/ImportStatusModel'),
   AuthorityStatusModel: require('./importDb/AuthorityStatusModel'),

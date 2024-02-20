@@ -4,15 +4,16 @@ const { lastBlockCLient } = require('../redis/redis');
 const { NODE_URLS } = require('../../constants/requestsConstants');
 
 exports.getPostNodes = async (key) => {
-  const result = await redisGetter.getHashAll(key, lastBlockCLient);
-
-  if (!result) return NODE_URLS;
-
-  const nodes = JSON.parse(result.nodes, null);
-
-  if (!nodes) return NODE_URLS;
-
-  return nodes;
+  // const result = await redisGetter.getHashAll(key, lastBlockCLient);
+  //
+  // if (!result) return NODE_URLS;
+  //
+  // const nodes = JSON.parse(result.nodes, null);
+  //
+  // if (!nodes) return NODE_URLS;
+  //
+  // return nodes;
+  return NODE_URLS;
 };
 
 exports.getClient = async (key) => {
