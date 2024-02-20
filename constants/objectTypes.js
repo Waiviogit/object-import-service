@@ -82,6 +82,7 @@ exports.FIELDS_BY_OBJECT_TYPE = {
   ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
     this.OBJECT_FIELDS.ADDRESS,
     this.OBJECT_FIELDS.MAP,
     this.OBJECT_FIELDS.EMAIL,
