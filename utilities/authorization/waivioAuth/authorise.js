@@ -9,9 +9,8 @@ const VALIDATE_TOKEN_URL = `https://${waivio_auth.host}/${waivio_auth.baseUrl}/$
 
 const validateTokenRequest = async (token) => {
   try {
-    console.log(VALIDATE_TOKEN_URL);
     const response = await fetchRequest({
-      url: 'https://waiviodev.com/auth/validate_auth_token',
+      url: VALIDATE_TOKEN_URL,
       method: 'POST',
       headers: {
         'Access-Token': token,
