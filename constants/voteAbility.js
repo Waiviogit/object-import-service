@@ -37,6 +37,7 @@ exports.WHITE_LIST = [
   'catshive',
   'liubaru1',
   'athleticshive',
+  'reviewhive',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
