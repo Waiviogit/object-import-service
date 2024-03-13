@@ -33,6 +33,24 @@ const gptCreateCompletion = async ({ content = '' }) => {
   }
 };
 
+const gptCreateCompletion4 = async ({ content = '' }) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4-1106-preview',
+      messages: [{
+        role: 'user',
+        content,
+      }],
+    }, {
+      timeout: 60000,
+    });
+    const result = _.get(response, 'choices[0].message.content', '');
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const gptCreateCompletionBot = async ({ content = '' }) => {
   try {
     const response = await openaiBot.chat.completions.create({
@@ -128,6 +146,17 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const makeDescriptionBasedOnReviews = async (reviews) => {
+  const reviewsString = reviews.join(';');
+
+  const { result, error } = await gptCreateCompletion4({
+    content: `make business description based on reviews and do not make a title: ${reviewsString}`,
+  });
+
+  if (!result || error) return '';
+  return `${result}${GPT_CRAFTED}`;
+};
+
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
 
 const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
@@ -160,4 +189,5 @@ module.exports = {
   restGptQuery,
   gptCreateImage,
   makeBusinessDescription,
+  makeDescriptionBasedOnReviews,
 };

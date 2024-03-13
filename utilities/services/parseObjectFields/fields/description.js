@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { FEATURES_KEYS, OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const {
-  makeDescription, makeBookDescription, makeProductDescription, makeBusinessDescription,
+  makeDescription, makeBookDescription, makeProductDescription, makeBusinessDescription, makeDescriptionBasedOnReviews,
 } = require('../../gptService');
 const { parseJson } = require('../../../helpers/jsonHelper');
 
@@ -79,6 +79,18 @@ const getDescriptionFromBook = async ({ object, allFields = [] }) => {
 };
 
 const getDescriptionFromBusiness = async (object) => {
+  if (object?.reviews?.length) {
+    const gptDescription = await makeDescriptionBasedOnReviews(object?.reviews);
+    if (gptDescription) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: object.user,
+        body: gptDescription,
+        locale: object.locale,
+      });
+    }
+  }
+
   const descriptionFromObject = getBodyFromDescriptions(object);
 
   if (descriptionFromObject) {
