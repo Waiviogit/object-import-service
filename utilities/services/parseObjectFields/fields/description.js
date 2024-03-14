@@ -80,7 +80,10 @@ const getDescriptionFromBook = async ({ object, allFields = [] }) => {
 
 const getDescriptionFromBusiness = async (object) => {
   if (object?.reviews?.length) {
-    const gptDescription = await makeDescriptionBasedOnReviews(object?.reviews);
+    const gptDescription = await makeDescriptionBasedOnReviews({
+      reviews: object?.reviews,
+      name: object.name,
+    });
     if (gptDescription) {
       return formField({
         fieldName: OBJECT_FIELDS.DESCRIPTION,
