@@ -38,6 +38,7 @@ exports.WHITE_LIST = [
   'liubaru1',
   'athleticshive',
   'reviewhive',
+  'hivesucre',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
