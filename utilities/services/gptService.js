@@ -150,7 +150,7 @@ const makeDescriptionBasedOnReviews = async ({ reviews, name }) => {
   const reviewsString = reviews.join(';');
 
   const { result, error } = await gptCreateCompletion4({
-    content: `make business description for ${name}, based on reviews and do not make a title: ${reviewsString}`,
+    content: `make business description for ${name}, based on reviews and do not make a title, do not use word "nestled": ${reviewsString}`,
   });
 
   if (!result || error) return '';
