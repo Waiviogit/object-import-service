@@ -3,11 +3,11 @@ const _ = require('lodash');
 const { getAccountRC } = require('../utilities/hiveApi/userUtil');
 const {
   ImportStatusModel,
-  AppModel,
   AuthorityStatusModel,
   DepartmentsStatusModel,
   DuplicateListStatusModel,
   DescriptionStatusModel,
+  ServiceBotModel,
 } = require('../models');
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
@@ -92,10 +92,11 @@ const startImports = async () => {
 };
 
 const getAverageRc = async () => {
-  const botNames = await AppModel.getBotsByRoleAndHost(
-    { host: config.appHost, role: OBJECT_BOT_ROLE.SERVICE_BOT },
-  );
-  if (!botNames.length) return 0;
+  const bots = await ServiceBotModel.findByRole({ role: OBJECT_BOT_ROLE.SERVICE_BOT });
+  if (!bots.length) return 0;
+
+  const botNames = bots.map((el) => el.name);
+
   const rates = await Promise.all(botNames.map(async (bot) => getAccountRC(bot)));
   const filteredRates = _.filter(rates, (r) => !r.error);
   const sum = _.sumBy(filteredRates, 'percentage');
