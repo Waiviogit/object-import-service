@@ -15,6 +15,7 @@ const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { gptCreateCompletion } = require('../gptService');
 const { removeQuotes } = require('../../helpers/stringFormatHelper');
+const { parseJson } = require('../../helpers/jsonHelper');
 
 const checkFieldsToCreate = async ({ importId }) => {
   const { count } = await DescriptionObjectModel.count({
@@ -28,12 +29,12 @@ const checkFieldsToCreate = async ({ importId }) => {
 };
 
 const promptsByFieldName = {
-  name: 'rewrite name of a product, avoiding any not related phrases in response',
-  title: 'Using your best SEO and copywriting skills, help me formulate an engaging title, max 250 symbols. Here\'s the original for reference',
-  description: 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
+  name: (brand) => `rewrite name of a product, avoiding any not related phrases in response ${brand ? `, keep in mind name of brand: ${brand}, name to rewrite` : ''}`,
+  title: () => 'Using your best SEO and copywriting skills, help me formulate an engaging title, max 250 symbols. Here\'s the original for reference',
+  description: () => 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
 
-const rewriteBodyWithGpt = async ({ objectType, field }) => {
+const rewriteBodyWithGpt = async ({ objectType, field, brand }) => {
   if (!FIELDS_TO_REWRITE_GPT.includes(field.name)) return '';
 
   if (objectType === OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.NAME) {
@@ -45,7 +46,7 @@ const rewriteBodyWithGpt = async ({ objectType, field }) => {
   if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
     return '';
   }
-  const prompt = `${promptsByFieldName[field.name]}: ${field.body}`;
+  const prompt = `${promptsByFieldName[field.name](brand)}: ${field.body}`;
 
   const { result, error } = await gptCreateCompletion({
     content: prompt,
@@ -66,6 +67,9 @@ const prepareFields = async ({
 
   if (!original || !originalProcessed) return;
 
+  const brandObject = parseJson(originalProcessed?.brand, '');
+  const brand = brandObject?.name ?? '';
+
   const originalFields = original.fields
     .filter((el) => FIELDS_TO_REWRITE_GPT.includes(el.name));
 
@@ -83,6 +87,7 @@ const prepareFields = async ({
       const fieldBody = await rewriteBodyWithGpt({
         objectType: original.object_type,
         field,
+        brand,
       });
 
       if (!fieldBody) continue;
