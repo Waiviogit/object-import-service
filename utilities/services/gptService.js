@@ -190,4 +190,5 @@ module.exports = {
   gptCreateImage,
   makeBusinessDescription,
   makeDescriptionBasedOnReviews,
+  gptCreateCompletion4,
 };

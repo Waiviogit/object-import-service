@@ -13,7 +13,7 @@ const { formField } = require('../../helpers/formFieldHelper');
 const { IMPORT_STATUS, IMPORT_TYPES } = require('../../../constants/appData');
 const { validateImportToRun } = require('../../../validators/accountValidator');
 const { sendUpdateImportForUser } = require('../socketClient');
-const { gptCreateCompletion } = require('../gptService');
+const { gptCreateCompletion4 } = require('../gptService');
 const { removeQuotes } = require('../../helpers/stringFormatHelper');
 const { parseJson } = require('../../helpers/jsonHelper');
 
@@ -48,7 +48,7 @@ const rewriteBodyWithGpt = async ({ objectType, field, brand }) => {
   }
   const prompt = `${promptsByFieldName[field.name](brand)}: ${field.body}`;
 
-  const { result, error } = await gptCreateCompletion({
+  const { result, error } = await gptCreateCompletion4({
     content: prompt,
   });
 
