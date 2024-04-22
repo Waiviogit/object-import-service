@@ -346,6 +346,7 @@ const checkRatingFields = async ({ dbObject, dfObject }) => {
     [OBJECT_TYPES.PRODUCT]: 'Value',
     [OBJECT_TYPES.BOOK]: 'Rating',
     [OBJECT_TYPES.RESTAURANT]: 'Value',
+    [OBJECT_TYPES.BUSINESS]: 'Overall',
     default: 'Value',
   };
 
