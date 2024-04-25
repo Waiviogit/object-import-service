@@ -39,6 +39,7 @@ exports.WHITE_LIST = [
   'athleticshive',
   'reviewhive',
   'hivesucre',
+  'acceptcryptomap',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
