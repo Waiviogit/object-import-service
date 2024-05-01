@@ -18,7 +18,7 @@ const decryptText = (ciphertext) => {
 const authoriseResponse = (valid = false) => {
   if (valid) return { isValid: true };
 
-  return { error: { status: 401, message: 'Token not valid!' } };
+  return { error: { status: 401, message: 'The Waivio authorization token is invalid!' } };
 };
 
 exports.authorise = async ({
