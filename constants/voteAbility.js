@@ -40,6 +40,7 @@ exports.WHITE_LIST = [
   'reviewhive',
   'hivesucre',
   'acceptcryptomap',
+  'brianoflondon',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
