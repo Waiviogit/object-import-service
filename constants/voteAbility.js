@@ -41,6 +41,7 @@ exports.WHITE_LIST = [
   'hivesucre',
   'acceptcryptomap',
   'brianoflondon',
+  'josegrech',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
