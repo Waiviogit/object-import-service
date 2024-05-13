@@ -349,6 +349,7 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
       user: datafinityObject.user,
       authorPermlink: existedDatafinity.author_permlink,
       importId: datafinityObject.importId,
+      createdId: existedDatafinity._id.toString(),
     });
     return true;
   }
