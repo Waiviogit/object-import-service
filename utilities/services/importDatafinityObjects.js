@@ -209,6 +209,7 @@ const startObjectImport = async ({
   if (!runImport) return;
 
   if (createNew) {
+    console.log(user, 'createObject');
     await createObject(datafinityObject);
     await sendUpdateImportForUser({ account: user });
     // trigger new import from parser
@@ -216,6 +217,8 @@ const startObjectImport = async ({
     const { wobject, error: dbError } = await Wobj.getOne({
       author_permlink: authorPermlink || datafinityObject.author_permlink,
     });
+
+    console.log('authorPermlink', authorPermlink || datafinityObject.author_permlink);
 
     if (dbError) return;
     // rating
@@ -236,14 +239,21 @@ const startObjectImport = async ({
       });
       return;
     }
+    console.log(user, 'processField');
 
     const { result: updatedObj, error: processErr } = await processField({
       datafinityObject,
       wobject,
       user,
     });
-    if (!updatedObj) return;
-    if (processErr) return;
+    if (!updatedObj) {
+      console.log(user, '!updatedObj');
+      return;
+    }
+    if (processErr) {
+      console.log(user, 'processErr');
+      return;
+    }
     await sendUpdateImportForUser({ account: user });
 
     emitStart({
