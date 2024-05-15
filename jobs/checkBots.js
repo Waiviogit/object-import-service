@@ -14,7 +14,6 @@ const {
 } = require('../constants/appData');
 const { startObjectImport } = require('../utilities/services/importDatafinityObjects');
 const { redisSetter, redisGetter } = require('../utilities/redis');
-const config = require('../config');
 const claimProcess = require('../utilities/services/authority/claimProcess');
 const importDepartments = require('../utilities/services/departmentsService/importDepartments');
 const duplicateProcess = require('../utilities/services/listDuplication/duplicateProcess');
@@ -91,7 +90,7 @@ const startImports = async () => {
   }
 };
 
-const getAverageRc = async () => {
+const getMaxRc = async () => {
   const bots = await ServiceBotModel.findByRole({ role: OBJECT_BOT_ROLE.SERVICE_BOT });
   if (!bots.length) return 0;
 
@@ -99,16 +98,16 @@ const getAverageRc = async () => {
 
   const rates = await Promise.all(botNames.map(async (bot) => getAccountRC(bot)));
   const filteredRates = _.filter(rates, (r) => !r.error);
-  const sum = _.sumBy(filteredRates, 'percentage');
+  const max = _.maxBy(filteredRates, 'percentage');
 
-  return Math.round(sum / filteredRates.length);
+  return max?.percentage ?? 0;
 };
 
 const checkBots = new CronJob('0 */1 * * * *', async () => {
-  const rc = await getAverageRc();
+  const rc = await getMaxRc();
   const { result: queueLength = 0 } = await redisGetter.getQueueLength();
 
-  if (rc < IMPORT_GLOBAL_SETTINGS.RC_TO_STOP) {
+  if (rc <= IMPORT_GLOBAL_SETTINGS.RC_TO_STOP) {
     await stopImports();
     return;
   }
