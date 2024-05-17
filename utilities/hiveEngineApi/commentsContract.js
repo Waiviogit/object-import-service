@@ -17,6 +17,10 @@ exports.getVotingPower = async ({ rewardPoolId, account, method }) => {
     downvotingPower: 10000,
     lastVoteTimestamp: Date.now(),
   };
-  if (_.isEmpty(result)) return [onEmptyResp];
+  if (_.isEmpty(result)) {
+    return method === 'findOne'
+      ? onEmptyResp
+      : [onEmptyResp];
+  }
   return result;
 };
