@@ -14,15 +14,6 @@ const getAuthorityField = ({ fields = [], user, authority }) => fields
       && el.creator === user
       && el.body === authority);
 
-const incrObjectsCount = async ({ user, importId, authorPermlink }) => {
-  await AuthorityObjectModel.updateToClaimedObject({
-    user, importId, authorPermlink,
-  });
-  await AuthorityStatusModel.updateClaimedCount({
-    user, importId, fieldsVoted: 1, objectsClaimed: 1,
-  });
-};
-
 const claimProcess = async ({ user, importId }) => {
   console.log(user, 'claim authority');
   const importStatus = await AuthorityStatusModel.getUserImport({ user, importId });
@@ -41,7 +32,7 @@ const claimProcess = async ({ user, importId }) => {
 
   const { wobject, error } = await Wobj.getOne({ author_permlink: nextObject.authorPermlink });
   if (error) {
-    await incrObjectsCount({
+    await AuthorityObjectModel.updateToClaimedObject({
       user, importId, authorPermlink: nextObject.authorPermlink,
     });
     claimProcess({ user, importId });
@@ -51,7 +42,7 @@ const claimProcess = async ({ user, importId }) => {
     fields: wobject?.fields ?? [], user, authority: importStatus.authority,
   });
   if (authority && importStatus.authority === AUTHORITY_FIELD_OPTIONS.ADMINISTRATIVE) {
-    await incrObjectsCount({
+    await AuthorityObjectModel.updateToClaimedObject({
       user, importId, authorPermlink: nextObject.authorPermlink,
     });
     claimProcess({ user, importId });
@@ -72,10 +63,13 @@ const claimProcess = async ({ user, importId }) => {
       importingAccount: user,
       importId,
     });
+    await AuthorityStatusModel.updateClaimedCount({
+      user, importId, fieldsVoted: 1, objectsClaimed: 1,
+    });
     await new Promise((resolve) => setTimeout(resolve, 4000));
   }
 
-  await incrObjectsCount({
+  await AuthorityObjectModel.updateToClaimedObject({
     user, importId, authorPermlink: nextObject.authorPermlink,
   });
   await sendUpdateImportForUser({ account: user });
