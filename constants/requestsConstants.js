@@ -33,6 +33,7 @@ exports.WAIVIO_API = {
     WOBJECT: '/wobject',
     LIST_ITEM_LINKS: '/list-item-links',
     LIST_ITEM_DEPARTMENTS: '/list-item-departments',
+    AUTHORITY: '/authority',
   },
   staging: {
     HOST: 'https://waiviodev.com',
@@ -41,6 +42,7 @@ exports.WAIVIO_API = {
     WOBJECT: '/wobject',
     LIST_ITEM_LINKS: '/list-item-links',
     LIST_ITEM_DEPARTMENTS: '/list-item-departments',
+    AUTHORITY: '/authority',
   },
   development: {
     HOST: 'http://localhost:3000',
@@ -49,5 +51,6 @@ exports.WAIVIO_API = {
     WOBJECT: '/wobject',
     LIST_ITEM_LINKS: '/list-item-links',
     LIST_ITEM_DEPARTMENTS: '/list-item-departments',
+    AUTHORITY: '/authority',
   },
 };

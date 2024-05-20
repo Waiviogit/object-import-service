@@ -4,12 +4,12 @@ const { OBJECT_TYPES, OBJECT_FIELDS } = require('../../../constants/objectTypes'
 const waivioApi = require('../../waivioApi');
 const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
-const { NotFoundError} = require('../../../constants/httpErrors');
+const { NotFoundError } = require('../../../constants/httpErrors');
 
 const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
   for (const authorPermlink of authorPermlinks) {
-    const { result: listItems, error } = await waivioApi.getListItemLinks({
+    const { result: listItems, error } = await waivioApi.getListItemLinksAuthority({
       authorPermlink, scanEmbedded,
     });
     if (error) return { error };
@@ -59,7 +59,7 @@ const claimAuthority = async ({
 
   if (object.object_type === OBJECT_TYPES.LIST) {
     const { result: links, error } = await waivioApi
-      .getListItemLinks({ authorPermlink, scanEmbedded });
+      .getListItemLinksAuthority({ authorPermlink, scanEmbedded });
     if (error) return { error };
     if (!links.length) return { error: new NotFoundError('Objects not found') };
     const { result, error: createError } = await createClaimTask({
