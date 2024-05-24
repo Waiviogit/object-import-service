@@ -55,7 +55,8 @@ module.exports = async (object) => {
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
     const sephoraImage = /sephora.com/.test(object.primaryImageURLs[0]);
-    if (sephoraImage) {
+    const waivioImage = /waivio.nyc3.digitaloceanspaces.com/.test(object.primaryImageURLs[0]);
+    if (sephoraImage || waivioImage) {
       fields.push(formField({
         fieldName: OBJECT_FIELDS.AVATAR,
         locale: object.locale,
@@ -89,7 +90,8 @@ module.exports = async (object) => {
 
   for (const element of _.uniq(elementsToCheck)) {
     const sephoraImage = /sephora.com/.test(element);
-    if (sephoraImage) {
+    const waivioImage = /waivio.nyc3.digitaloceanspaces.com/.test(element);
+    if (sephoraImage || waivioImage) {
       imagesWithOkResolution.push(element);
       continue;
     }
