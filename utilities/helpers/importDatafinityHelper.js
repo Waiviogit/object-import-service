@@ -245,7 +245,7 @@ const validateSameFieldsProductId = ({ fieldData, foundedFields }) => {
   let same;
   for (const body of createReversedJSONStringArray(fieldData.body)) {
     const newField = { ...fieldData, body };
-    same = foundedFields.find((field) => _.isEqual(field, _.pick(newField, SET_UNIQ_FIELDS)));
+    same = foundedFields.find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS), _.pick(newField, SET_UNIQ_FIELDS)));
     if (same) return !!same;
   }
   return !!same;
@@ -262,22 +262,21 @@ const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
 };
 
 const validateSameFieldDefault = ({ fieldData, foundedFields }) => !!foundedFields
-  .find((field) => _.isEqual(field, _.pick(fieldData, SET_UNIQ_FIELDS)));
+  .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS), _.pick(fieldData, SET_UNIQ_FIELDS)));
 
 const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFields
-  .find((field) => _.isEqual(field, _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
+  .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS_AUTHORITY), _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
 
 const validateSameFields = ({ fieldData, wobject }) => {
-  const foundedFields = _.map(wobject.fields, (field) => _.pick(field, SET_UNIQ_FIELDS));
   const validation = {
     [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
-    [OBJECT_FIELDS.AVATAR]: () => !!foundedFields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
+    [OBJECT_FIELDS.AVATAR]: () => !!wobject.fields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
     [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
     default: validateSameFieldDefault,
   };
 
-  return (validation[fieldData.name] || validation.default)({ fieldData, foundedFields });
+  return (validation[fieldData.name] || validation.default)({ fieldData, foundedFields: wobject.fields });
 };
 
 const checkAddress = (object) => /[0-9]/.test(_.get(object, 'address', ''));
