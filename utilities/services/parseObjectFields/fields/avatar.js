@@ -55,8 +55,7 @@ module.exports = async (object) => {
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
     const sephoraImage = /sephora.com/.test(object.primaryImageURLs[0]);
-    const waivioImage = /waivio.nyc3.digitaloceanspaces.com/.test(object.primaryImageURLs[0]);
-    if (sephoraImage || waivioImage) {
+    if (sephoraImage) {
       fields.push(formField({
         fieldName: OBJECT_FIELDS.AVATAR,
         locale: object.locale,
