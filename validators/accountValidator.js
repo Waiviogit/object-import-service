@@ -7,7 +7,7 @@ const {
   IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY,
 } = require('../constants/appData');
 const { redisGetter, redisSetter } = require('../utilities/redis');
-const { getVoteCost } = require('../utilities/helpers/importDatafinityHelper');
+const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 const { guestMana } = require('../utilities/guestUser');
 
@@ -29,6 +29,8 @@ const guestImportAccountValidator = async (account) => {
 };
 
 const importAccountValidator = async (user, voteCost) => {
+  if (isUserInWhitelist(user)) return { result: true };
+
   if (isGuestAccount(user)) return guestImportAccountValidator(user);
 
   console.log(user, 'checkVotePower');
@@ -192,6 +194,8 @@ const validateGuestImportToRun = async ({
 const validateImportToRun = async ({
   user, importId, type, authorPermlink,
 }) => {
+  if (isUserInWhitelist(user)) return true;
+
   if (isGuestAccount(user)) {
     return validateGuestImportToRun({
       user, importId, type, authorPermlink,
