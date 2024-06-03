@@ -24,6 +24,8 @@ const getVoteCostInitial = (account) => {
   return VOTE_COST.INITIAL;
 };
 
+const isUserInWhitelist = (account) => _.includes(WHITE_LIST, account);
+
 const checkBookInProduct = (products) => {
   let book = false;
 
@@ -396,4 +398,5 @@ module.exports = {
   isValidHttpUrl,
   getProductRating,
   checkRatingFields,
+  isUserInWhitelist,
 };
