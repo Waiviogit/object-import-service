@@ -30,7 +30,6 @@ const findOne = async ({ filter, projection, options }) => {
   }
 };
 
-
 const find = async ({ filter, projection, options }) => {
   try {
     const result = await DescriptionObject.find(filter, projection, options);
@@ -60,6 +59,15 @@ const deleteMany = async ({ filter, options }) => {
   }
 };
 
+const countDocuments = async ({ filter, options }) => {
+  try {
+    const result = await DescriptionObject.countDocuments(filter, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   findOne,
   insertMany,
@@ -67,4 +75,5 @@ module.exports = {
   updateOne,
   deleteMany,
   find,
+  countDocuments,
 };

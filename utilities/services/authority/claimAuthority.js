@@ -49,6 +49,111 @@ const getListItemsFromMenu = ({ fields }) => fields
   .filter((el) => el?.objectType === OBJECT_TYPES.LIST)
   .map((el) => el.linkToObject);
 
+const claimList = async ({
+  user, authorPermlink, authority, scanEmbedded, object,
+}) => {
+  const { result: links, error } = await waivioApi
+    .getListItemLinksAuthority({ authorPermlink, scanEmbedded });
+  if (error) return { error };
+  if (!links.length) return { error: new NotFoundError('Objects not found') };
+  const { result, error: createError } = await createClaimTask({
+    links,
+    user,
+    authority,
+    lists: [object.author_permlink],
+  });
+  if (createError) return { error: createError };
+  claimProcess({
+    user: result.user,
+    importId: result.importId,
+  });
+  return { result };
+};
+
+const claimBusiness = async ({
+  user, authorPermlink, authority, scanEmbedded, object,
+}) => {
+  const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
+  const { result: links, error } = await getListObjectsFromArr({ authorPermlinks, scanEmbedded });
+  if (error) return { error };
+  links.push(object.author_permlink);
+  const { result, error: createError } = await createClaimTask({
+    links,
+    user,
+    authority,
+    lists: authorPermlinks,
+  });
+  if (createError) return { error: createError };
+  claimProcess({
+    user: result.user,
+    importId: result.importId,
+  });
+  return { result };
+};
+
+const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
+  let skip = 0;
+  const limit = 500;
+
+  while (true) {
+    const { result, error } = await waivioApi.getObjectsFromMap({
+      authorPermlink, skip, limit,
+    });
+    skip += limit;
+    if (error) return { error };
+
+    const { error: inserError } = await AuthorityObjectModel.insertMany(
+      result?.result.map((el) => ({
+        user,
+        importId,
+        authorPermlink: el,
+      })),
+    );
+    if (inserError) return { error: inserError };
+    ///
+    if (!result.hasMore) break;
+  }
+
+  const { result: objectsCount } = await AuthorityObjectModel
+    .countDocuments({ filter: { importId } });
+
+  await AuthorityStatusModel.updateOne({
+    filter: { importId },
+    update: { objectsCount },
+  });
+  claimProcess({
+    user,
+    importId,
+  });
+};
+
+const claimMap = async ({
+  user, authorPermlink, authority, scanEmbedded, object,
+}) => {
+  const importId = uuid.v4();
+
+  fetchAllObjectFromMap({
+    importId, user, authorPermlink,
+  });
+
+  const { result, error: statusError } = await AuthorityStatusModel.create({
+    importId,
+    user,
+    authority,
+    objectsCount: 0,
+    lists: [object.author_permlink],
+  });
+  if (statusError) return { statusError };
+  return { result: result.toObject() };
+};
+
+const claimByType = {
+  [OBJECT_TYPES.LIST]: claimList,
+  [OBJECT_TYPES.BUSINESS]: claimBusiness,
+  [OBJECT_TYPES.MAP]: claimMap,
+  default: () => ({ error: { status: 422, message: 'Wrong object type' } }),
+};
+
 const claimAuthority = async ({
   user, authorPermlink, authority, scanEmbedded,
 }) => {
@@ -57,44 +162,9 @@ const claimAuthority = async ({
   });
   if (!object) return { error: { status: 404, message: 'Not Found' } };
 
-  if (object.object_type === OBJECT_TYPES.LIST) {
-    const { result: links, error } = await waivioApi
-      .getListItemLinksAuthority({ authorPermlink, scanEmbedded });
-    if (error) return { error };
-    if (!links.length) return { error: new NotFoundError('Objects not found') };
-    const { result, error: createError } = await createClaimTask({
-      links,
-      user,
-      authority,
-      lists: [object.author_permlink],
-    });
-    if (createError) return { error: createError };
-    claimProcess({
-      user: result.user,
-      importId: result.importId,
-    });
-    return { result };
-  }
-  if (object.object_type === OBJECT_TYPES.BUSINESS) {
-    const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
-    const { result: links, error } = await getListObjectsFromArr({ authorPermlinks, scanEmbedded });
-    if (error) return { error };
-    links.push(object.author_permlink);
-    const { result, error: createError } = await createClaimTask({
-      links,
-      user,
-      authority,
-      lists: authorPermlinks,
-    });
-    if (createError) return { error: createError };
-    claimProcess({
-      user: result.user,
-      importId: result.importId,
-    });
-    return { result };
-  }
-
-  return { error: { status: 422, message: 'Wrong object type' } };
+  return (claimByType[object.object_type] || claimByType.default)({
+    user, authorPermlink, authority, scanEmbedded, object,
+  });
 };
 
 module.exports = claimAuthority;

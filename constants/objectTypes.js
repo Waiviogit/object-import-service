@@ -12,6 +12,7 @@ exports.OBJECT_TYPES = {
   RESTAURANT: 'restaurant',
   PRODUCT: 'product',
   LIST: 'list',
+  MAP: 'map',
 };
 
 exports.DATAFINITY_IDS = 'keys';

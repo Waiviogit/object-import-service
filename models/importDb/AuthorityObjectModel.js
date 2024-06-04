@@ -62,6 +62,15 @@ const deleteMany = async ({ filter, options }) => {
   }
 };
 
+const countDocuments = async ({ filter, options }) => {
+  try {
+    const result = await AuthorityObject.countDocuments(filter, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   insertMany,
   findOne,
@@ -70,4 +79,5 @@ module.exports = {
   updateToClaimedObject,
   find,
   deleteMany,
+  countDocuments,
 };

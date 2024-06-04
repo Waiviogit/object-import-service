@@ -52,5 +52,7 @@ exports.WAIVIO_API = {
     LIST_ITEM_LINKS: '/list-item-links',
     LIST_ITEM_DEPARTMENTS: '/list-item-departments',
     AUTHORITY: '/authority',
+    MAP: '/map',
+    LIST: '/list',
   },
 };
