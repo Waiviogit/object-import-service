@@ -102,7 +102,10 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
       authorPermlink, skip, limit,
     });
     skip += limit;
-    if (error) return { error };
+    if (error) {
+      console.log('waivioApi getObjectsFromMap error', error);
+      return { error };
+    }
 
     const { error: inserError } = await AuthorityObjectModel.insertMany(
       result?.result.map((el) => ({
@@ -111,7 +114,10 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
         authorPermlink: el,
       })),
     );
-    if (inserError) return { error: inserError };
+    if (inserError) {
+      console.log('inserError AuthorityObjectModel', inserError);
+      return { error: inserError };
+    }
     ///
     if (!result.hasMore) break;
   }
