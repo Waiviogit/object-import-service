@@ -50,9 +50,19 @@ const createDescriptionList = async ({
   };
 };
 
-const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
+const fetchAllObjectFromMap = async ({
+  importId, user, authorPermlink, object,
+}) => {
   let skip = 0;
   const limit = 500;
+
+  await DescriptionObjectModel.insertMany([{
+    user,
+    importId,
+    type: object.object_type,
+    authorPermlink: object.author_permlink,
+    name: object.default_name,
+  }]);
 
   while (true) {
     const { result, error } = await waivioApi.getObjectsFromMap({
@@ -94,7 +104,7 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
   rewriteDescription({ importId, user });
 };
 
-const createDescriptionMap = async ({ user, authorPermlink }) => {
+const createDescriptionMap = async ({ user, authorPermlink, object }) => {
   const importId = uuid.v4();
 
   const { result: task } = await DescriptionStatusModel.create({
@@ -105,7 +115,9 @@ const createDescriptionMap = async ({ user, authorPermlink }) => {
     objectsCount: 0,
   });
 
-  fetchAllObjectFromMap({ importId, user, authorPermlink });
+  fetchAllObjectFromMap({
+    importId, user, authorPermlink, object,
+  });
 
   return {
     result: task,
@@ -127,7 +139,7 @@ const createDuplicateTask = async ({
   if (!object) return { error: new NotFoundError('Object not found') };
 
   return (createByType[object.object_type] || createByType.default)({
-    authorPermlink, scanEmbedded, user,
+    authorPermlink, scanEmbedded, user, object,
   });
 };
 

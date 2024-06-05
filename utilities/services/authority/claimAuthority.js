@@ -95,7 +95,12 @@ const claimBusiness = async ({
 const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
   let skip = 0;
   const limit = 500;
-  console.log('fetchAllObjectFromMap');
+
+  await AuthorityObjectModel.insertMany([{
+    user,
+    importId,
+    authorPermlink,
+  }]);
 
   while (true) {
     const { result, error } = await waivioApi.getObjectsFromMap({
@@ -103,7 +108,6 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
     });
     skip += limit;
     if (error) {
-      console.log('waivioApi getObjectsFromMap error', error);
       return { error };
     }
 
