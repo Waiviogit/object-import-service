@@ -132,10 +132,6 @@ const claimMap = async ({
 }) => {
   const importId = uuid.v4();
 
-  fetchAllObjectFromMap({
-    importId, user, authorPermlink,
-  });
-
   const { result, error: statusError } = await AuthorityStatusModel.create({
     importId,
     user,
@@ -144,6 +140,11 @@ const claimMap = async ({
     lists: [object.author_permlink],
   });
   if (statusError) return { statusError };
+
+  fetchAllObjectFromMap({
+    importId, user, authorPermlink,
+  });
+
   return { result: result.toObject() };
 };
 
