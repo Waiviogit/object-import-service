@@ -5,6 +5,7 @@ const waivioApi = require('../../waivioApi');
 const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
 const { NotFoundError } = require('../../../constants/httpErrors');
+const { IMPORT_STATUS } = require('../../../constants/appData');
 
 const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
@@ -94,6 +95,7 @@ const claimBusiness = async ({
 const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
   let skip = 0;
   const limit = 500;
+  console.log('fetchAllObjectFromMap');
 
   while (true) {
     const { result, error } = await waivioApi.getObjectsFromMap({
@@ -119,7 +121,7 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
 
   await AuthorityStatusModel.updateOne({
     filter: { importId },
-    update: { objectsCount },
+    update: { objectsCount, status: IMPORT_STATUS.ACTIVE },
   });
   claimProcess({
     user,
@@ -137,6 +139,7 @@ const claimMap = async ({
     user,
     authority,
     objectsCount: 0,
+    status: IMPORT_STATUS.PENDING,
     lists: [object.author_permlink],
   });
   if (statusError) return { statusError };

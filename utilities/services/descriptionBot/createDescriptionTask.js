@@ -4,6 +4,7 @@ const { OBJECT_TYPES } = require('../../../constants/objectTypes');
 const { NotFoundError, NotAcceptableError, ServiceUnavailableError } = require('../../../constants/httpErrors');
 const waivioApi = require('../../waivioApi');
 const rewriteDescription = require('./rewriteDescription');
+const { IMPORT_STATUS } = require('../../../constants/appData');
 
 const createDescriptionList = async ({
   authorPermlink, scanEmbedded, user,
@@ -87,7 +88,7 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
 
   await DescriptionStatusModel.updateOne({
     filter: { importId },
-    update: { objectsCount },
+    update: { objectsCount, status: IMPORT_STATUS.ACTIVE },
   });
 
   rewriteDescription({ importId, user });
@@ -100,6 +101,7 @@ const createDescriptionMap = async ({ user, authorPermlink }) => {
     user,
     importId,
     baseList: authorPermlink,
+    status: IMPORT_STATUS.PENDING,
     objectsCount: 0,
   });
 
