@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const {
-  AuthorityStatusModel, AuthorityObjectModel,
+  AuthorityStatusModel, AuthorityObjectModel, Wobj,
 } = require('../../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const { redisGetter } = require('../../redis');
@@ -30,6 +30,14 @@ const getStatistic = async ({
     },
   });
   if (error) return { error };
+
+  await Promise.all(result.map(async (el) => {
+    const { result: objects } = await Wobj.find({
+      filter: { author_permlink: { $in: el.lists } },
+      projection: { author_permlink: 1, object_type: 1, _id: 0 },
+    });
+    el.objects = objects;
+  }));
 
   return {
     result,

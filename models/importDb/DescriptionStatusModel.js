@@ -38,7 +38,7 @@ const findOne = async ({ filter, projection, options }) => {
 
 const find = async ({ filter, projection, options }) => {
   try {
-    const result = await DescriptionStatus.find(filter, projection, options);
+    const result = await DescriptionStatus.find(filter, projection, options).lean();
     return { result };
   } catch (error) {
     return { error };
