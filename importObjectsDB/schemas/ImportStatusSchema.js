@@ -14,8 +14,8 @@ const ImportStatusSchema = new Schema({
   },
   objectType: { type: String },
   authority: { type: String, enum: Object.values(AUTHORITY_FIELD_OPTIONS) },
-  fieldsCount: { type: Number },
-  fieldsCreatedCount: { type: Number },
+  fieldsCount: { type: Number, default: 0 },
+  fieldsCreatedCount: { type: Number, default: 0 },
   finishedAt: { type: Date },
   objectsLinks: { type: [String] },
 }, { timestamps: true, versionKey: false });
