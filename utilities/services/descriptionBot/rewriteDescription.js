@@ -37,13 +37,10 @@ const promptsByFieldName = {
 const rewriteBodyWithGpt = async ({ objectType, field, brand }) => {
   if (!FIELDS_TO_REWRITE_GPT.includes(field.name)) return '';
 
-  if (objectType === OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.NAME) {
+  if (objectType !== OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.NAME) {
     return '';
   }
-  if (objectType === OBJECT_TYPES.BOOK && field.name === OBJECT_FIELDS.NAME) {
-    return '';
-  }
-  if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
+  if (objectType !== OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.TITLE) {
     return '';
   }
   const prompt = `${promptsByFieldName[field.name](brand)}: ${field.body}`;
