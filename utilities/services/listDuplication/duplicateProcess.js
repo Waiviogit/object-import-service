@@ -120,7 +120,6 @@ const checkFieldsToVote = async ({ importId }) => {
 };
 
 const promptsByFieldName = {
-  name: (brand) => `rewrite name of a product, avoiding any not related phrases in response ${brand ? `, keep in mind name of brand: ${brand}, name to rewrite` : ''}`,
   title: () => 'Using your best SEO and copywriting skills, help me formulate an engaging title, max 250 symbols. Here\'s the original for reference',
   description: () => 'rewrite description  seo friendly, act as a professional copywriter and seo expert, 3 paragraph max',
 };
@@ -128,12 +127,10 @@ const promptsByFieldName = {
 const rewriteBodyWithGpt = async ({ objectType, field, brand }) => {
   if (!FIELDS_TO_REWRITE_GPT.includes(field.name)) return field.body;
 
-  if (objectType === OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.NAME) {
-    return field.body;
+  if (objectType !== OBJECT_TYPES.LIST && field.name === OBJECT_FIELDS.TITLE) {
+    return '';
   }
-  if (objectType === OBJECT_TYPES.PRODUCT && field.name === OBJECT_FIELDS.TITLE) {
-    return field.body;
-  }
+
   const prompt = `${promptsByFieldName[field.name](brand)}: ${field.body}`;
 
   const { result, error } = await gptCreateCompletion({
