@@ -272,6 +272,7 @@ const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFi
 const validateSameFields = ({ fieldData, wobject }) => {
   const validation = {
     [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
+    [OBJECT_FIELDS.COMPANY_ID]: validateSameFieldsProductId,
     [OBJECT_FIELDS.AVATAR]: () => !!wobject.fields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
     [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
