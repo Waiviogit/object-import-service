@@ -14,7 +14,11 @@ const send = async (data) => {
   }
   while (true) {
     try {
-      const { data: response } = await axios.post(URL, data);
+      const { data: response } = await axios.post(URL, data, {
+        headers: {
+          'access-key': process.env.OBJECT_BOT_ACCESS_KEY,
+        },
+      });
 
       if (response && response.transactionId && response.parentAuthor && response.parentPermlink && response.author && response.permlink) {
         return { response };

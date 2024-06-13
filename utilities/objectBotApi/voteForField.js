@@ -23,6 +23,7 @@ const send = async ({
       {
         headers: {
           api_key: process.env.OBJECT_BOT_API_KEY,
+          'access-key': process.env.OBJECT_BOT_ACCESS_KEY,
         },
       },
     );
