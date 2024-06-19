@@ -45,6 +45,7 @@ exports.WHITE_LIST = [
   'jonsnow1983',
   'campingmapper',
   'activerunners',
+  'irenok',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
