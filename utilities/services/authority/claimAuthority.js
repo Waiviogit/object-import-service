@@ -1,28 +1,28 @@
 const uuid = require('uuid');
-const { Wobj, AuthorityStatusModel, AuthorityObjectModel } = require('../../../models');
+const {
+  Wobj, AuthorityStatusModel, AuthorityObjectModel, App,
+} = require('../../../models');
 const { OBJECT_TYPES, OBJECT_FIELDS } = require('../../../constants/objectTypes');
 const waivioApi = require('../../waivioApi');
 const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
-const { NotFoundError } = require('../../../constants/httpErrors');
 const { IMPORT_STATUS } = require('../../../constants/appData');
+const { getAllObjectsInList } = require('../../helpers/wObjectHelper');
 
 const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
+  const { app } = await App.getOne({ host: 'waivio.com' });
   for (const authorPermlink of authorPermlinks) {
-    const { result: listItems, error } = await waivioApi.getListItemLinksAuthority({
-      authorPermlink, scanEmbedded,
-    });
-    if (error) return { error };
+    const listItems = await getAllObjectsInList({ app, authorPermlink, scanEmbedded });
     result.push(...listItems);
   }
-  return { result };
+  return result;
 };
 
-const createClaimTask = async ({
-  links = [], user, authority, lists,
+const updateClaimTask = async ({
+  user, importId, authorPermlinks, scanEmbedded,
 }) => {
-  const importId = uuid.v4();
+  const links = await getListObjectsFromArr({ authorPermlinks, scanEmbedded });
 
   const { error: inserError } = await AuthorityObjectModel.insertMany(
     links.map((el) => ({
@@ -33,15 +33,21 @@ const createClaimTask = async ({
   );
   if (inserError) return { error: inserError };
 
-  const { result, error } = await AuthorityStatusModel.create({
-    importId,
-    user,
-    authority,
-    objectsCount: links.length,
-    lists,
+  await AuthorityStatusModel.updateOne({
+    filter: {
+      importId,
+      user,
+    },
+    update: {
+      objectsCount: links.length,
+      status: IMPORT_STATUS.ACTIVE,
+    },
   });
-  if (error) return { error };
-  return { result: result.toObject() };
+
+  claimProcess({
+    user,
+    importId,
+  });
 };
 
 const getListItemsFromMenu = ({ fields }) => fields
@@ -53,42 +59,48 @@ const getListItemsFromMenu = ({ fields }) => fields
 const claimList = async ({
   user, authorPermlink, authority, scanEmbedded, object,
 }) => {
-  const { result: links, error } = await waivioApi
-    .getListItemLinksAuthority({ authorPermlink, scanEmbedded });
-  if (error) return { error };
-  if (!links.length) return { error: new NotFoundError('Objects not found') };
-  const { result, error: createError } = await createClaimTask({
-    links,
+  const importId = uuid.v4();
+
+  const authorPermlinks = [authorPermlink];
+
+  const { result, error: statusError } = await AuthorityStatusModel.create({
+    importId,
     user,
     authority,
-    lists: [object.author_permlink],
+    objectsCount: 0,
+    status: IMPORT_STATUS.PENDING,
+    lists: authorPermlinks,
   });
-  if (createError) return { error: createError };
-  claimProcess({
-    user: result.user,
-    importId: result.importId,
+
+  if (statusError) return { error: statusError };
+
+  updateClaimTask({
+    user, scanEmbedded, importId, authorPermlinks,
   });
+
   return { result };
 };
 
 const claimBusiness = async ({
   user, authorPermlink, authority, scanEmbedded, object,
 }) => {
+  const importId = uuid.v4();
   const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
-  const { result: links, error } = await getListObjectsFromArr({ authorPermlinks, scanEmbedded });
-  if (error) return { error };
-  links.push(object.author_permlink);
-  const { result, error: createError } = await createClaimTask({
-    links,
+
+  const { result, error: statusError } = await AuthorityStatusModel.create({
+    importId,
     user,
     authority,
+    objectsCount: 0,
+    status: IMPORT_STATUS.PENDING,
     lists: authorPermlinks,
   });
-  if (createError) return { error: createError };
-  claimProcess({
-    user: result.user,
-    importId: result.importId,
+  if (statusError) return { error: statusError };
+
+  updateClaimTask({
+    user, scanEmbedded, importId, authorPermlinks,
   });
+
   return { result };
 };
 
@@ -152,7 +164,7 @@ const claimMap = async ({
     status: IMPORT_STATUS.PENDING,
     lists: [object.author_permlink],
   });
-  if (statusError) return { statusError };
+  if (statusError) return { error: statusError };
 
   fetchAllObjectFromMap({
     importId, user, authorPermlink,

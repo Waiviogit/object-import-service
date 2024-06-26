@@ -1,26 +1,23 @@
 const uuid = require('uuid');
-const { Wobj, DuplicateListStatusModel, DuplicateListObjectModel } = require('../../../models');
+const {
+  Wobj, DuplicateListStatusModel, DuplicateListObjectModel, App,
+} = require('../../../models');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
-const { NotFoundError, NotAcceptableError, ServiceUnavailableError } = require('../../../constants/httpErrors');
-const waivioApi = require('../../waivioApi');
+const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
 const duplicateProcess = require('./duplicateProcess');
+const { getAllObjectsInListForImport } = require('../../helpers/wObjectHelper');
+const { IMPORT_STATUS } = require('../../../constants/appData');
 
-const createDuplicateTask = async ({
-  user, authorPermlink, scanEmbedded,
+const getListItems = async ({
+  user, authorPermlink, scanEmbedded, importId,
 }) => {
-  const importId = uuid.v4();
-  const { result: object } = await Wobj.findOne({
-    filter: { author_permlink: authorPermlink },
+  const { app } = await App.getOne({ host: 'waivio.com' });
+
+  const links = await getAllObjectsInListForImport({
+    authorPermlink, handledItems: [authorPermlink], scanEmbedded, app,
   });
-  if (!object) return { error: new NotFoundError('Object not found') };
-  if (object.object_type !== OBJECT_TYPES.LIST) return { error: new NotAcceptableError('Not a list') };
 
-  const { result: links, error: getListErr } = await waivioApi
-    .getListItemLinks({ authorPermlink, scanEmbedded });
-
-  if (getListErr) return { error: new ServiceUnavailableError('getListItemLinks Error') };
-
-  if (!links.length) return { error: new NotFoundError('List not found') };
+  if (!links.length) return;
 
   const { result: objects } = await Wobj.find({
     filter: { author_permlink: { $in: links } },
@@ -33,14 +30,6 @@ const createDuplicateTask = async ({
 
   const objectsList = objects.filter((o) => o.object_type === OBJECT_TYPES.LIST);
 
-  const { result: task } = await DuplicateListStatusModel.create({
-    user,
-    importId,
-    rootObject: authorPermlink,
-    objectsCount: links.length,
-    objectsListCount: objectsList.length,
-  });
-
   const duplicateObjects = objects.map((el) => ({
     user,
     importId,
@@ -51,8 +40,45 @@ const createDuplicateTask = async ({
 
   await DuplicateListObjectModel.insertMany(duplicateObjects);
 
+  await DuplicateListStatusModel.updateOne({
+    filter: {
+      user,
+      importId,
+    },
+    update: {
+      objectsCount: links.length,
+      objectsListCount: objectsList.length,
+      status: IMPORT_STATUS.ACTIVE,
+    },
+  });
+
   duplicateProcess({
     importId, user,
+  });
+};
+
+const createDuplicateTask = async ({
+  user, authorPermlink, scanEmbedded,
+}) => {
+  const importId = uuid.v4();
+
+  const { result: object } = await Wobj.findOne({
+    filter: { author_permlink: authorPermlink },
+  });
+  if (!object) return { error: new NotFoundError('Object not found') };
+  if (object.object_type !== OBJECT_TYPES.LIST) return { error: new NotAcceptableError('Not a list') };
+
+  const { result: task } = await DuplicateListStatusModel.create({
+    user,
+    importId,
+    rootObject: authorPermlink,
+    objectsCount: 0,
+    objectsListCount: 0,
+    status: IMPORT_STATUS.PENDING,
+  });
+
+  getListItems({
+    user, authorPermlink, scanEmbedded, importId,
   });
 
   return {
