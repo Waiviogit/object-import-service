@@ -1,19 +1,21 @@
 const uuid = require('uuid');
-const { Wobj, DescriptionObjectModel, DescriptionStatusModel } = require('../../../models');
+const {
+  Wobj, DescriptionObjectModel, DescriptionStatusModel, App,
+} = require('../../../models');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
-const { NotFoundError, NotAcceptableError, ServiceUnavailableError } = require('../../../constants/httpErrors');
+const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
 const waivioApi = require('../../waivioApi');
 const rewriteDescription = require('./rewriteDescription');
 const { IMPORT_STATUS } = require('../../../constants/appData');
+const { getAllObjectsInListForImport } = require('../../helpers/wObjectHelper');
 
-const createDescriptionList = async ({
-  authorPermlink, scanEmbedded, user,
+const processAllListItems = async ({
+  authorPermlink, scanEmbedded, user, importId,
 }) => {
-  const importId = uuid.v4();
-  const { result: links, error: getListErr } = await waivioApi
-    .getListItemLinks({ authorPermlink, scanEmbedded });
-
-  if (getListErr) return { error: new ServiceUnavailableError('getListItemLinks Error') };
+  const { app } = await App.getOne({ host: 'waivio.com' });
+  const links = await getAllObjectsInListForImport({
+    authorPermlink, handledItems: [authorPermlink], scanEmbedded, app,
+  });
 
   if (!links.length) return { error: new NotFoundError('List not found') };
 
@@ -26,13 +28,6 @@ const createDescriptionList = async ({
     },
   });
 
-  const { result: task } = await DescriptionStatusModel.create({
-    user,
-    importId,
-    baseList: authorPermlink,
-    objectsCount: links.length,
-  });
-
   const duplicateObjects = objects.map((el) => ({
     user,
     importId,
@@ -43,7 +38,33 @@ const createDescriptionList = async ({
 
   await DescriptionObjectModel.insertMany(duplicateObjects);
 
+  const { result: objectsCount } = await DescriptionObjectModel
+    .countDocuments({ filter: { importId } });
+
+  await DescriptionStatusModel.updateOne({
+    filter: { importId },
+    update: { objectsCount, status: IMPORT_STATUS.ACTIVE },
+  });
+
   rewriteDescription({ importId, user });
+};
+
+const createDescriptionList = async ({
+  authorPermlink, scanEmbedded, user,
+}) => {
+  const importId = uuid.v4();
+
+  const { result: task } = await DescriptionStatusModel.create({
+    user,
+    importId,
+    baseList: authorPermlink,
+    status: IMPORT_STATUS.PENDING,
+    objectsCount: 0,
+  });
+
+  processAllListItems({
+    authorPermlink, user, importId, scanEmbedded,
+  });
 
   return {
     result: task,

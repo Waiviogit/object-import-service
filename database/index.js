@@ -29,5 +29,6 @@ module.exports = {
     Department: require('./schemas/DepartmentSchema'),
     GuestMana: require('./schemas/GuestManaSchema'),
     ServiceBot: require('./schemas/ServiceBotSchema'),
+    App: require('./schemas/AppSchema'),
   },
 };
