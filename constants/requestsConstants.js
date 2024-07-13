@@ -7,13 +7,10 @@ exports.VOTE_EVALUATION = {
 };
 
 exports.HIVE_ENGINE_NODES = [
-  'https://engine.waivio.com',
   'https://herpc.dtools.dev',
   'https://api.hive-engine.com/rpc/',
-  // 'https://api.primersion.com',
   'https://herpc.kanibot.com',
-  'https://engine.deathwing.me',
-  // 'https://he.sourov.dev',
+  'https://he.sourov.dev',
 ];
 
 exports.NODE_URLS = [

@@ -46,6 +46,7 @@ exports.WHITE_LIST = [
   'campingmapper',
   'activerunners',
   'irenok',
+  'luxita',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
