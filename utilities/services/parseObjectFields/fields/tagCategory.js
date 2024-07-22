@@ -158,7 +158,17 @@ const createWaivioTags = async (object, allFields) => {
   return fields;
 };
 
+const addDefaultTags = async (object, allFields) => {
+  const gptFields = await getTagsFromDescription(object, allFields);
+  if (gptFields) {
+    console.log();
+    return gptFields;
+  }
+};
+
 module.exports = async (object, allFields) => {
   if (object.waivio_tags) return createWaivioTags(object, allFields);
   if (object.object_type === OBJECT_TYPES.RESTAURANT) return tagsForRestaurant(object, allFields);
+
+  return addDefaultTags(object, allFields);
 };
