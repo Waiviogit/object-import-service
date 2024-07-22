@@ -167,7 +167,6 @@ const createWaivioTags = async (object, allFields) => {
 const addDefaultTags = async (object, allFields) => {
   const gptFields = await getTagsFromDescription(object, allFields);
   if (gptFields) {
-    console.log();
     return gptFields;
   }
 };
