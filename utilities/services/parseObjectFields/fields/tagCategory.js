@@ -69,8 +69,14 @@ const getTagsFromDescription = async (object, allFields) => {
 };
 
 const tagsForRestaurant = async (object, allFields) => {
-  if (!object.cuisines) return;
   const fields = [];
+  if (!object.cuisines) {
+    const gptFields = await getTagsFromDescription(object, allFields);
+    if (gptFields)fields.push(...gptFields);
+    if (fields.length) return fields;
+    return;
+  }
+
   if (object.locale === 'en-US') {
     for (const cuisine of object.cuisines) {
       const body = cuisine.toLocaleLowerCase();
