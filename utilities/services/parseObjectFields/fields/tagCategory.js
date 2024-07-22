@@ -4,8 +4,71 @@ const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const supposedUpdatesTranslate = require('../../../../translations/supposedUpdates');
 const { translate } = require('../../../helpers/translateHelper');
+const { gptTagsFromDescription } = require('../../gptService');
 
-const tagsForRestaurant = async (object) => {
+const getTagsFromDescription = async (object, allFields) => {
+  if (!object.useGPT) return;
+  const description = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.DESCRIPTION,
+  );
+  if (!description) return;
+
+  const fields = [];
+  const tagCategories = {
+    product: 'Pros',
+    business: 'Pros',
+    restaurant: 'Features',
+    book: 'Tags',
+    default: 'Pros',
+  };
+
+  const category = tagCategories[object.object_type] || tagCategories.default;
+  const preCreated = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === category,
+  );
+  if (!preCreated) {
+    fields.push(
+      formField({
+        fieldName: OBJECT_FIELDS.TAG_CATEGORY,
+        locale: object.locale,
+        user: object.user,
+        body: category,
+        id: uuid.v4(),
+      }),
+    );
+  }
+
+  const { result, error } = await gptTagsFromDescription({ content: description.body });
+  if (error || !result?.length) return;
+
+  for (const tag of result) {
+    const tagCategory = _.find(
+      [...allFields, ...fields],
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === category,
+    );
+    const sameTag = _.find(
+      allFields,
+      (f) => f.name === OBJECT_FIELDS.CATEGORY_ITEM && f.body === tag,
+    );
+    if (sameTag) continue;
+    if (!tagCategory) continue;
+
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
+      locale: object.locale,
+      user: object.user,
+      body: tag,
+      tagCategory: category,
+      id: tagCategory.id,
+    }));
+  }
+
+  return fields;
+};
+
+const tagsForRestaurant = async (object, allFields) => {
   if (!object.cuisines) return;
   const fields = [];
   if (object.locale === 'en-US') {
@@ -19,6 +82,8 @@ const tagsForRestaurant = async (object) => {
         tagCategory: supposedUpdatesTranslate.Cuisine[object.locale],
       }));
     }
+    const gptFields = await getTagsFromDescription(object, [...allFields, ...fields]);
+    if (gptFields)fields.push(...gptFields);
     return fields;
   }
   for (const cuisine of object.cuisines) {
@@ -42,6 +107,8 @@ const tagsForRestaurant = async (object) => {
     }));
   }
   if (_.isEmpty(fields)) return;
+  const gptFields = await getTagsFromDescription(object, [...allFields, ...fields]);
+  if (gptFields)fields.push(...gptFields);
   return fields;
 };
 
@@ -71,8 +138,10 @@ const createWaivioTags = async (object, allFields) => {
   for (const tag of object.waivio_tags) {
     const { key = '', value = '' } = tag;
     if (!key || !value) continue;
-    const tagCategory = _.find([...allFields, ...categoryFields],
-      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === key);
+    const tagCategory = _.find(
+      [...allFields, ...categoryFields],
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === key,
+    );
 
     itemFields.push(formField({
       fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
@@ -83,11 +152,13 @@ const createWaivioTags = async (object, allFields) => {
       ...(tagCategory && { id: tagCategory.id }),
     }));
   }
-
-  return [...categoryFields, ...itemFields];
+  const fields = [...categoryFields, ...itemFields];
+  const gptFields = await getTagsFromDescription(object, [...allFields, ...fields]);
+  if (gptFields)fields.push(...gptFields);
+  return fields;
 };
 
 module.exports = async (object, allFields) => {
   if (object.waivio_tags) return createWaivioTags(object, allFields);
-  if (object.object_type === OBJECT_TYPES.RESTAURANT) return tagsForRestaurant(object);
+  if (object.object_type === OBJECT_TYPES.RESTAURANT) return tagsForRestaurant(object, allFields);
 };
