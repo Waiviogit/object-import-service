@@ -119,8 +119,14 @@ const tagsForRestaurant = async (object, allFields) => {
 };
 
 const createWaivioTags = async (object, allFields) => {
+  const fields = [];
   const categories = _.uniq(_.map(object.waivio_tags, 'key'));
-  if (!categories.length) return;
+  if (!categories.length) {
+    const gptFields = await getTagsFromDescription(object, [...allFields, ...fields]);
+    if (gptFields)fields.push(...gptFields);
+
+    return fields;
+  }
   const categoryFields = [];
   const itemFields = [];
   for (const category of categories) {
@@ -158,7 +164,7 @@ const createWaivioTags = async (object, allFields) => {
       ...(tagCategory && { id: tagCategory.id }),
     }));
   }
-  const fields = [...categoryFields, ...itemFields];
+  fields.push(...categoryFields, ...itemFields);
   const gptFields = await getTagsFromDescription(object, [...allFields, ...fields]);
   if (gptFields)fields.push(...gptFields);
   return fields;
