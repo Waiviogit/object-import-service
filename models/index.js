@@ -16,4 +16,6 @@ module.exports = {
   DescriptionObjectModel: require('./importDb/DescriptionObjectModel'),
   DescriptionStatusModel: require('./importDb/DescriptionStatusModel'),
   TelegramImportUsageModel: require('./importDb/TelegramImportUsageModel'),
+  TagsStatusModel: require('./importDb/TagsStatusModel'),
+  TagsObjectModel: require('./importDb/TagsObjectModel'),
 };

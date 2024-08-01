@@ -3,18 +3,14 @@ const db = require('../importObjects_Connection');
 
 const { Schema } = mongoose;
 
-const DuplicateListObjectSchema = new Schema({
+const TagsObjectSchema = new Schema({
   user: { type: String, required: true, index: true },
   importId: { type: String, required: true, index: true },
   type: { type: String, required: true, index: true }, // list or object
   name: { type: String, required: true },
-  linkToDuplicate: { type: String, required: true },
-  authorPermlink: { type: String, default: '' },
-  fieldsCreated: { type: Number, default: 0 },
-  fieldsVoted: { type: Number, default: 0 },
-  duplicateCreated: { type: Boolean, default: false },
+  authorPermlink: { type: String, default: '', required: true },
   processed: { type: Boolean, default: false },
-  voted: { type: Boolean, default: false },
+  fieldsCreated: { type: Boolean, default: false },
   fields: {
     type: [
       {
@@ -36,17 +32,8 @@ const DuplicateListObjectSchema = new Schema({
   },
 }, { timestamps: false, versionKey: false });
 
-DuplicateListObjectSchema.index({ importId: 1, type: 1, processed: 1 });
-DuplicateListObjectSchema.index({
-  importId: 1,
-  type: 1,
-  duplicateCreated: 1,
-});
-DuplicateListObjectSchema.index({
-  importId: 1,
-  linkToDuplicate: 1,
-});
+TagsObjectSchema.index({ importId: 1, type: 1, processed: 1 });
 
-const DuplicateListObjectModel = db.model('duplicate_list_object', DuplicateListObjectSchema);
+const TagsObjectModel = db.model('tags_object', TagsObjectSchema);
 
-module.exports = DuplicateListObjectModel;
+module.exports = TagsObjectModel;
