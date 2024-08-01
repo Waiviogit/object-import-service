@@ -4,4 +4,5 @@ module.exports = {
   importDepartmentsController: require('./importDepartmentsController'),
   duplicateListController: require('./duplicateListController'),
   descriptionBotController: require('./descriptionBotController'),
+  addTagsController: require('./addTagsController'),
 };

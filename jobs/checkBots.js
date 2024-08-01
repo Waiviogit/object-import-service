@@ -8,6 +8,7 @@ const {
   DuplicateListStatusModel,
   DescriptionStatusModel,
   ServiceBotModel,
+  TagsStatusModel,
 } = require('../models');
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
@@ -18,6 +19,7 @@ const claimProcess = require('../utilities/services/authority/claimProcess');
 const importDepartments = require('../utilities/services/departmentsService/importDepartments');
 const duplicateProcess = require('../utilities/services/listDuplication/duplicateProcess');
 const rewriteDescription = require('../utilities/services/descriptionBot/rewriteDescription');
+const createTags = require('../utilities/services/tagsBot/createTags');
 
 const processes = [
   {
@@ -40,6 +42,10 @@ const processes = [
   {
     model: DescriptionStatusModel,
     processStarter: rewriteDescription,
+  },
+  {
+    model: TagsStatusModel,
+    processStarter: createTags,
   },
 ];
 
