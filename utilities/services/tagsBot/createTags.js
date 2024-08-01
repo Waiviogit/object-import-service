@@ -184,7 +184,6 @@ const checkFieldsToCreate = async ({ importId }) => {
 };
 
 const createTags = async ({ importId, user }) => {
-  console.log(user, 'rewriteDescription');
 
   const importStatus = await TagsStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
