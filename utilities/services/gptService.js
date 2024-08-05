@@ -70,13 +70,13 @@ const gptCreateCompletionBot = async ({ content = '' }) => {
   }
 };
 
-const gptTagsFromDescription = async ({ content = '', createdTags }) => {
+const gptTagsFromDescription = async ({ content = '', createdTags, language }) => {
   try {
     const response = await openaiBot.chat.completions.create({
       model: 'gpt-4-1106-preview',
       messages: [{
         role: 'system',
-        content: `from the given string you need to come up with 10 tags close in meaning use single word if possible. in the process of selecting tags they should all be in lower case, don't use names of cities, countries and other territories as tags, do not use special characters, also be guided by the fact that the tags should be popular ${createdTags?.length ? `we already have this tags ${createdTags.join(',')}, don't use them` : ''}. Please provide a response in the following format: ["tag1", "tag2", "tag3", "tag4", "tag5"]`,
+        content: `from the given string you need to come up with 10 tags close in meaning use single word if possible ${language ? `in ${language} language` : ''}. in the process of selecting tags they should all be in lower case, don't use names of cities, countries and other territories as tags, do not use special characters, also be guided by the fact that the tags should be popular ${createdTags?.length ? `we already have this tags ${createdTags.join(',')}, don't use them` : ''}. Please provide a response in the following format: ["tag1", "tag2", "tag3", "tag4", "tag5"]`,
       }, {
         role: 'user',
         content,

@@ -11,6 +11,7 @@ const TagsStatusSchema = new Schema({
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
   },
+  locale: { type: String },
   objectsCount: { type: Number, required: true },
   objectsUpdated: { type: Number, default: 0 },
   finishedAt: { type: Date },

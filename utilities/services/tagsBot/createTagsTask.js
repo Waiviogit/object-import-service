@@ -62,7 +62,9 @@ const fetchAllObjectFromMap = async ({
   createTags({ importId, user });
 };
 
-const createTagsMap = async ({ user, authorPermlink, object }) => {
+const createTagsMap = async ({
+  user, authorPermlink, object, locale,
+}) => {
   const importId = uuid.v4();
 
   const { result: task } = await TagsStatusModel.create({
@@ -71,6 +73,7 @@ const createTagsMap = async ({ user, authorPermlink, object }) => {
     baseList: authorPermlink,
     status: IMPORT_STATUS.PENDING,
     objectsCount: 0,
+    locale,
   });
 
   fetchAllObjectFromMap({
@@ -122,7 +125,9 @@ const processAllListItems = async ({
   createTags({ importId, user });
 };
 
-const createTagsList = async ({ authorPermlink, scanEmbedded, user }) => {
+const createTagsList = async ({
+  authorPermlink, scanEmbedded, user, locale,
+}) => {
   const importId = uuid.v4();
 
   const { result: task } = await TagsStatusModel.create({
@@ -131,6 +136,7 @@ const createTagsList = async ({ authorPermlink, scanEmbedded, user }) => {
     baseList: authorPermlink,
     status: IMPORT_STATUS.PENDING,
     objectsCount: 0,
+    locale,
   });
 
   processAllListItems({
@@ -149,7 +155,7 @@ const createByType = {
 };
 
 const createTagsTask = async ({
-  user, authorPermlink, scanEmbedded,
+  user, authorPermlink, scanEmbedded, locale,
 }) => {
   const { result: object } = await Wobj.findOne({
     filter: { author_permlink: authorPermlink },
@@ -157,7 +163,7 @@ const createTagsTask = async ({
   if (!object) return { error: new NotFoundError('Object not found') };
 
   return (createByType[object.object_type] || createByType.default)({
-    authorPermlink, scanEmbedded, user, object,
+    authorPermlink, scanEmbedded, user, object, locale,
   });
 };
 

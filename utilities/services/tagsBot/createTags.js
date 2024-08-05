@@ -11,6 +11,7 @@ const { getObject } = require('../../waivioApi');
 const { formField } = require('../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../constants/objectTypes');
 const { gptTagsFromDescription } = require('../gptService');
+const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 
 const categoriesByType = {
   product: 'Pros',
@@ -23,9 +24,9 @@ const categoriesByType = {
 const tagsCountNeeded = 10;
 
 const prepareFields = async ({
-  authorPermlink, importId, user,
+  authorPermlink, importId, user, locale,
 }) => {
-  const { result: originalProcessed } = await getObject({ authorPermlink });
+  const { result: originalProcessed } = await getObject({ authorPermlink, locale });
   if (!originalProcessed) return;
 
   const fields = [];
@@ -52,6 +53,7 @@ const prepareFields = async ({
       fieldName: OBJECT_FIELDS.TAG_CATEGORY,
       body: categoryName,
       user,
+      locale,
       id: uuid.v4(),
     });
     fields.push(category);
@@ -73,8 +75,12 @@ const prepareFields = async ({
     return;
   }
 
+  const language = locale === 'en-US'
+    ? ''
+    : LANGUAGES_SET[locale] || '';
+
   const { result, error } = await gptTagsFromDescription({
-    content: originalProcessed.description, createdTags: itemsNames,
+    content: originalProcessed.description, createdTags: itemsNames, language,
   });
   if (error) {
     await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -100,6 +106,7 @@ const prepareFields = async ({
       user,
       tagCategory: category.body,
       id: category.id,
+      locale,
     }));
   }
 
@@ -115,7 +122,7 @@ const prepareFields = async ({
   });
 };
 
-const rewriteFields = async ({ importId, user }) => {
+const rewriteFields = async ({ importId, user, locale }) => {
   const { result } = await TagsObjectModel.findOne({
     filter: {
       importId,
@@ -125,7 +132,9 @@ const rewriteFields = async ({ importId, user }) => {
 
   if (!result) return;
   if (!result?.fieldsCreated) {
-    await prepareFields({ authorPermlink: result.authorPermlink, importId, user });
+    await prepareFields({
+      authorPermlink: result.authorPermlink, importId, user, locale,
+    });
     createTags({ importId, user });
     return;
   }
@@ -184,7 +193,6 @@ const checkFieldsToCreate = async ({ importId }) => {
 };
 
 const createTags = async ({ importId, user }) => {
-
   const importStatus = await TagsStatusModel.getUserImport({ user, importId });
   if (!importStatus) return;
   if (importStatus.status !== IMPORT_STATUS.ACTIVE) return;
@@ -196,7 +204,7 @@ const createTags = async ({ importId, user }) => {
 
   const createFields = await checkFieldsToCreate({ importId });
   if (createFields) {
-    return rewriteFields({ importId, user });
+    return rewriteFields({ importId, user, locale: importStatus.locale });
   }
 
   await TagsStatusModel.updateOne({

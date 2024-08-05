@@ -11,7 +11,7 @@ const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 const createTagsTask = async (req, res, next) => {
   const value = validators.validate(
     req.body,
-    validators.duplicateList.duplicateListSchema,
+    validators.addTags.addTagsSchema,
     next,
   );
   if (!value) return;
