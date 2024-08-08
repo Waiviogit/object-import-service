@@ -131,7 +131,7 @@ module.exports = async (object, allFields) => {
   if ([OBJECT_TYPES.BUSINESS, OBJECT_TYPES.RESTAURANT].includes(object.object_type)) {
     return getDescriptionFromBusiness(object);
   }
-  if (OBJECT_TYPES.LINK) {
+  if (object.object_type === OBJECT_TYPES.LINK) {
     return linkDescription(object);
   }
 
