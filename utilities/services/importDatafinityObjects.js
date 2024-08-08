@@ -444,9 +444,30 @@ const createObject = async (datafinityObject) => {
 const getWobjectByKeys = async (datafinityObject) => {
   const fields = _.filter(
     datafinityObject.fields,
-    (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID], f.name),
+    (f) => _.includes([OBJECT_FIELDS.PRODUCT_ID, OBJECT_FIELDS.COMPANY_ID, OBJECT_FIELDS.URL], f.name),
   );
+
   for (const field of fields) {
+    if (field.name === OBJECT_FIELDS.URL) {
+      const { result, error } = await Wobj.findOne({
+        filter: {
+          fields: {
+            $elemMatch: {
+              name: field.name,
+              body: field.body,
+            },
+          },
+        },
+      });
+      if (error) {
+        console.error(error.message);
+        continue;
+      }
+      if (result) {
+        return result;
+      }
+      return;
+    }
     const parsedBody = parseJson(field.body, null);
 
     const keyIds = AMAZON_ASINS.includes(_.get(parsedBody, 'productIdType'))
