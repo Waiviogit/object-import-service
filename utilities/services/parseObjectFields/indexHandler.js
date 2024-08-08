@@ -28,4 +28,6 @@ module.exports = {
   groupId: require('./fields/groupId'),
   link: require('./fields/link'),
   phone: require('./fields/phone'),
+  url: require('./fields/url'),
+  title: require('./fields/title'),
 };

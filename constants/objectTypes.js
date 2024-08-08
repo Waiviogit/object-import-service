@@ -3,6 +3,7 @@ exports.IMPORT_OBJECT_TYPES = {
   BUSINESS: 'business',
   BOOK: 'book',
   PRODUCT: 'product',
+  LINK: 'link',
 };
 
 exports.OBJECT_TYPES = {
@@ -75,6 +76,7 @@ exports.OBJECT_FIELDS = {
   TITLE: 'title',
   LINK: 'link',
   PHONE: 'phone',
+  URL: 'url',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -144,6 +146,12 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.PRICE,
     this.OBJECT_FIELDS.DESCRIPTION,
     this.OBJECT_FIELDS.TAG_CATEGORY,
+  ],
+  link: [
+    this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
+    this.OBJECT_FIELDS.URL,
+    this.OBJECT_FIELDS.TITLE,
   ],
 };
 

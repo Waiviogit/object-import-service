@@ -138,6 +138,7 @@ const filterImportObjects = ({
 };
 
 const bufferToArray = (buffer) => {
+  if (!buffer) return [];
   let stringFromBuffer = buffer.toString();
   const expectValid = stringFromBuffer[0] === '[';
   if (!expectValid) {
