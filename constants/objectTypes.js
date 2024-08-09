@@ -14,6 +14,7 @@ exports.OBJECT_TYPES = {
   PRODUCT: 'product',
   LIST: 'list',
   MAP: 'map',
+  LINK: 'link',
 };
 
 exports.DATAFINITY_IDS = 'keys';
