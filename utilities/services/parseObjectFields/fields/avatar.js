@@ -50,7 +50,7 @@ const checkForDuplicates = async (urls = []) => {
   }
 };
 
-module.exports = async (object) => {
+const avatar = async (object) => {
   const fields = [];
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
@@ -140,7 +140,7 @@ module.exports = async (object) => {
   }
   if (_.isEmpty(fields)) return;
 
-  const imagesForGallery = _.slice(images, sliceStart);
+  const imagesForGallery = loadAvatar ? _.slice(images, sliceStart) : images;
   if (_.isEmpty(imagesForGallery)) return fields;
 
   for (const imagesForGalleryElement of imagesForGallery) {
@@ -170,3 +170,5 @@ module.exports = async (object) => {
 
   return fields;
 };
+
+module.exports = avatar;
