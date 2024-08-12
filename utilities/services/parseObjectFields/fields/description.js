@@ -2,7 +2,12 @@ const _ = require('lodash');
 const { FEATURES_KEYS, OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const { formField } = require('../../../helpers/formFieldHelper');
 const {
-  makeDescription, makeBookDescription, makeProductDescription, makeBusinessDescription, makeDescriptionBasedOnReviews,
+  makeDescription,
+  makeBookDescription,
+  makeProductDescription,
+  makeBusinessDescription,
+  makeDescriptionBasedOnReviews,
+  makeLinkDescription,
 } = require('../../gptService');
 const { parseJson } = require('../../../helpers/jsonHelper');
 
@@ -116,7 +121,20 @@ const getDescriptionFromBusiness = async (object) => {
     }
   }
 };
-const linkDescription = (object) => {
+const linkDescription = async (object, allFields) => {
+  const url = _.find(allFields, (el) => el.name === OBJECT_FIELDS.URL);
+  if (url) {
+    const gptDescription = await makeLinkDescription(url.body);
+    if (gptDescription) {
+      return formField({
+        fieldName: OBJECT_FIELDS.DESCRIPTION,
+        user: object.user,
+        body: gptDescription,
+        locale: object.locale,
+      });
+    }
+  }
+
   if (!object.fieldDescription) return;
 
   return formField({
@@ -132,7 +150,7 @@ module.exports = async (object, allFields) => {
     return getDescriptionFromBusiness(object);
   }
   if (object.object_type === OBJECT_TYPES.LINK) {
-    return linkDescription(object);
+    return linkDescription(object, allFields);
   }
 
   if (object.object_type === OBJECT_TYPES.BOOK) {

@@ -136,6 +136,23 @@ const makeBusinessDescription = async (business = {}) => {
   return `${result}${GPT_CRAFTED}`;
 };
 
+const makeLinkDescription = async (url) => {
+  const { result: firstResponse, error: answerError } = await gptCreateCompletion4({
+    content: `${QUESTION_PROMPT} ${url} answer only yes or no`,
+  });
+  if (answerError) return '';
+  const positiveAnswer = checkForPositiveAnswer(firstResponse);
+  if (!positiveAnswer) return '';
+
+  const { result, error } = await gptCreateCompletion4({
+    content: `${BASIC_PROMPT} ${url}`,
+  });
+
+  if (!result || error) return '';
+  if (checkAiResponse(result)) return '';
+  return `${result}${GPT_CRAFTED}`;
+};
+
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
   const { result: firstResponse, error: answerError } = await gptCreateCompletion({
     content: `${QUESTION_PROMPT} ${author}, the author of ${book}, answer only yes or no`,
@@ -216,4 +233,5 @@ module.exports = {
   makeDescriptionBasedOnReviews,
   gptCreateCompletion4,
   gptTagsFromDescription,
+  makeLinkDescription,
 };
