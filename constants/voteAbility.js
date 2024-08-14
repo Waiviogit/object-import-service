@@ -47,6 +47,7 @@ exports.WHITE_LIST = [
   'activerunners',
   'irenok',
   'luxita',
+  'rehabhive',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
