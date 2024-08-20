@@ -37,10 +37,10 @@ const importTags = async (req, res, next) => {
 };
 
 const importWobjectsJson = async (req, res, next) => {
-  const { result, error } = await importObjectsFromFile.importWobjects();
+  const result = await importObjectsFromFile.importWobjects();
 
-  if (error) {
-    return next(error);
+  if (result?.error) {
+    return next(result.error);
   }
   res.status(200).json({ message: 'Wobjects added to queue of creating!' });
 };

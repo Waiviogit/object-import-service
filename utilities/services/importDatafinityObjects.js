@@ -57,8 +57,8 @@ const saveObjects = async ({
     // const save = needToSaveObject(product);
     // if (!save) continue;
 
-    const { result, error } = await DatafinityObject.create(product);
-    if (error) continue;
+    const result = await DatafinityObject.create(product);
+    if (result?.error) continue;
     await ImportStatusModel.updateOne({
       filter: { importId },
       update: {
