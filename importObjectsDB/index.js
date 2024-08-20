@@ -11,5 +11,7 @@ module.exports = {
     DescriptionStatus: require('./schemas/DescriptionStatusScema'),
     DescriptionObject: require('./schemas/DescriptionObjectSchema'),
     TelegramImportUsage: require('./schemas/TelegramImportUsageSchema'),
+    TagsStatus: require('./schemas/TagsStatusSchema'),
+    TagsObject: require('./schemas/TagsObjectSchema'),
   },
 };

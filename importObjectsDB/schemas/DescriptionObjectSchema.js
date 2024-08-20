@@ -25,6 +25,7 @@ const DescriptionObjectSchema = new Schema({
         asin: String,
         connectedObject: Boolean,
         bookName: String,
+        tagCategory: String,
       },
     ],
     default: [],

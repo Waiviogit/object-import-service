@@ -4,6 +4,7 @@ const {
   DepartmentsStatusModel,
   DuplicateListStatusModel,
   DescriptionStatusModel,
+  TagsStatusModel,
 } = require('../../models');
 const { startObjectImport } = require('../services/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
@@ -11,6 +12,7 @@ const claimProcess = require('../services/authority/claimProcess');
 const importDepartments = require('../services/departmentsService/importDepartments');
 const duplicateProcess = require('../services/listDuplication/duplicateProcess');
 const rewriteDescription = require('../services/descriptionBot/rewriteDescription');
+const createTags = require('../services/tagsBot/createTags');
 
 const tasksToRun = [
   {
@@ -33,6 +35,10 @@ const tasksToRun = [
   {
     model: DescriptionStatusModel,
     processStarter: rewriteDescription,
+  },
+  {
+    model: TagsStatusModel,
+    processStarter: createTags,
   },
 ];
 
