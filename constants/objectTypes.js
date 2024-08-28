@@ -4,6 +4,7 @@ exports.IMPORT_OBJECT_TYPES = {
   BOOK: 'book',
   PRODUCT: 'product',
   LINK: 'link',
+  RECIPE: 'recipe',
 };
 
 exports.OBJECT_TYPES = {
@@ -15,6 +16,7 @@ exports.OBJECT_TYPES = {
   LIST: 'list',
   MAP: 'map',
   LINK: 'link',
+  RECIPE: 'recipe',
 };
 
 exports.DATAFINITY_IDS = 'keys';
@@ -78,6 +80,11 @@ exports.OBJECT_FIELDS = {
   LINK: 'link',
   PHONE: 'phone',
   URL: 'url',
+  CALORIES: 'calories',
+  BUDGET: 'budget',
+  COOKING_TIME: 'cookingTime',
+  COST: 'cost',
+  RECIPE_INGREDIENTS: 'recipeIngredients',
 };
 
 exports.FIELDS_BY_OBJECT_TYPE = {
@@ -154,6 +161,19 @@ exports.FIELDS_BY_OBJECT_TYPE = {
     this.OBJECT_FIELDS.URL,
     this.OBJECT_FIELDS.TITLE,
     this.OBJECT_FIELDS.DESCRIPTION,
+  ],
+  recipe: [
+    this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
+    this.OBJECT_FIELDS.DESCRIPTION,
+    this.OBJECT_FIELDS.TAG_CATEGORY,
+    this.OBJECT_FIELDS.PRODUCT_ID,
+    this.OBJECT_FIELDS.DEPARTMENTS,
+    // new
+    this.OBJECT_FIELDS.CALORIES,
+    this.OBJECT_FIELDS.BUDGET,
+    this.OBJECT_FIELDS.COOKING_TIME,
+    this.OBJECT_FIELDS.RECIPE_INGREDIENTS,
   ],
 };
 

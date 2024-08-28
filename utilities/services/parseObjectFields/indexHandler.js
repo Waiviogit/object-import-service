@@ -30,4 +30,8 @@ module.exports = {
   phone: require('./fields/phone'),
   url: require('./fields/url'),
   title: require('./fields/title'),
+  calories: require('./fields/calories'),
+  budget: require('./fields/budget'),
+  cookingTime: require('./fields/cookingTime'),
+  recipeIngredients: require('./fields/recipeIngredients'),
 };
