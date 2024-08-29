@@ -156,7 +156,7 @@ module.exports = async (object, allFields) => {
   if (object.object_type === OBJECT_TYPES.BOOK) {
     return getDescriptionFromBook({ object, allFields });
   }
-  if (!object.fieldDescription) {
+  if (object.fieldDescription) {
     return formField({
       fieldName: OBJECT_FIELDS.DESCRIPTION,
       user: object.user,
