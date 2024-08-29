@@ -13,5 +13,7 @@ module.exports = {
     TelegramImportUsage: require('./schemas/TelegramImportUsageSchema'),
     TagsStatus: require('./schemas/TagsStatusSchema'),
     TagsObject: require('./schemas/TagsObjectSchema'),
+    RecipeGenerationStatus: require('./schemas/RecipeGenerationStatusSchema'),
+    RecipeGenerated: require('./schemas/RecipeGeneratedSchema'),
   },
 };

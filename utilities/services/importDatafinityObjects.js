@@ -102,9 +102,20 @@ const emitStart = ({
 };
 
 const importObjects = async ({
-  file, user, objectType, authority, locale, translate, useGPT, forceImport, addDatafinityData,
+  file,
+  user,
+  objectType,
+  authority,
+  locale,
+  translate,
+  useGPT,
+  forceImport,
+  addDatafinityData,
+  jsonObjects,
 }) => {
-  const products = bufferToArray(file.buffer);
+  const products = file?.buffer
+    ? bufferToArray(file.buffer)
+    : jsonObjects;
 
   if (_.isEmpty(products)) {
     return { error: new Error('products not found') };

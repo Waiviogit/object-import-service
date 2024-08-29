@@ -1,8 +1,11 @@
+const crypto = require('node:crypto');
 const { gptSystemUserPrompt, gptCreateImage } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
+const { RecipeGeneratedModel, RecipeGenerationStatusModel } = require('../../../models');
+const { importObjects } = require('../importDatafinityObjects');
 
-// todo generate imaage
-// todo add productId
+// todo on startup import resume
+// todo delete object after import complete
 
 const systemPrompt = `you are prompted to generate a recipe from the given name. 
 The response format should be a json object according to the following scheme: 
@@ -12,7 +15,7 @@ The response format should be a json object according to the following scheme:
     "categories": "string[]",
     "fieldCalories": "string",
     "fieldCookingTime": "string",
-    "fieldRecipeIngredients": "string",
+    "fieldRecipeIngredients": "string[]",
 }
 
 where: 
@@ -39,8 +42,7 @@ example:
 
 return it like a string don't use code snippet symbols
 `;
-
-const imagePrompt = ({ name, description, recipeIngredients }) => `Create a high-resolution, photo-realistic cover image for a recipe, focusing on its name "${name}" and description "${description}". The image should depict the main dish of the recipe in an appetizing and inviting way. Include key ingredients, such as ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should resemble a rustic kitchen table, with soft, natural lighting and subtle shadows to create a warm and cozy atmosphere.`;
+const imagePrompt = ({ name, recipeIngredients }) => `Create a high-resolution, photo-realistic cover image for a recipe, focusing on its name "${name}". The image should depict the main dish of the recipe in an appetizing and inviting way. Include key ingredients, such as ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should resemble a rustic kitchen table, with soft, natural lighting and subtle shadows to create a warm and cozy atmosphere.`;
 
 const generateRecipe = async (name) => {
   const { result, error } = await gptSystemUserPrompt({
@@ -51,8 +53,8 @@ const generateRecipe = async (name) => {
   return jsonHelper.parseJson(result, null);
 };
 
-const generateRecipeImage = async ({ name, description, recipeIngredients }) => {
-  const prompt = imagePrompt({ name, description, recipeIngredients });
+const generateRecipeImage = async ({ name, recipeIngredients }) => {
+  const prompt = imagePrompt({ name, recipeIngredients });
 
   const { result, error } = await gptCreateImage({
     prompt,
@@ -63,3 +65,76 @@ const generateRecipeImage = async ({ name, description, recipeIngredients }) => 
   return images[0];
 };
 
+const updateErrorCount = async (recipeDoc) => {
+  const failed = recipeDoc.errorCount > 3;
+  await RecipeGeneratedModel.updateError(recipeDoc._id, failed);
+};
+
+const getProductId = () => ([{ key: 'instacart', value: crypto.randomUUID() }]);
+
+const generateRecipeAndImage = async (importId) => {
+  while (true) {
+    let recipeDoc = await RecipeGeneratedModel.getNotProcessed(importId);
+    if (!recipeDoc) break;
+
+    // step1 generate schema
+    if (!recipeDoc.hasSchema) {
+      const recipe = await generateRecipe(recipeDoc.name);
+      if (!recipe) {
+        await updateErrorCount(recipeDoc);
+        continue;
+      }
+      recipe.waivio_product_ids = getProductId();
+      recipeDoc = await RecipeGeneratedModel.updateRecipeSchema(recipeDoc._id, recipe);
+    }
+    // step2 generate image
+    const image = await generateRecipeImage({
+      name: recipeDoc.name,
+      description: recipeDoc.fieldDescription,
+      recipeIngredients: recipeDoc.fieldRecipeIngredients,
+    });
+    if (!image) {
+      await updateErrorCount(recipeDoc);
+      continue;
+    }
+    await RecipeGeneratedModel.updateImage(recipeDoc._id, image);
+  }
+
+  const status = await RecipeGenerationStatusModel.getImportById(importId);
+  const docsToImport = await RecipeGeneratedModel.getCompleted(importId);
+
+  if (!status || !docsToImport?.length) {
+    await RecipeGenerationStatusModel.setFinished(importId);
+    return;
+  }
+  const { user, authority, locale } = status;
+
+  // start Import
+  await importObjects({
+    user, authority, locale, jsonObjects: docsToImport,
+  });
+
+  await RecipeGenerationStatusModel.setFinished(importId);
+};
+
+const createObjectsForImport = async ({
+  recipeList, user, authority, locale = 'en-US',
+}) => {
+  const importId = crypto.randomUUID();
+
+  const { result } = await RecipeGenerationStatusModel.create({
+    importId, user, locale, authority,
+  });
+  await RecipeGeneratedModel.insertMany(recipeList.map((el) => ({
+    name: el, importId,
+  })));
+  generateRecipeAndImage(importId);
+
+  return { result };
+};
+
+module.exports = {
+  generateRecipeImage,
+  generateRecipe,
+  createObjectsForImport,
+};
