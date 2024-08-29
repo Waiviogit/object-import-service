@@ -5,6 +5,7 @@ exports.IMPORT_OBJECT_TYPES = {
   PRODUCT: 'product',
   LINK: 'link',
   RECIPE: 'recipe',
+  PERSON: 'person',
 };
 
 exports.OBJECT_TYPES = {
@@ -90,6 +91,16 @@ exports.OBJECT_FIELDS = {
 exports.FIELDS_BY_OBJECT_TYPE = {
   person: [
     this.OBJECT_FIELDS.NAME,
+    this.OBJECT_FIELDS.AVATAR,
+    this.OBJECT_FIELDS.ADDRESS,
+    this.OBJECT_FIELDS.MAP,
+    this.OBJECT_FIELDS.EMAIL,
+    this.OBJECT_FIELDS.WEBSITE,
+    this.OBJECT_FIELDS.PRODUCT_ID,
+    this.OBJECT_FIELDS.PHONE,
+    this.OBJECT_FIELDS.LINK,
+    this.OBJECT_FIELDS.DESCRIPTION,
+    this.OBJECT_FIELDS.TAG_CATEGORY,
   ],
   restaurant: [
     this.OBJECT_FIELDS.NAME,

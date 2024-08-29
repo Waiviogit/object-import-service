@@ -149,13 +149,22 @@ module.exports = async (object, allFields) => {
   if ([OBJECT_TYPES.BUSINESS, OBJECT_TYPES.RESTAURANT].includes(object.object_type)) {
     return getDescriptionFromBusiness(object);
   }
-  if ([OBJECT_TYPES.RECIPE, OBJECT_TYPES.LINK].includes(object.object_type)) {
+  if ([OBJECT_TYPES.LINK].includes(object.object_type)) {
     return linkDescription(object, allFields);
   }
 
   if (object.object_type === OBJECT_TYPES.BOOK) {
     return getDescriptionFromBook({ object, allFields });
   }
+  if (!object.fieldDescription) {
+    return formField({
+      fieldName: OBJECT_FIELDS.DESCRIPTION,
+      user: object.user,
+      body: object.fieldDescription,
+      locale: object.locale,
+    });
+  }
+
   if (object.useGPT) {
     const gptDbAnswer = await makeProductDescription(object.name);
     if (gptDbAnswer) {
