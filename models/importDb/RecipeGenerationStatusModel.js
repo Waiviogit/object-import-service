@@ -75,6 +75,15 @@ const setFinished = async (importId) => updateOne({
   filter: { importId }, update: { status: IMPORT_STATUS.FINISHED },
 });
 
+const deleteById = async (importId) => {
+  try {
+    const result = await RecipeGenerationStatus.deleteOne({ importId });
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 module.exports = {
   create,
   updateOne,
@@ -85,4 +94,5 @@ module.exports = {
   getUserImport,
   getImportById,
   setFinished,
+  deleteById,
 };

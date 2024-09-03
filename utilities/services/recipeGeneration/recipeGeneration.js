@@ -1,9 +1,9 @@
-const crypto = require('node:crypto');
 const { gptSystemUserPrompt, gptCreateImage } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
-const { RecipeGeneratedModel, RecipeGenerationStatusModel } = require('../../../models');
-const { importObjects } = require('../importDatafinityObjects');
+const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
+const { saveObjects } = require('../importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
+const { IMPORT_STATUS } = require('../../../constants/appData');
 
 // todo on startup import resume
 // todo delete object after import complete
@@ -22,11 +22,7 @@ The response format should be a json object according to the following scheme:
 
 where: 
 name - of recipe without changes
-fieldDescription - here you write recipe: follow these steps:
-  - Write a short introduction.
-  - Provide a list of ingredients.
-  - Write detailed instructions on how to cook the recipe.
-
+fieldDescription - description of a recipe
 categories - list of categories to which this recipe can be assigned min 5 max 10 items
 fieldCalories - total calories in recipe in calories
 fieldCookingTime - total cooking time in minutes and hours
@@ -35,7 +31,7 @@ fieldRecipeIngredients - list of recipe ingredients
 example:
 { 
     "name" : "Greek Beef Stuffed Onions",
-    "fieldDescription": "I was attempting to achieve a crispy, inside-out Parmesan omelet — and it worked! The caramelized cheese formed a thin but protective layer and, since the eggs had never directly touched the pan, they were moist and tender. This will also work whether you use one or three eggs, depending on the texture you're going for. Using a single egg is kind of a cool trick, since the cheese layer is almost as thick, and you can really appreciate the crispness even more. Crack eggs into a mixing bowl. Add 1/4 teaspoon water. Whisk together until just beaten (do not overmix). Drizzle olive oil into an 8-inch nonstick skillet. Brush evenly over the bottom of the pan. Evenly grate cheese into the skillet approximately 1/2-inch deep (or just shy of 1 ounce).Place pan over medium-high heat. Cheese will slowly start to melt. When cheese starts to bubble and turn golden brown, about 4 minutes, pour eggs evenly over cheese. Reduce heat to low. Sprinkle with salt, pepper, and cayenne. Cover and let eggs cook on low until they are set, checking after the first 30 seconds. For 2 eggs, this should take about 1 minute, total cooking time.Remove pan from heat. Carefully use a spatula to fold parmalet in half. Transfer to a serving plate.",
+    "fieldDescription": "Greek Beef Stuffed Onions are a delightful Mediterranean dish that combines tender onions filled with a savory mixture of ground beef, herbs, and spices. To prepare, large onions are hollowed out, parboiled until soft, and then filled with a delicious stuffing made from ground beef, rice, garlic, fresh parsley, mint, cinnamon, and a hint of tomato. The stuffed onions are then baked in a rich tomato sauce until the beef is fully cooked and the flavors meld together beautifully. This dish is perfect as a main course or a hearty side, offering a unique and comforting taste of Greek cuisine. Serve hot, garnished with a sprinkle of fresh herbs and a drizzle of extra virgin olive oil for an authentic touch.",
     "categories": ["Breakfast and Brunch", "Eggs", "Omelet Recipes"],
     "fieldCalories": "291 Calories",
     "fieldCookingTime": "15 mins",
@@ -81,10 +77,29 @@ const getProductId = (name = '') => ([{
     .replace(/ +/g, '-').trim().toLocaleLowerCase(),
 }]);
 
+const deleteRecipePreprocessedData = async (importId) => {
+  await RecipeGenerationStatusModel.deleteById(importId);
+  await RecipeGeneratedModel.deleteManyById(importId);
+};
+
+const recipeFields = ['fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients'];
+const formUpdateData = (importRecipe, generatedRecipe) => {
+  const updateData = {};
+  for (const field of recipeFields) {
+    if (!importRecipe[field]) updateData[field] = generatedRecipe[field];
+  }
+
+  if (!importRecipe?.waivio_product_ids?.length) {
+    updateData.waivio_product_ids = getProductId(importRecipe.name);
+  }
+
+  return updateData;
+};
+
 const generateRecipeAndImage = async (importId) => {
   const status = await RecipeGenerationStatusModel.getImportById(importId);
   if (!status) return;
-  const { user, authority, locale } = status;
+  const { locale } = status;
 
   while (true) {
     let recipeDoc = await RecipeGeneratedModel.getNotProcessed(importId);
@@ -97,10 +112,18 @@ const generateRecipeAndImage = async (importId) => {
         await updateErrorCount(recipeDoc);
         continue;
       }
-      recipe.waivio_product_ids = getProductId(recipeDoc.name);
-      recipeDoc = await RecipeGeneratedModel.updateRecipeSchema(recipeDoc._id, recipe);
+
+      recipeDoc = await RecipeGeneratedModel
+        .updateRecipeSchema(recipeDoc._id, formUpdateData(recipeDoc, recipe));
     }
+
     // step2 generate image
+
+    if (recipeDoc?.primaryImageURLs?.length) {
+      await RecipeGeneratedModel.updateImage(recipeDoc._id, recipeDoc.primaryImageURLs[0]);
+      continue;
+    }
+
     const image = await generateRecipeImage({
       name: recipeDoc.name,
       description: recipeDoc.fieldDescription,
@@ -117,32 +140,42 @@ const generateRecipeAndImage = async (importId) => {
 
   if (!docsToImport?.length) return RecipeGenerationStatusModel.setFinished(importId);
 
-  // start Import
-  await importObjects({
-    user, authority, locale, jsonObjects: docsToImport,
-  });
+  const importStatus = await ImportStatusModel.findOneByImportId(importId);
+  if (!importStatus || importStatus?.status !== IMPORT_STATUS.PENDING) {
+    // user has deleted import
+    await deleteRecipePreprocessedData(importId);
+  }
 
-  await RecipeGenerationStatusModel.setFinished(importId);
+  const {
+    user, objectType, authority, translate, useGPT,
+  } = importStatus;
+
+  await saveObjects({
+    objects: docsToImport,
+    user,
+    importStatus,
+    authority,
+    locale,
+    translate,
+    objectType,
+    importId,
+    useGPT,
+  });
+  await deleteRecipePreprocessedData(importId);
 };
 
-const createObjectsForImport = async ({
-  recipeList, user, authority, locale = 'en-US',
+const createRecipeObjectsForImport = async ({
+  objects, user, authority, locale = 'en-US', importId,
 }) => {
-  const importId = crypto.randomUUID();
-
-  const { result } = await RecipeGenerationStatusModel.create({
+  await RecipeGenerationStatusModel.create({
     importId, user, locale, authority,
   });
-  await RecipeGeneratedModel.insertMany(recipeList.map((el) => ({
-    name: el, importId,
-  })));
+  await RecipeGeneratedModel.insertMany(objects);
   generateRecipeAndImage(importId);
-
-  return { result };
 };
 
 module.exports = {
   generateRecipeImage,
   generateRecipe,
-  createObjectsForImport,
+  createRecipeObjectsForImport,
 };

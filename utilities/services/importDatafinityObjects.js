@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const _ = require('lodash');
-const uuid = require('uuid');
+const crypto = require('node:crypto');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
@@ -14,9 +14,6 @@ const {
 } = require('../../constants/appData');
 const { formField } = require('../helpers/formFieldHelper');
 const {
-  filterImportObjects,
-  bufferToArray,
-  needToSaveObject,
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
@@ -32,39 +29,30 @@ const { makeAuthorDescription } = require('./gptService');
 const { sendUpdateImportForUser } = require('./socketClient');
 const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
 const { validateImportToRun } = require('../../validators/accountValidator');
+const { createRecipeObjectsForImport } = require('./recipeGeneration/recipeGeneration');
 
 const saveObjects = async ({
-  products, user, objectType, authority, locale, translate, importId, useGPT,
+  objects, user, objectType, authority, locale, translate, importId, useGPT,
 }) => {
-  await redisSetter.set({
-    key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}`,
-    value: user,
-  });
+  for (const object of objects) {
+    object.importId = importId;
+    object.user = user;
+    object.object_type = objectType;
+    object.locale = locale;
+    object.translate = translate;
+    if (authority) object.authority = authority;
+    object.useGPT = useGPT;
+    object.rating = getProductRating(object);
+    object.fields = await parseFields(object);
 
-  for (const product of products) {
-    product.importId = importId;
-    product.user = user;
-    product.object_type = objectType;
-    product.locale = locale;
-    product.translate = translate;
-    if (authority) {
-      product.authority = authority;
-    }
-    product.useGPT = useGPT;
-    product.rating = getProductRating(product);
-    product.fields = await parseFields(product);
-
-    // const save = needToSaveObject(product);
-    // if (!save) continue;
-
-    const result = await DatafinityObject.create(product);
+    const result = await DatafinityObject.create(object);
     if (result?.error) continue;
     await ImportStatusModel.updateOne({
       filter: { importId },
       update: {
         $inc: {
           objectsCount: 1,
-          fieldsCount: product.fields.length,
+          fieldsCount: object.fields.length,
         },
       },
     });
@@ -101,53 +89,70 @@ const emitStart = ({
   myEE.emit('import');
 };
 
+const startSaveObjects = ({ objectType }) => objectType !== OBJECT_TYPES.RECIPE;
+
+const startAdditionalProcessing = ({ objectType }) => objectType === OBJECT_TYPES.RECIPE;
+
+const additionalProcessingByType = {
+  [OBJECT_TYPES.RECIPE]: createRecipeObjectsForImport,
+  default: () => {},
+};
+
+const getAdditionalHandlerByType = (objectType) => additionalProcessingByType[objectType]
+    || additionalProcessingByType.default;
+
 const importObjects = async ({
-  file,
   user,
   objectType,
   authority,
   locale,
   translate,
   useGPT,
-  forceImport,
   addDatafinityData,
-  jsonObjects,
+  objects,
 }) => {
-  const products = file?.buffer
-    ? bufferToArray(file.buffer)
-    : jsonObjects;
-
-  if (_.isEmpty(products)) {
-    return { error: new Error('products not found') };
-  }
-  const importId = uuid.v4();
-  const { uniqueProducts, error: filterError } = filterImportObjects({ products, objectType });
-  if (filterError && !forceImport) return { error: filterError };
-  if (_.isEmpty(uniqueProducts)) return { error: new Error('products already exists or has wrong type') };
-
-  if (addDatafinityData) {
-    await addDatafinityDataToProducts(uniqueProducts);
-  }
+  const importId = crypto.randomUUID();
+  if (addDatafinityData) await addDatafinityDataToProducts(objects);
 
   await ImportStatusModel.create({
-    importId,
-    user,
-    objectsCount: 0,
-    objectType,
-    authority,
     status: IMPORT_STATUS.PENDING,
-  });
-
-  saveObjects({
-    products: uniqueProducts,
-    user,
+    objectsCount: 0,
+    importId,
     objectType,
     authority,
+    user,
     locale,
     translate,
-    importId,
     useGPT,
   });
+  await redisSetter.set({
+    key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}`,
+    value: user,
+  });
+
+  const startSave = startSaveObjects({ objectType });
+  const additionalProcessing = startAdditionalProcessing({ objectType });
+
+  if (additionalProcessing) {
+    const handler = getAdditionalHandlerByType(objectType);
+
+    handler({
+      importId, objects, user, locale, authority,
+    });
+  }
+
+  if (startSave) {
+    saveObjects({
+      objects,
+      user,
+      objectType,
+      authority,
+      locale,
+      translate,
+      importId,
+      useGPT,
+    });
+  }
 
   return { result: importId };
 };
@@ -505,4 +510,4 @@ const getWobjectByKeys = async (datafinityObject) => {
   }
 };
 
-module.exports = { importObjects, startObjectImport };
+module.exports = { importObjects, startObjectImport, saveObjects };

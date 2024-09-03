@@ -123,6 +123,8 @@ const getCompleted = async (importId) => {
   return result;
 };
 
+const deleteManyById = async (importId) => deleteMany({ filter: { importId } });
+
 module.exports = {
   findOne,
   insertMany,
@@ -136,4 +138,5 @@ module.exports = {
   updateRecipeSchema,
   updateImage,
   getCompleted,
+  deleteManyById,
 };

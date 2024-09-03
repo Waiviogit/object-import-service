@@ -63,6 +63,21 @@ const findOneAndUpdate = async ({ filter, update, options }) => {
   }
 };
 
+const findOneByImportId = async (importId) => {
+  const { result } = await findOne({
+    filter: { importId },
+  });
+
+  return result;
+};
+
 module.exports = {
-  find, findOne, updateOne, findOneAndDelete, create, findOneAndUpdate, updateMany,
+  find,
+  findOne,
+  updateOne,
+  findOneAndDelete,
+  create,
+  findOneAndUpdate,
+  updateMany,
+  findOneByImportId,
 };

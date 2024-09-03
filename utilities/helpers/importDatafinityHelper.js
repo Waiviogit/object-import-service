@@ -147,19 +147,6 @@ const bufferToArray = (buffer) => {
   return parseJson(stringFromBuffer, []);
 };
 
-const needToSaveObject = (object) => {
-  if (object.object_type === OBJECT_TYPES.RESTAURANT) {
-    const map = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.MAP);
-    if (!map) return false;
-  }
-  // if (object.object_type === OBJECT_TYPES.PRODUCT) {
-  //   const groupIdField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
-  //   const optionsField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.OPTIONS);
-  //   if (groupIdField && !optionsField) return false;
-  // }
-  return true;
-};
-
 const prepareObjectForImport = async (datafinityObject) => {
   const permlink = datafinityObject.author_permlink
     ? datafinityObject.author_permlink
@@ -385,7 +372,6 @@ module.exports = {
   filterImportObjects,
   getVoteCost,
   bufferToArray,
-  needToSaveObject,
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
