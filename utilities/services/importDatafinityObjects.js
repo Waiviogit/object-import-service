@@ -179,10 +179,10 @@ const updateImportedObjectsList = async ({ datafinityObject, user, authorPermlin
   });
 };
 
-const startObjectImport = async ({
-  user, authorPermlink = null, importId, createdId,
+// if return undefined exit from import function if return object continue import
+const getImportObject = async ({
+  importId, authorPermlink, user, createdId,
 }) => {
-  console.log(user, 'startObjectImport');
   if (importId) {
     const activeStatus = await checkImportActiveStatus(importId);
     if (!activeStatus) return;
@@ -217,55 +217,64 @@ const startObjectImport = async ({
     if (!activeStatus) return;
   }
 
-  const createNew = !datafinityObject.author_permlink;
+  return datafinityObject;
+};
+
+const startObjectImport = async ({
+  user, authorPermlink = null, importId, createdId,
+}) => {
+  const importedObject = await getImportObject({
+    importId, authorPermlink, user, createdId,
+  });
+  if (!importedObject) return;
+
+  const createNew = !importedObject.author_permlink;
 
   const runImport = await validateImportToRun({
-    user, authorPermlink, importId: datafinityObject.importId, type: IMPORT_TYPES.OBJECTS,
+    user, authorPermlink, importId: importedObject.importId, type: IMPORT_TYPES.OBJECTS,
   });
   if (!runImport) return;
 
   if (createNew) {
-    await createObject(datafinityObject);
+    await createObject(importedObject);
     await sendUpdateImportForUser({ account: user });
     // trigger new import from parser
-  } else if (authorPermlink || datafinityObject.author_permlink) {
+  } else if (authorPermlink || importedObject.author_permlink) {
     const { wobject, error: dbError } = await Wobj.getOne({
-      author_permlink: authorPermlink || datafinityObject.author_permlink,
+      author_permlink: authorPermlink || importedObject.author_permlink,
     });
 
     if (dbError) return;
     // rating
     await checkRatingFields({
       dbObject: wobject,
-      dfObject: datafinityObject,
+      dfObject: importedObject,
     });
 
-    if (!datafinityObject.fields.length) {
-      await DatafinityObject.removeOne(datafinityObject._id);
+    if (!importedObject.fields.length) {
+      const { startAuthorPermlink } = importedObject;
+
+      await DatafinityObject.removeOne(importedObject._id);
       emitStart({
-        user: datafinityObject.user,
-        importId: datafinityObject.importId,
-        ...(
-          datafinityObject.startAuthorPermlink
-                    && { authorPermlink: datafinityObject.startAuthorPermlink }
-        ),
+        user: importedObject.user,
+        importId: importedObject.importId,
+        ...(startAuthorPermlink && { authorPermlink: startAuthorPermlink }),
       });
       return;
     }
 
     const { result: updatedObj, error: processErr } = await processField({
-      datafinityObject,
+      datafinityObject: importedObject,
       wobject,
       user,
     });
-    if (!updatedObj) return;
-    if (processErr) return;
+    if (!updatedObj || processErr) return;
     await sendUpdateImportForUser({ account: user });
 
     emitStart({
-      user: datafinityObject.user,
-      authorPermlink: datafinityObject.author_permlink,
-      importId: datafinityObject.importId,
+      user: importedObject.user,
+      authorPermlink: importedObject.author_permlink,
+      importId: importedObject.importId,
     });
   }
 };
@@ -360,6 +369,7 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   const { result: existedDatafinity } = await DatafinityObject.findOne({
     filter: { startAuthorPermlink: datafinityObject.author_permlink },
   });
+
   if (existedDatafinity) {
     emitStart({
       user: datafinityObject.user,
