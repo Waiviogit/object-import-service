@@ -4,6 +4,8 @@ const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } =
 const { saveObjects } = require('../objectsImport/importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
+const { IMAGE_SIZE } = require('../../../constants/fileFormats');
+const { loadImageByUrl } = require('../../helpers/imageHelper');
 
 const systemPrompt = (language) => `you are prompted to generate a recipe from the given name. 
 The response format should be a json object according to the following scheme: 
@@ -60,7 +62,12 @@ const generateRecipeImage = async ({ name, description, recipeIngredients }) => 
   if (error) return '';
 
   const images = result.map((image) => image?.url);
-  return images[0];
+  // load to our cdn because ttl link
+  const { result: image } = await loadImageByUrl(
+    images[0],
+    IMAGE_SIZE.CONTAIN,
+  );
+  return image;
 };
 
 const updateErrorCount = async (recipeDoc) => {

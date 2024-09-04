@@ -3,6 +3,11 @@ const db = require('../importObjects_Connection');
 
 const { Schema } = mongoose;
 
+const productIdSchema = new Schema({
+  key: { type: String },
+  value: { type: String },
+}, { _id: false });
+
 const RecipeGeneratedSchema = new Schema({
   importId: { type: String, required: true },
   completed: { type: Boolean, default: false },
@@ -16,12 +21,7 @@ const RecipeGeneratedSchema = new Schema({
   fieldCookingTime: { type: String },
   fieldRecipeIngredients: { type: [String] },
   primaryImageURLs: { type: [String] },
-  waivio_product_ids: {
-    type: [{
-      key: { type: String },
-      value: { type: String },
-    }],
-  },
+  waivio_product_ids: { type: [productIdSchema] },
 }, { timestamps: true, versionKey: false });
 
 RecipeGeneratedSchema.index({ importId: 1, completed: 1, failed: 1 });

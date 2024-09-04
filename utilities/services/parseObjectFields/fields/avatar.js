@@ -1,36 +1,10 @@
 const _ = require('lodash');
 const uuid = require('uuid');
 const axios = require('axios');
-const FormData = require('form-data');
 const { IMAGE_SIZE } = require('../../../../constants/fileFormats');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../../constants/objectTypes');
-const { isProperResolution } = require('../../../helpers/imageHelper');
-
-const loadImageByUrl = async (url, size) => {
-  try {
-    const bodyFormData = new FormData();
-
-    bodyFormData.append('imageUrl', url);
-    if (size) {
-      bodyFormData.append('size', size);
-    }
-    const resp = await axios.post(
-      process.env.SAVE_IMAGE_URL,
-      bodyFormData,
-      {
-        headers: bodyFormData.getHeaders(),
-        timeout: 15000,
-      },
-    );
-    const result = _.get(resp, 'data.image');
-    if (!result) return { error: new Error('Internal server error') };
-    return { result };
-  } catch (error) {
-    console.error(error.message);
-    return { error };
-  }
-};
+const { isProperResolution, loadImageByUrl } = require('../../../helpers/imageHelper');
 
 const checkForDuplicates = async (urls = []) => {
   try {

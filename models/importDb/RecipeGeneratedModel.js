@@ -32,7 +32,7 @@ const findOne = async ({ filter, projection, options }) => {
 
 const find = async ({ filter, projection, options }) => {
   try {
-    const result = await RecipeGenerated.find(filter, projection, options);
+    const result = await RecipeGenerated.find(filter, projection, options).lean();
 
     return { result };
   } catch (error) {
@@ -117,6 +117,7 @@ const getCompleted = async (importId) => {
       fieldCookingTime: 1,
       fieldRecipeIngredients: 1,
       primaryImageURLs: 1,
+      waivio_product_ids: 1,
     },
   });
 

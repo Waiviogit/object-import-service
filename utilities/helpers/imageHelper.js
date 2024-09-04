@@ -3,6 +3,7 @@ const { promisify } = require('util');
 const sizeOf = require('image-size');
 const _ = require('lodash');
 const axios = require('axios');
+const FormData = require('form-data');
 
 const timeout = (ms) => new Promise((resolve, reject) => {
   setTimeout(() => {
@@ -62,6 +63,32 @@ const isProperResolution = async (imageUrl) => {
   return true;
 };
 
+const loadImageByUrl = async (url, size) => {
+  try {
+    const bodyFormData = new FormData();
+
+    bodyFormData.append('imageUrl', url);
+    if (size) {
+      bodyFormData.append('size', size);
+    }
+    const resp = await axios.post(
+      process.env.SAVE_IMAGE_URL,
+      bodyFormData,
+      {
+        headers: bodyFormData.getHeaders(),
+        timeout: 15000,
+      },
+    );
+    const result = _.get(resp, 'data.image');
+    if (!result) return { error: new Error('Internal server error') };
+    return { result };
+  } catch (error) {
+    console.error(error.message);
+    return { error };
+  }
+};
+
 module.exports = {
   isProperResolution,
+  loadImageByUrl,
 };
