@@ -1,18 +1,17 @@
 const EventEmitter = require('events');
 const _ = require('lodash');
-const crypto = require('node:crypto');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
-} = require('../../models');
+} = require('../../../models');
 const {
   OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS, VIRTUAL_FIELDS,
-} = require('../../constants/objectTypes');
-const { addWobject, addField } = require('./importObjectsService');
-const { parseJson } = require('../helpers/jsonHelper');
+} = require('../../../constants/objectTypes');
+const { addWobject, addField } = require('../importObjectsService');
+const { parseJson } = require('../../helpers/jsonHelper');
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS, IMPORT_TYPES,
-} = require('../../constants/appData');
-const { formField } = require('../helpers/formFieldHelper');
+} = require('../../../constants/appData');
+const { formField } = require('../../helpers/formFieldHelper');
 const {
   prepareObjectForImport,
   specialFieldsHelper,
@@ -21,15 +20,13 @@ const {
   createAsinVariations,
   getProductRating,
   checkRatingFields,
-} = require('../helpers/importDatafinityHelper');
-const { checkImportActiveStatus } = require('../helpers/importDatafinityValidationHelper');
-const { parseFields } = require('./parseObjectFields/mainFieldsParser');
-const { redisGetter, redisSetter } = require('../redis');
-const { makeAuthorDescription } = require('./gptService');
-const { sendUpdateImportForUser } = require('./socketClient');
-const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
-const { validateImportToRun } = require('../../validators/accountValidator');
-const { createRecipeObjectsForImport } = require('./recipeGeneration/recipeGeneration');
+} = require('../../helpers/importDatafinityHelper');
+const { checkImportActiveStatus } = require('../../helpers/importDatafinityValidationHelper');
+const { parseFields } = require('../parseObjectFields/mainFieldsParser');
+const { redisGetter, redisSetter } = require('../../redis');
+const { makeAuthorDescription } = require('../gptService');
+const { sendUpdateImportForUser } = require('../socketClient');
+const { validateImportToRun } = require('../../../validators/accountValidator');
 
 const getFieldsCount = (fields = []) => {
   const realFields = fields.filter((el) => !Object.values(VIRTUAL_FIELDS).includes(el.name));
@@ -88,74 +85,6 @@ const emitStart = ({
     user, authorPermlink, importId, createdId,
   }));
   myEE.emit('import');
-};
-
-const startSaveObjects = ({ objectType }) => objectType !== OBJECT_TYPES.RECIPE;
-
-const startAdditionalProcessing = ({ objectType }) => objectType === OBJECT_TYPES.RECIPE;
-
-const additionalProcessingByType = {
-  [OBJECT_TYPES.RECIPE]: createRecipeObjectsForImport,
-  default: () => {},
-};
-
-const getAdditionalHandlerByType = (objectType) => additionalProcessingByType[objectType]
-    || additionalProcessingByType.default;
-
-const importObjects = async ({
-  user,
-  objectType,
-  authority,
-  locale,
-  translate,
-  useGPT,
-  addDatafinityData,
-  objects,
-}) => {
-  const importId = crypto.randomUUID();
-  if (addDatafinityData) await addDatafinityDataToProducts(objects);
-
-  await ImportStatusModel.create({
-    status: IMPORT_STATUS.PENDING,
-    objectsCount: 0,
-    importId,
-    objectType,
-    authority,
-    user,
-    locale,
-    translate,
-    useGPT,
-  });
-  await redisSetter.set({
-    key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}`,
-    value: user,
-  });
-
-  const startSave = startSaveObjects({ objectType });
-  const additionalProcessing = startAdditionalProcessing({ objectType });
-
-  if (additionalProcessing) {
-    const handler = getAdditionalHandlerByType(objectType);
-
-    handler({
-      importId, objects, user, locale, authority,
-    });
-  }
-
-  if (startSave) {
-    saveObjects({
-      objects,
-      user,
-      objectType,
-      authority,
-      locale,
-      translate,
-      importId,
-      useGPT,
-    });
-  }
-
-  return { result: importId };
 };
 
 const finishImport = async ({ importId, user }) => {
@@ -377,12 +306,23 @@ const existConnectedAuthors = async ({ field }) => {
   return true;
 };
 
-const existConnectedObject = async ({ field }) => {
+const existConnectedList = async ({ field, datafinityObject }) => {
+  const { result } = await Wobj.findOne({
+    filter: {
+      author_permlink: field.body,
+      fields: { $elemMatch: { name: OBJECT_FIELDS.LIST_ITEM, body: datafinityObject.author_permlink } },
+    },
+  });
+  return !!result;
+};
+
+const existConnectedObject = async ({ field, datafinityObject }) => {
   const fieldCheck = {
     authors: existConnectedAuthors,
+    addToList: existConnectedList,
     default: () => false,
   };
-  return (fieldCheck[field.name] || fieldCheck.default)({ field });
+  return (fieldCheck[field.name] || fieldCheck.default)({ field, datafinityObject });
 };
 
 const checkFieldConnectedObject = async ({ datafinityObject }) => {
@@ -403,7 +343,7 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
     });
     return true;
   }
-  const existObject = await existConnectedObject({ field });
+  const existObject = await existConnectedObject({ field, datafinityObject });
   if (existObject) return false;
 
   const newImportObject = await createFieldObject({ field, datafinityObject });
@@ -544,4 +484,4 @@ const getWobjectByKeys = async (datafinityObject) => {
   }
 };
 
-module.exports = { importObjects, startObjectImport, saveObjects };
+module.exports = { startObjectImport, saveObjects };

@@ -85,6 +85,7 @@ const OBJECT_FIELDS = {
   COOKING_TIME: 'cookingTime',
   COST: 'cost',
   RECIPE_INGREDIENTS: 'recipeIngredients',
+  LIST_ITEM: 'listItem',
 };
 
 const VIRTUAL_FIELDS = {

@@ -1,6 +1,6 @@
 const redis = require('redis');
 const config = require('../../../config');
-const { startObjectImport } = require('../../services/importDatafinityObjects');
+const { startObjectImport } = require('../../services/objectsImport/importDatafinityObjects');
 const { IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const claimProcess = require('../../services/authority/claimProcess');
 const importDepartments = require('../../services/departmentsService/importDepartments');

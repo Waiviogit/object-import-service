@@ -1,7 +1,7 @@
 const { gptSystemUserPrompt, gptCreateImage } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
 const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
-const { saveObjects } = require('../importDatafinityObjects');
+const { saveObjects } = require('../objectsImport/importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 
@@ -110,8 +110,10 @@ const generateRecipeAndImage = async ({ importId }) => {
         continue;
       }
 
+      const updateData = formUpdateData(recipeDoc, recipe);
+
       recipeDoc = await RecipeGeneratedModel
-        .updateRecipeSchema(recipeDoc._id, formUpdateData(recipeDoc, recipe));
+        .updateRecipeSchema(recipeDoc._id, updateData);
     }
 
     // step2 generate image
@@ -170,7 +172,7 @@ const createRecipeObjectsForImport = async ({
   await RecipeGenerationStatusModel.create({
     importId, user, locale, authority,
   });
-  await RecipeGeneratedModel.insertMany(objects);
+  await RecipeGeneratedModel.insertMany(objects.map((el) => ({ ...el, importId })));
   generateRecipeAndImage({ importId });
 };
 

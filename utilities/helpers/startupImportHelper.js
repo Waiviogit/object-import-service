@@ -7,7 +7,7 @@ const {
   TagsStatusModel,
   RecipeGenerationStatusModel,
 } = require('../../models');
-const { startObjectImport } = require('../services/importDatafinityObjects');
+const { startObjectImport } = require('../services/objectsImport/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
 const claimProcess = require('../services/authority/claimProcess');
 const importDepartments = require('../services/departmentsService/importDepartments');
