@@ -5,9 +5,6 @@ const { saveObjects } = require('../importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 
-// todo on startup import resume
-// todo delete object after import complete
-
 const systemPrompt = (language) => `you are prompted to generate a recipe from the given name. 
 The response format should be a json object according to the following scheme: 
 { 
@@ -96,7 +93,7 @@ const formUpdateData = (importRecipe, generatedRecipe) => {
   return updateData;
 };
 
-const generateRecipeAndImage = async (importId) => {
+const generateRecipeAndImage = async ({ importId }) => {
   const status = await RecipeGenerationStatusModel.getImportById(importId);
   if (!status) return;
   const { locale } = status;
@@ -138,7 +135,10 @@ const generateRecipeAndImage = async (importId) => {
 
   const docsToImport = await RecipeGeneratedModel.getCompleted(importId);
 
-  if (!docsToImport?.length) return RecipeGenerationStatusModel.setFinished(importId);
+  if (!docsToImport?.length) {
+    await deleteRecipePreprocessedData(importId);
+    return;
+  }
 
   const importStatus = await ImportStatusModel.findOneByImportId(importId);
   if (!importStatus || importStatus?.status !== IMPORT_STATUS.PENDING) {
@@ -171,11 +171,12 @@ const createRecipeObjectsForImport = async ({
     importId, user, locale, authority,
   });
   await RecipeGeneratedModel.insertMany(objects);
-  generateRecipeAndImage(importId);
+  generateRecipeAndImage({ importId });
 };
 
 module.exports = {
   generateRecipeImage,
   generateRecipe,
   createRecipeObjectsForImport,
+  generateRecipeAndImage,
 };

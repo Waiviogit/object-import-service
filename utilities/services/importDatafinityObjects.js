@@ -5,7 +5,7 @@ const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
 } = require('../../models');
 const {
-  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS,
+  OBJECT_TYPES, OBJECT_IDS, OBJECT_FIELDS, VIRTUAL_FIELDS,
 } = require('../../constants/objectTypes');
 const { addWobject, addField } = require('./importObjectsService');
 const { parseJson } = require('../helpers/jsonHelper');
@@ -31,6 +31,11 @@ const { addDatafinityDataToProducts } = require('../datafinitiApi/operations');
 const { validateImportToRun } = require('../../validators/accountValidator');
 const { createRecipeObjectsForImport } = require('./recipeGeneration/recipeGeneration');
 
+const getFieldsCount = (fields = []) => {
+  const realFields = fields.filter((el) => !Object.values(VIRTUAL_FIELDS).includes(el.name));
+  return realFields.length;
+};
+
 const saveObjects = async ({
   objects, user, objectType, authority, locale, translate, importId, useGPT,
 }) => {
@@ -47,14 +52,10 @@ const saveObjects = async ({
 
     const result = await DatafinityObject.create(object);
     if (result?.error) continue;
+
     await ImportStatusModel.updateOne({
       filter: { importId },
-      update: {
-        $inc: {
-          objectsCount: 1,
-          fieldsCount: object.fields.length,
-        },
-      },
+      update: { $inc: { objectsCount: 1, fieldsCount: getFieldsCount(object.fields) } },
     });
     await sendUpdateImportForUser({ account: user });
   }
@@ -336,11 +337,33 @@ const createPersonFromAuthors = async ({ datafinityObject, field }) => {
   return object;
 };
 
+const createList = async ({ field, datafinityObject }) => ({
+  user: datafinityObject.user,
+  importId: datafinityObject.importId,
+  object_type: OBJECT_TYPES.LIST,
+  authority: datafinityObject.authority,
+  startAuthorPermlink: datafinityObject.author_permlink,
+  name: OBJECT_TYPES.LIST,
+  locale: datafinityObject.locale,
+  author_permlink: field.body,
+  fields: [
+    formField({
+      fieldName: 'listItem',
+      user: datafinityObject.user,
+      body: datafinityObject.author_permlink,
+      locale: datafinityObject.locale,
+    }),
+  ],
+});
+
 const createFieldObject = async ({ field, datafinityObject }) => {
   const formObject = {
     authors: createPersonFromAuthors,
+    addToList: createList,
+    default: () => {},
   };
-  return formObject[field.name]({ field, datafinityObject });
+
+  return (formObject[field.name] || formObject.default)({ field, datafinityObject });
 };
 
 const existConnectedAuthors = async ({ field }) => {
@@ -357,8 +380,9 @@ const existConnectedAuthors = async ({ field }) => {
 const existConnectedObject = async ({ field }) => {
   const fieldCheck = {
     authors: existConnectedAuthors,
+    default: () => false,
   };
-  return fieldCheck[field.name]({ field });
+  return (fieldCheck[field.name] || fieldCheck.default)({ field });
 };
 
 const checkFieldConnectedObject = async ({ datafinityObject }) => {
@@ -379,9 +403,9 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
     });
     return true;
   }
-
   const existObject = await existConnectedObject({ field });
   if (existObject) return false;
+
   const newImportObject = await createFieldObject({ field, datafinityObject });
   const { result } = await DatafinityObject.create(newImportObject);
 
