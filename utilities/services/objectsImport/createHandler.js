@@ -1,11 +1,11 @@
 const crypto = require('node:crypto');
-const { OBJECT_TYPES } = require('../../../constants/wobjectsData');
 const { createRecipeObjectsForImport } = require('../recipeGeneration/recipeGeneration');
 const { addDatafinityDataToProducts } = require('../../datafinitiApi/operations');
 const { ImportStatusModel } = require('../../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const { redisSetter } = require('../../redis');
 const { saveObjects } = require('./importDatafinityObjects');
+const { OBJECT_TYPES } = require('../../../constants/objectTypes');
 
 const startSaveObjects = ({ objectType }) => objectType !== OBJECT_TYPES.RECIPE;
 
