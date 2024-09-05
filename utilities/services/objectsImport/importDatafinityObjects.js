@@ -266,24 +266,32 @@ const createPersonFromAuthors = async ({ datafinityObject, field }) => {
   return object;
 };
 
-const createList = async ({ field, datafinityObject }) => ({
-  user: datafinityObject.user,
-  importId: datafinityObject.importId,
-  object_type: OBJECT_TYPES.LIST,
-  authority: datafinityObject.authority,
-  startAuthorPermlink: datafinityObject.author_permlink,
-  name: OBJECT_TYPES.LIST,
-  locale: datafinityObject.locale,
-  author_permlink: field.body,
-  fields: [
-    formField({
-      fieldName: 'listItem',
-      user: datafinityObject.user,
-      body: datafinityObject.author_permlink,
-      locale: datafinityObject.locale,
-    }),
-  ],
-});
+const createList = async ({ field, datafinityObject }) => {
+  // we need this if parser will be slow not posting lot of updates
+  await DatafinityObject.updateOne(
+    { _id: datafinityObject._id },
+    { $pop: { fields: -1 } },
+  );
+
+  return {
+    user: datafinityObject.user,
+    importId: datafinityObject.importId,
+    object_type: OBJECT_TYPES.LIST,
+    authority: datafinityObject.authority,
+    startAuthorPermlink: datafinityObject.author_permlink,
+    name: OBJECT_TYPES.LIST,
+    locale: datafinityObject.locale,
+    author_permlink: field.body,
+    fields: [
+      formField({
+        fieldName: 'listItem',
+        user: datafinityObject.user,
+        body: datafinityObject.author_permlink,
+        locale: datafinityObject.locale,
+      }),
+    ],
+  };
+};
 
 const createFieldObject = async ({ field, datafinityObject }) => {
   const formObject = {
@@ -333,7 +341,6 @@ const existConnectedObject = async ({ field, datafinityObject }) => {
 const checkFieldConnectedObject = async ({ datafinityObject }) => {
   const field = datafinityObject.fields[0];
   if (!field) return false;
-  console.log(field.name, field.connectedObject);
   if (!field.connectedObject) return false;
 
   const { result: existedDatafinity } = await DatafinityObject.findOne({
@@ -350,17 +357,18 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
     return true;
   }
   const existObject = await existConnectedObject({ field, datafinityObject });
-  console.log('existObject', existObject);
   if (existObject) return false;
 
   const newImportObject = await createFieldObject({ field, datafinityObject });
   const { result } = await DatafinityObject.create(newImportObject);
 
+  const addObjectsCount = datafinityObject.object_type !== OBJECT_TYPES.RECIPE;
+
   await ImportStatusModel.updateOne({
     filter: { importId: datafinityObject.importId },
     update: {
       $inc: {
-        objectsCount: 1,
+        ...(addObjectsCount && { objectsCount: 1 }),
         fieldsCount: newImportObject.fields.length,
       },
     },
@@ -397,7 +405,7 @@ const processField = async ({ datafinityObject, wobject, user }) => {
     });
     await new Promise((resolve) => setTimeout(resolve, 4000));
   }
-  if (sameField) console.error(`same field ${JSON.stringify(datafinityObject.fields[0])}`);
+  if (sameField) console.error(`same field: ${datafinityObject.fields[0]?.name}`);
 
   const { result, error } = await DatafinityObject.findOneAndModify(
     { _id: datafinityObject._id },
@@ -406,7 +414,6 @@ const processField = async ({ datafinityObject, wobject, user }) => {
 
   if (error) {
     console.error(error.message);
-
     return { error };
   }
   return { result };
