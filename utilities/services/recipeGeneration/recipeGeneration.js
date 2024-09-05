@@ -21,7 +21,7 @@ The response format should be a json object according to the following scheme:
 
 where: 
 name - of recipe without changes
-fieldDescription - description of a recipe
+fieldDescription - make description of a recipe, don't write recipe itself
 categories - list of categories to which this recipe can be assigned min 5 max 10 items
 fieldCalories - total calories in recipe in calories
 fieldCookingTime - total cooking time in minutes and hours
