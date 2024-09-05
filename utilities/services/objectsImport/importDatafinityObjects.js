@@ -310,7 +310,12 @@ const existConnectedList = async ({ field, datafinityObject }) => {
   const { result } = await Wobj.findOne({
     filter: {
       author_permlink: field.body,
-      fields: { $elemMatch: { name: OBJECT_FIELDS.LIST_ITEM, body: datafinityObject.author_permlink } },
+      fields: {
+        $elemMatch: {
+          name: OBJECT_FIELDS.LIST_ITEM,
+          body: datafinityObject.author_permlink,
+        },
+      },
     },
   });
   return !!result;
@@ -328,6 +333,7 @@ const existConnectedObject = async ({ field, datafinityObject }) => {
 const checkFieldConnectedObject = async ({ datafinityObject }) => {
   const field = datafinityObject.fields[0];
   if (!field) return false;
+  console.log(field.name, field.connectedObject);
   if (!field.connectedObject) return false;
 
   const { result: existedDatafinity } = await DatafinityObject.findOne({
@@ -344,6 +350,7 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
     return true;
   }
   const existObject = await existConnectedObject({ field, datafinityObject });
+  console.log('existObject', existObject);
   if (existObject) return false;
 
   const newImportObject = await createFieldObject({ field, datafinityObject });
