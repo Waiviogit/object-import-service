@@ -18,6 +18,7 @@ const RecipeGeneratedSchema = new Schema({
   fieldDescription: { type: String },
   categories: { type: [String] },
   fieldCalories: { type: String },
+  fieldBudget: { type: String },
   fieldCookingTime: { type: String },
   fieldRecipeIngredients: { type: [String] },
   primaryImageURLs: { type: [String] },
