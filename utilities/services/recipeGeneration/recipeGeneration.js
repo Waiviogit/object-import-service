@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { gptSystemUserPrompt, gptCreateImage } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
 const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
@@ -90,7 +91,7 @@ const recipeFields = ['fieldDescription', 'categories', 'fieldCalories', 'fieldC
 const formUpdateData = (importRecipe, generatedRecipe) => {
   const updateData = {};
   for (const field of recipeFields) {
-    if (!importRecipe[field]) updateData[field] = generatedRecipe[field];
+    if (_.isEmpty(importRecipe[field])) updateData[field] = generatedRecipe[field];
   }
 
   if (!importRecipe?.waivio_product_ids?.length) {

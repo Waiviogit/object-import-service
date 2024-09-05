@@ -22,7 +22,7 @@ const count = async ({ filter, options }) => {
 
 const findOne = async ({ filter, projection, options }) => {
   try {
-    const result = await RecipeGenerated.findOne(filter, projection, options);
+    const result = await RecipeGenerated.findOne(filter, projection, options).lean();
 
     return { result };
   } catch (error) {
@@ -112,6 +112,7 @@ const getCompleted = async (importId) => {
     projection: {
       name: 1,
       fieldDescription: 1,
+      fieldBudget: 1,
       categories: 1,
       fieldCalories: 1,
       fieldCookingTime: 1,
