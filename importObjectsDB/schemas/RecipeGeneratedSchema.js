@@ -13,7 +13,7 @@ const RecipeGeneratedSchema = new Schema({
   completed: { type: Boolean, default: false },
   failed: { type: Boolean, default: false },
   hasSchema: { type: Boolean, default: false },
-  errorCount: { type: Number, default: false },
+  errorCount: { type: Number, default: 0 },
   name: { type: String, required: true },
   fieldDescription: { type: String },
   categories: { type: [String] },
@@ -21,6 +21,7 @@ const RecipeGeneratedSchema = new Schema({
   fieldCookingTime: { type: String },
   fieldRecipeIngredients: { type: [String] },
   primaryImageURLs: { type: [String] },
+  listAssociations: { type: [String] },
   waivio_product_ids: { type: [productIdSchema] },
 }, { timestamps: true, versionKey: false });
 

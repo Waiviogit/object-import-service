@@ -118,6 +118,7 @@ const getCompleted = async (importId) => {
       fieldRecipeIngredients: 1,
       primaryImageURLs: 1,
       waivio_product_ids: 1,
+      listAssociations: 1,
     },
   });
 
