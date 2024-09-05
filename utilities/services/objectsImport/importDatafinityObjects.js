@@ -153,6 +153,7 @@ const getImportObject = async ({
 const startObjectImport = async ({
   user, authorPermlink = null, importId, createdId,
 }) => {
+  console.log(user, 'startObjectImport');
   const importedObject = await getImportObject({
     importId, authorPermlink, user, createdId,
   });
