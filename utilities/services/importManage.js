@@ -1,6 +1,6 @@
 const { ImportStatusModel, DatafinityObject } = require('../../models');
 const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
-const { startObjectImport } = require('./importDatafinityObjects');
+const { startObjectImport } = require('./objectsImport/importDatafinityObjects');
 const { redisGetter } = require('../redis');
 
 const getStatistic = async ({

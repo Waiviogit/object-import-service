@@ -18,4 +18,6 @@ module.exports = {
   TelegramImportUsageModel: require('./importDb/TelegramImportUsageModel'),
   TagsStatusModel: require('./importDb/TagsStatusModel'),
   TagsObjectModel: require('./importDb/TagsObjectModel'),
+  RecipeGeneratedModel: require('./importDb/RecipeGeneratedModel'),
+  RecipeGenerationStatusModel: require('./importDb/RecipeGenerationStatusModel'),
 };

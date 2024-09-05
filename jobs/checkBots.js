@@ -13,7 +13,7 @@ const {
 const {
   IMPORT_STATUS, IMPORT_REDIS_KEYS, IMPORT_GLOBAL_SETTINGS, OBJECT_BOT_ROLE,
 } = require('../constants/appData');
-const { startObjectImport } = require('../utilities/services/importDatafinityObjects');
+const { startObjectImport } = require('../utilities/services/objectsImport/importDatafinityObjects');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const claimProcess = require('../utilities/services/authority/claimProcess');
 const importDepartments = require('../utilities/services/departmentsService/importDepartments');

@@ -1,7 +1,9 @@
 const _ = require('lodash');
 const uuid = require('uuid');
 const { WHITE_LIST, VOTE_COST } = require('../../constants/voteAbility');
-const { OBJECT_TYPES, PARENT_ASIN_FIELDS, OBJECT_FIELDS } = require('../../constants/objectTypes');
+const {
+  OBJECT_TYPES, PARENT_ASIN_FIELDS, OBJECT_FIELDS, VIRTUAL_FIELDS,
+} = require('../../constants/objectTypes');
 const { parseJson } = require('./jsonHelper');
 const { generateUniquePermlink } = require('./permlinkGenerator');
 const { addField } = require('../services/importObjectsService');
@@ -147,19 +149,6 @@ const bufferToArray = (buffer) => {
   return parseJson(stringFromBuffer, []);
 };
 
-const needToSaveObject = (object) => {
-  if (object.object_type === OBJECT_TYPES.RESTAURANT) {
-    const map = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.MAP);
-    if (!map) return false;
-  }
-  // if (object.object_type === OBJECT_TYPES.PRODUCT) {
-  //   const groupIdField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.GROUP_ID);
-  //   const optionsField = _.find(object.fields, (f) => f.name === OBJECT_FIELDS.OPTIONS);
-  //   if (groupIdField && !optionsField) return false;
-  // }
-  return true;
-};
-
 const prepareObjectForImport = async (datafinityObject) => {
   const permlink = datafinityObject.author_permlink
     ? datafinityObject.author_permlink
@@ -277,6 +266,7 @@ const validateSameFields = ({ fieldData, wobject }) => {
     [OBJECT_FIELDS.AVATAR]: () => !!wobject.fields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
     [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
+    [VIRTUAL_FIELDS.ADD_TO_LIST]: () => true,
     default: validateSameFieldDefault,
   };
 
@@ -385,7 +375,6 @@ module.exports = {
   filterImportObjects,
   getVoteCost,
   bufferToArray,
-  needToSaveObject,
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,

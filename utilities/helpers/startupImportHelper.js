@@ -5,14 +5,16 @@ const {
   DuplicateListStatusModel,
   DescriptionStatusModel,
   TagsStatusModel,
+  RecipeGenerationStatusModel,
 } = require('../../models');
-const { startObjectImport } = require('../services/importDatafinityObjects');
+const { startObjectImport } = require('../services/objectsImport/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
 const claimProcess = require('../services/authority/claimProcess');
 const importDepartments = require('../services/departmentsService/importDepartments');
 const duplicateProcess = require('../services/listDuplication/duplicateProcess');
 const rewriteDescription = require('../services/descriptionBot/rewriteDescription');
 const createTags = require('../services/tagsBot/createTags');
+const { generateRecipeAndImage } = require('../services/recipeGeneration/recipeGeneration');
 
 const tasksToRun = [
   {
@@ -39,6 +41,10 @@ const tasksToRun = [
   {
     model: TagsStatusModel,
     processStarter: createTags,
+  },
+  {
+    model: RecipeGenerationStatusModel,
+    processStarter: generateRecipeAndImage,
   },
 ];
 

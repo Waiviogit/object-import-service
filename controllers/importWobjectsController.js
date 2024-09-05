@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const validators = require('./validators');
 const {
   importObjectsService, importTagsService, importObjectsFromFile, importDatafinityObjects, importManage,
@@ -8,7 +9,7 @@ const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
-const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
+const { getVoteCostInitial, bufferToArray, filterImportObjects } = require('../utilities/helpers/importDatafinityHelper');
 const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
 const { restGptQuery } = require('../utilities/services/gptService');
 const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
@@ -46,37 +47,41 @@ const importWobjectsJson = async (req, res, next) => {
 };
 
 const importObjectsFromTextOrJson = async (req, res, next) => {
-  if (!req.file) {
-    return next({ status: 422, message: 'No File' });
-  }
-  if (req.file.size > FILE_MAX_SIZE) {
-    return next({ status: 422, message: 'Allowed file size must be less than 100 MB' });
-  }
+  if (!req.file) return next({ status: 422, message: 'No File' });
+  if (req.file.size > FILE_MAX_SIZE) return next({ status: 422, message: 'file size must be less than 100 MB' });
+
   const value = validators.validate(
     req.body,
     validators.importWobjects.importDatafinityObjectsSchema,
     next,
   );
-
   if (!value) return;
 
-  console.log(value.user, 'authorise');
   const { error: authError } = await authorise({
     username: value.user,
     ...getAccessTokensFromReq(req),
   });
-
   if (authError) return next(authError);
-  console.log(value.user, 'importAccountValidator');
+
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
     getVoteCostInitial(value.user),
   );
   if (!validAcc) return next(accError);
 
-  console.log(value.user, 'importObjects');
-  const { result, error } = await importDatafinityObjects
-    .importObjects({ file: req.file, ...value });
+  const products = bufferToArray(req.file.buffer);
+  if (_.isEmpty(products)) return { error: { status: 404, message: 'products not found' } };
+  const { uniqueProducts, error: filterError } = filterImportObjects({
+    products,
+    objectType: value.objectType,
+  });
+  if (filterError && !value?.forceImport) return { error: filterError };
+  if (_.isEmpty(uniqueProducts)) return { error: { status: 422, message: 'products already exists or has wrong type' } };
+
+  const { result, error } = await importDatafinityObjects.importObjects({
+    ...value,
+    objects: uniqueProducts,
+  });
   if (error) return next(error);
 
   res.status(200).json({ result });

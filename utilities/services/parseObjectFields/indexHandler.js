@@ -34,4 +34,5 @@ module.exports = {
   budget: require('./fields/budget'),
   cookingTime: require('./fields/cookingTime'),
   recipeIngredients: require('./fields/recipeIngredients'),
+  addToList: require('./fields/addToList'),
 };

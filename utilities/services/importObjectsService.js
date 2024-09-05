@@ -57,8 +57,6 @@ const addWobjectsToQueue = async ({ wobjects = [], immediately } = {}) => {
 };
 
 const runImportWobjectsQueue = async () => {
-  // await importWobjectsDataClient.flushdbAsync();
-  // await importWobjectsQueueClient.flushdbAsync();
   const { result, error: createError } = await redisQueue.createQueue({
     client: importRsmqClient,
     qname: IMPORT_WOBJECTS_QNAME,

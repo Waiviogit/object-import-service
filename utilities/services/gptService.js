@@ -94,6 +94,29 @@ const gptTagsFromDescription = async ({ content = '', createdTags, language }) =
   }
 };
 
+const gptSystemUserPrompt = async ({ systemPrompt, userPrompt }) => {
+  try {
+    const response = await openaiBot.chat.completions.create({
+      model: 'gpt-4-1106-preview',
+      messages: [{
+        role: 'system',
+        content: systemPrompt,
+      }, {
+        role: 'user',
+        content: userPrompt,
+      }],
+    }, {
+      timeout: 60000,
+    });
+
+    const result = _.get(response, 'choices[0].message.content', '');
+
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const makeDescription = async (description = '') => {
   const { result, error } = await gptCreateCompletion({
     content: `Create description for product max 3 paragraph from following text: ${description}`,
@@ -234,4 +257,5 @@ module.exports = {
   gptCreateCompletion4,
   gptTagsFromDescription,
   makeLinkDescription,
+  gptSystemUserPrompt,
 };

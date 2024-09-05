@@ -18,6 +18,9 @@ const ImportStatusSchema = new Schema({
   fieldsCreatedCount: { type: Number, default: 0 },
   finishedAt: { type: Date },
   objectsLinks: { type: [String] },
+  locale: { type: String },
+  translate: { type: Boolean },
+  useGPT: { type: Boolean },
 }, { timestamps: true, versionKey: false });
 
 ImportStatusSchema.index({ user: 1, importId: 1 }, { unique: true });
