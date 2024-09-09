@@ -41,7 +41,8 @@ example:
 fill all info in ${language} language
 return it like a string don't use code snippet symbols 
 `;
-const imagePrompt = ({ name, recipeIngredients, description }) => `Create a high-resolution, photo-realistic cover image for a recipe "${name}", ${description}. The image should depict the main dish of the recipe in an appetizing and inviting way. Include key ingredients, such as ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should resemble a rustic kitchen table, with soft, natural lighting and subtle shadows to create a warm and cozy atmosphere. there should be no text on the picture`;
+
+const imagePrompt = ({ name, recipeIngredients, description }) => `Make photo-realistic image for a recipe "${name}", ${description}. The image should depict the main dish of the recipe in an appetizing, realistic and inviting way . Include some of ingredients from list: ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should be white. Do not add text to image`;
 
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
