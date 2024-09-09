@@ -23,6 +23,16 @@ const categoriesByType = {
 
 const tagsCountNeeded = 10;
 
+const updateNumberOfTags = async (importId, numberOfTags) => TagsStatusModel.updateOne({
+  filter: { importId },
+  update: { $inc: { numberOfTags } },
+});
+
+const updatePostedTags = async (importId) => TagsStatusModel.updateOne({
+  filter: { importId },
+  update: { $inc: { postedTags: 1 } },
+});
+
 const prepareFields = async ({
   authorPermlink, importId, user, locale,
 }) => {
@@ -72,6 +82,7 @@ const prepareFields = async ({
         fieldsCreated: true,
       },
     });
+    await updateNumberOfTags(importId, fields.length);
     return;
   }
 
@@ -120,6 +131,7 @@ const prepareFields = async ({
       fieldsCreated: true,
     },
   });
+  await updateNumberOfTags(importId, fields.length);
 };
 
 const rewriteFields = async ({ importId, user, locale }) => {
@@ -152,6 +164,8 @@ const rewriteFields = async ({ importId, user, locale }) => {
       importingAccount: user,
       importId,
     });
+
+    await updatePostedTags(importId);
   }
 
   const conditionForProcessed = result.fields.length === 1 || !result.fields.length;

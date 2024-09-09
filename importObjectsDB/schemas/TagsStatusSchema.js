@@ -14,6 +14,8 @@ const TagsStatusSchema = new Schema({
   locale: { type: String },
   objectsCount: { type: Number, required: true },
   objectsUpdated: { type: Number, default: 0 },
+  numberOfTags: { type: Number, default: 0 },
+  postedTags: { type: Number, default: 0 },
   finishedAt: { type: Date },
 }, { timestamps: true, versionKey: false });
 
