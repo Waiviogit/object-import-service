@@ -48,6 +48,7 @@ exports.WHITE_LIST = [
   'irenok',
   'luxita',
   'rehabhive',
+  'recipes.curator',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
