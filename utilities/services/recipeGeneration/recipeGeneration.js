@@ -131,7 +131,7 @@ const generateRecipeAndImage = async ({ importId }) => {
         continue;
       }
 
-      const updateData = formUpdateData(recipeDoc, recipe);
+      const updateData = formUpdateData(recipeDoc, recipe, locale);
 
       recipeDoc = await RecipeGeneratedModel
         .updateRecipeSchema(recipeDoc._id, updateData);
