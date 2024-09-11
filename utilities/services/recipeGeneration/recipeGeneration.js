@@ -44,6 +44,14 @@ return it like a string don't use code snippet symbols
 
 const imagePrompt = ({ name, recipeIngredients, description }) => `Make photo-realistic image for a recipe "${name}", ${description}. The image should depict the main dish of the recipe in an appetizing, realistic and inviting way . Include some of ingredients from list: ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should be white. Do not add text to image`;
 
+const formatResponseToValidJson = (string = '') => string
+  .replace(/```/gm, '')
+  .replace('json', '')
+  .replace(/^"|"$/gm, '') // Remove the outermost quotes
+  .replace(/\\"/gm, '"') // Replace escaped quotes with actual quotes
+  .replace(/\\n/gm, '')
+  .replace(/\\\\/gm, '\\');
+
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
 
@@ -52,7 +60,7 @@ const generateRecipe = async (name, locale) => {
     userPrompt: name,
   });
   if (error) return null;
-  return jsonHelper.parseJson(result.replace(/```/gm, '').replace('json', '').replace('""', '"'), null);
+  return jsonHelper.parseJson(formatResponseToValidJson(result), null);
 };
 
 const generateRecipeImage = async ({ name, description, recipeIngredients }) => {
@@ -89,7 +97,8 @@ const deleteRecipePreprocessedData = async (importId) => {
 };
 
 const recipeFields = ['fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients'];
-const formUpdateData = (importRecipe, generatedRecipe) => {
+
+const formUpdateData = (importRecipe, generatedRecipe, locale) => {
   const updateData = {};
   for (const field of recipeFields) {
     if (_.isEmpty(importRecipe[field])) updateData[field] = generatedRecipe[field];
@@ -97,6 +106,9 @@ const formUpdateData = (importRecipe, generatedRecipe) => {
 
   if (!importRecipe?.waivio_product_ids?.length) {
     updateData.waivio_product_ids = getProductId(importRecipe.name);
+  }
+  if (locale !== 'en-US') {
+    updateData.name = generatedRecipe.name;
   }
 
   return updateData;
