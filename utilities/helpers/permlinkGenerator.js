@@ -1,3 +1,4 @@
+const unidecode = require('unidecode');
 const { Wobj } = require('../../models');
 
 const PERMLINK_MAX_LEN = 255;
@@ -16,7 +17,7 @@ exports.genRandomString = (stringLength) => {
 };
 
 exports.permlinkGenerator = (string) => {
-  const permlink = `${this.genRandomString(3)}-${string}`
+  const permlink = `${this.genRandomString(3)}-${unidecode(string)}`
     .toLowerCase()
     .replace(/[ _]/g, '-')
     .replace(/[.]/g, '')
