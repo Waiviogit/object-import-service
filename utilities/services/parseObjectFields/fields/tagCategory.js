@@ -24,9 +24,12 @@ const getTagsFromDescription = async (object, allFields) => {
   };
 
   const category = tagCategories[object.object_type] || tagCategories.default;
+  const categoryName = supposedUpdatesTranslate[category][object.locale]
+      || supposedUpdatesTranslate[category]['en-US'];
+
   const preCreated = _.find(
     allFields,
-    (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === category,
+    (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === categoryName,
   );
   if (!preCreated) {
     fields.push(
@@ -34,7 +37,7 @@ const getTagsFromDescription = async (object, allFields) => {
         fieldName: OBJECT_FIELDS.TAG_CATEGORY,
         locale: object.locale,
         user: object.user,
-        body: category,
+        body: categoryName,
         id: uuid.v4(),
       }),
     );
@@ -46,7 +49,7 @@ const getTagsFromDescription = async (object, allFields) => {
   for (const tag of result) {
     const tagCategory = _.find(
       [...allFields, ...fields],
-      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === category,
+      (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === categoryName,
     );
     const sameTag = _.find(
       allFields,
@@ -60,7 +63,7 @@ const getTagsFromDescription = async (object, allFields) => {
       locale: object.locale,
       user: object.user,
       body: tag,
-      tagCategory: category,
+      tagCategory: categoryName,
       id: tagCategory.id,
     }));
   }
