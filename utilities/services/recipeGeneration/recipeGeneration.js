@@ -21,7 +21,7 @@ The response format should be a json object according to the following scheme:
 }
 
 where: 
-name - of recipe without changes
+name - name of recipe 
 fieldDescription - make description of a recipe, don't write recipe itself
 categories - list of categories to which this recipe can be assigned min 5 max 10 items
 fieldCalories - total calories in recipe in calories
@@ -38,7 +38,7 @@ example:
     "fieldBudget": "$",
     "fieldRecipeIngredients": ["2 eggs", "¼ teaspoon water", "1 teaspoon olive oil", "1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "kosher salt and freshly ground black pepper to taste", "1 pinch cayenne pepper"],
 }
-fill all info in ${language} language
+value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
 `;
 
@@ -52,7 +52,7 @@ const generateRecipe = async (name, locale) => {
     userPrompt: name,
   });
   if (error) return null;
-  return jsonHelper.parseJson(result.replace(/```/gm, '').replace('json', ''), null);
+  return jsonHelper.parseJson(result.replace(/```/gm, '').replace('json', '').replace('""', '"'), null);
 };
 
 const generateRecipeImage = async ({ name, description, recipeIngredients }) => {
