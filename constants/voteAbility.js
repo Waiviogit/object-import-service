@@ -49,6 +49,7 @@ exports.WHITE_LIST = [
   'luxita',
   'rehabhive',
   'recipes.curator',
+  'sofiag',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
