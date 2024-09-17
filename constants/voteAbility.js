@@ -50,6 +50,7 @@ exports.WHITE_LIST = [
   'rehabhive',
   'recipes.curator',
   'sofiag',
+  'missbitcoinshop',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
