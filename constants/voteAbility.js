@@ -51,6 +51,7 @@ exports.WHITE_LIST = [
   'recipes.curator',
   'sofiag',
   'missbitcoinshop',
+  'waivio_diora-cherry',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
