@@ -52,6 +52,7 @@ exports.WHITE_LIST = [
   'sofiag',
   'missbitcoinshop',
   'waivio_diora-cherry',
+  'waivio_hivecooking',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
