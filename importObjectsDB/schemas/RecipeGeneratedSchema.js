@@ -24,6 +24,7 @@ const RecipeGeneratedSchema = new Schema({
   primaryImageURLs: { type: [String] },
   listAssociations: { type: [String] },
   waivio_product_ids: { type: [productIdSchema] },
+  waivio_tags: { type: [productIdSchema] },
 }, { timestamps: true, versionKey: false });
 
 RecipeGeneratedSchema.index({ importId: 1, completed: 1, failed: 1 });
