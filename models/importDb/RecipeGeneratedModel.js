@@ -120,6 +120,7 @@ const getCompleted = async (importId) => {
       primaryImageURLs: 1,
       waivio_product_ids: 1,
       listAssociations: 1,
+      waivio_tags: 1,
     },
   });
 
