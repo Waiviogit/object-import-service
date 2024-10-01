@@ -63,7 +63,7 @@ const generateRecipe = async (name, locale) => {
   if (error) return null;
   const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
   if (!formatedResponse) return null;
-  if (formatedResponse.description) formatedResponse.description += GPT_CRAFTED;
+  if (formatedResponse.fieldDescription) formatedResponse.fieldDescription += GPT_CRAFTED;
 
   return formatedResponse;
 };
