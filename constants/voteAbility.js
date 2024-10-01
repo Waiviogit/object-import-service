@@ -53,6 +53,7 @@ exports.WHITE_LIST = [
   'missbitcoinshop',
   'waivio_diora-cherry',
   'waivio_hivecooking',
+  'zapweb3',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
