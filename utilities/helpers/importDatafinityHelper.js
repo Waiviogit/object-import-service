@@ -260,10 +260,19 @@ const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFi
   .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS_AUTHORITY), _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
 
 const validateSameFields = ({ fieldData, wobject }) => {
+  const fieldNamesSet = new Set(wobject.fields.map((f) => f.name));
+  const fieldExistsInSet = (fieldName) => fieldNamesSet.has(fieldName);
+
   const validation = {
+    /** ------------------Validate fields exist ------------------------------------------*/
+    [OBJECT_FIELDS.AVATAR]: () => fieldExistsInSet(OBJECT_FIELDS.AVATAR),
+    [OBJECT_FIELDS.RECIPE_INGREDIENTS]: () => fieldExistsInSet(OBJECT_FIELDS.RECIPE_INGREDIENTS),
+    [OBJECT_FIELDS.CALORIES]: () => fieldExistsInSet(OBJECT_FIELDS.CALORIES),
+    [OBJECT_FIELDS.BUDGET]: () => fieldExistsInSet(OBJECT_FIELDS.BUDGET),
+    [OBJECT_FIELDS.COOKING_TIME]: () => fieldExistsInSet(OBJECT_FIELDS.COOKING_TIME),
+    /**---------------------------------------------------------------------------------*/
     [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
     [OBJECT_FIELDS.COMPANY_ID]: validateSameFieldsProductId,
-    [OBJECT_FIELDS.AVATAR]: () => !!wobject.fields.find((f) => f.name === OBJECT_FIELDS.AVATAR),
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
     [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
     [VIRTUAL_FIELDS.ADD_TO_LIST]: () => true,
