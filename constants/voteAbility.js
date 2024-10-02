@@ -54,6 +54,7 @@ exports.WHITE_LIST = [
   'waivio_diora-cherry',
   'waivio_hivecooking',
   'zapweb3',
+  'dailydining',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
