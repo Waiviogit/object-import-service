@@ -43,7 +43,7 @@ value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
 `;
 
-const imagePrompt = ({ name, recipeIngredients, description }) => `Make photo-realistic image for a recipe "${name}", ${description}. The image should depict the main dish of the recipe in an appetizing, realistic and inviting way . Include some of ingredients from list: ${recipeIngredients.join(',')}, arranged artistically around the dish to enhance the visual appeal. The background should be white. Do not add text to image`;
+const imagePrompt = ({ name }) => `use your knowledge of the following dish and create a product photo of "${name}" In a dish appropriate for this food on a solid white background`;
 
 const formatResponseToValidJson = (string = '') => string
   .replace(/```/gm, '')
@@ -68,8 +68,8 @@ const generateRecipe = async (name, locale) => {
   return formatedResponse;
 };
 
-const generateRecipeImage = async ({ name, description, recipeIngredients }) => {
-  const prompt = imagePrompt({ name, recipeIngredients, description });
+const generateRecipeImage = async ({ name }) => {
+  const prompt = imagePrompt({ name });
 
   const { result, error } = await gptCreateImage({
     prompt,
@@ -149,11 +149,7 @@ const generateRecipeAndImage = async ({ importId }) => {
       continue;
     }
 
-    const image = await generateRecipeImage({
-      name: recipeDoc.name,
-      description: recipeDoc.fieldDescription,
-      recipeIngredients: recipeDoc.fieldRecipeIngredients,
-    });
+    const image = await generateRecipeImage({ name: recipeDoc.name });
     if (!image) {
       await updateErrorCount(recipeDoc);
       continue;
