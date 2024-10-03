@@ -126,6 +126,11 @@ const getImportObject = async ({
   });
 
   if (!datafinityObject && importId) {
+    console.log(`finishImport ___________ 
+    importId: ${importId} 
+    authorPermlink: ${authorPermlink} 
+    user: ${user} 
+    createdId: ${createdId}`);
     await finishImport({ importId, user });
     await sendUpdateImportForUser({ account: user });
     return;
