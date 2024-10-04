@@ -9,7 +9,8 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "node --max-old-space-size=500 ./bin/service.js"
+    "start": "node --max-old-space-size=500 ./bin/service.js",
+    "getQueueAttributes": "node ./utilities/redis/rsmq/getQueueAttributes.js"
   },
   "dependencies": {
     "@hiveio/dhive": "^1.2.3",
