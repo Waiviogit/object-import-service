@@ -145,7 +145,7 @@ const getImportObject = async ({
     return;
   }
 
-  if (authorPermlink) {
+  if (authorPermlink && datafinityObject) {
     await updateImportedObjectsList({
       datafinityObject, user, authorPermlink,
     });
