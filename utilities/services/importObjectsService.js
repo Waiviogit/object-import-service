@@ -57,6 +57,7 @@ const addWobjectsToQueue = async ({ wobjects = [], immediately } = {}) => {
 };
 
 const runImportWobjectsQueue = async () => {
+  console.log('start runImportWobjectsQueue');
   const { result, error: createError } = await redisQueue.createQueue({
     client: importRsmqClient,
     qname: IMPORT_WOBJECTS_QNAME,
@@ -73,6 +74,7 @@ const runImportWobjectsQueue = async () => {
 
       if (receiveError) {
         if (receiveError.message === 'No messages') {
+          console.log('No messages in queue');
           await new Promise((r) => setTimeout(r, 1000));
           continue;
         } else {
