@@ -74,7 +74,6 @@ const runImportWobjectsQueue = async () => {
 
       if (receiveError) {
         if (receiveError.message === 'No messages') {
-          console.log('No messages in queue');
           await new Promise((r) => setTimeout(r, 1000));
           continue;
         } else {

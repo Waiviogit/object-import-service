@@ -45,7 +45,6 @@ const receiveMessage = async ({ client, qname = 'queue' }) => {
       return { error };
     }
   } else {
-    console.log('receiveMessage ERR', JSON.stringify(resp, null, 2));
     return { error: { message: 'No messages' } };
   }
 };
