@@ -118,6 +118,10 @@ const getImportObject = async ({
     if (!activeStatus) return;
   }
 
+  /** race condition somewhere need to check importId without params
+   * to finish import on purpose
+   * */
+
   const { datafinityObject, error } = await DatafinityObject.getOne({
     user,
     ...(importId && { importId }),
@@ -125,7 +129,12 @@ const getImportObject = async ({
     ...(createdId && { _id: createdId }),
   });
 
-  if (!datafinityObject && importId) {
+  const { datafinityObject: lastImportObject } = await DatafinityObject.getOne({
+    user,
+    importId,
+  });
+
+  if (!lastImportObject && importId) {
     console.log(`finishImport ___________ 
     importId: ${importId} 
     authorPermlink: ${authorPermlink} 
@@ -143,7 +152,11 @@ const getImportObject = async ({
   }
 
   if (error || !datafinityObject) {
-    console.error(error.message);
+    console.error(error?.message ?? `datafinityObject not found 
+    importId: ${importId} 
+    authorPermlink: ${authorPermlink} 
+    user: ${user} 
+    createdId: ${createdId}`);
     return;
   }
   // need to check twice
