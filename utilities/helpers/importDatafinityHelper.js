@@ -256,6 +256,18 @@ const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
 const validateSameFieldDefault = ({ fieldData, foundedFields }) => !!foundedFields
   .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS), _.pick(fieldData, SET_UNIQ_FIELDS)));
 
+const validateSameFieldsDepartments = ({ fieldData, foundedFields }) => {
+  const existSame = validateSameFieldDefault({ fieldData, foundedFields });
+  if (existSame) return true;
+
+  const departmentsCount = _.filter(
+    foundedFields,
+    (el) => el.name === OBJECT_FIELDS.DEPARTMENTS,
+  )?.length ?? 0;
+
+  return departmentsCount >= 0;
+};
+
 const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFields
   .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS_AUTHORITY), _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
 
@@ -275,6 +287,7 @@ const validateSameFields = ({ fieldData, wobject }) => {
     [OBJECT_FIELDS.COMPANY_ID]: validateSameFieldsProductId,
     [OBJECT_FIELDS.DESCRIPTION]: validateSameFieldDescription,
     [OBJECT_FIELDS.AUTHORITY]: validateSameFieldAuthority,
+    [OBJECT_FIELDS.DEPARTMENTS]: validateSameFieldsDepartments,
     [VIRTUAL_FIELDS.ADD_TO_LIST]: () => true,
     default: validateSameFieldDefault,
   };
