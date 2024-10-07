@@ -265,7 +265,7 @@ const validateSameFieldsDepartments = ({ fieldData, foundedFields }) => {
     (el) => el.name === OBJECT_FIELDS.DEPARTMENTS,
   )?.length ?? 0;
 
-  return departmentsCount >= 0;
+  return departmentsCount >= 10;
 };
 
 const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFields
