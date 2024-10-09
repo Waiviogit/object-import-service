@@ -27,6 +27,9 @@ const { redisGetter, redisSetter } = require('../../redis');
 const { makeAuthorDescription } = require('../gptService');
 const { sendUpdateImportForUser } = require('../socketClient');
 const { validateImportToRun } = require('../../../validators/accountValidator');
+const { getObject } = require('../../waivioApi');
+const { ARRAY_FIELDS } = require('../../../constants/wobjectsData');
+const { voteForField } = require('../../objectBotApi');
 
 const getFieldsCount = (fields = []) => {
   const realFields = fields.filter((el) => !Object.values(VIRTUAL_FIELDS).includes(el.name));
@@ -404,15 +407,58 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   return true;
 };
 
+const getFieldsToVote = async ({ wobject, field, user }) => {
+  /** if field created by user or already has user's vote skip it */
+  const fieldsToVote = _.filter(wobject.fields, (el) => {
+    const sameName = el.name === field.name;
+    const creatorNotUser = el.creator !== user;
+    const userNotHasPositiveVote = !_.find(
+      el.active_votes,
+      (v) => v.voter === user && v.weight > 0,
+    );
+
+    return sameName && creatorNotUser && userNotHasPositiveVote;
+  });
+  if (!fieldsToVote?.length) return [];
+
+  /** we need vote all fields if it is array fields */
+  if (ARRAY_FIELDS.includes(field.name)) return fieldsToVote;
+  if (fieldsToVote?.length === 1) return fieldsToVote;
+
+  const { result: originalProcessed } = await getObject({
+    authorPermlink: wobject.author_permlink,
+  });
+
+  /** for single fields full object on processed is only news feed we don't have it on import */
+  const fieldToVote = _.find(fieldsToVote, (f) => f.body === originalProcessed[field.name]);
+
+  return _.compact([fieldToVote]);
+};
+const voteForFields = async ({ fieldsToVote, user, wobject }) => {
+  for (const field of fieldsToVote) {
+    await voteForField.send({
+      voter: user,
+      authorPermlink: wobject.author_permlink,
+      author: field.author,
+      permlink: field.permlink,
+      fieldType: field.name,
+      shouldWhiteListVote: true,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+  }
+};
+
 const processField = async ({ datafinityObject, wobject, user }) => {
   const exit = await checkFieldConnectedObject({ datafinityObject });
   if (exit) return { result: false };
   await specialFieldsHelper({ datafinityObject, wobject });
-  const sameField = validateSameFields({ fieldData: datafinityObject.fields[0], wobject });
+  const field = datafinityObject.fields[0];
+
+  const sameField = validateSameFields({ fieldData: field, wobject });
 
   if (!sameField) {
     await addField({
-      field: datafinityObject.fields[0],
+      field,
       wobject,
       importingAccount: user,
       importId: datafinityObject.importId,
@@ -427,7 +473,12 @@ const processField = async ({ datafinityObject, wobject, user }) => {
     });
     await new Promise((resolve) => setTimeout(resolve, 4000));
   }
-  if (sameField) console.error(`same field: ${datafinityObject.fields[0]?.name}`);
+
+  if (sameField) {
+    console.error(`same field: ${datafinityObject.fields[0]?.name}`);
+    const fieldsToVote = await getFieldsToVote({ wobject, user, field });
+    if (fieldsToVote.length) await voteForFields({ fieldsToVote, user, wobject });
+  }
 
   const { result, error } = await DatafinityObject.findOneAndModify(
     { _id: datafinityObject._id },
