@@ -8,7 +8,7 @@ const ThreadStatusSchema = new Schema({
   user: { type: String, required: true },
   importId: { type: String, required: true, index: true },
   status: {
-    type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.ACTIVE,
+    type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.PENDING,
   },
   locale: { type: String },
   groupPermlink: { type: String, required: true },

@@ -16,5 +16,6 @@ module.exports = {
     RecipeGenerationStatus: require('./schemas/RecipeGenerationStatusSchema'),
     RecipeGenerated: require('./schemas/RecipeGeneratedSchema'),
     ThreadStatus: require('./schemas/ThreadStatusSchema'),
+    ThreadMessage: require('./schemas/ThreadMessageSchema'),
   },
 };
