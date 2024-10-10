@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const uuid = require('uuid');
+
 const { WHITE_LIST, VOTE_COST } = require('../../constants/voteAbility');
 const {
   OBJECT_TYPES, PARENT_ASIN_FIELDS, OBJECT_FIELDS, VIRTUAL_FIELDS,
@@ -12,6 +12,7 @@ const { Wobj, DatafinityObject } = require('../../models');
 const { AMAZON_ASINS } = require('../../constants/appData');
 const { broadcastJson } = require('../hiveApi/broadcastUtil');
 const { GPT_CRAFTED } = require('../../constants/openai');
+const { createUUID } = require('./cryptoHelper');
 
 const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
 const SET_UNIQ_FIELDS_AUTHORITY = ['name', 'body', 'locale', 'creator'];
@@ -178,7 +179,7 @@ const specialFieldsHelper = async ({ datafinityObject, wobject }) => {
       field.id = existingCategory.id;
       return;
     }
-    const id = uuid.v4();
+    const id = createUUID();
     await addField({
       field: formField({
         fieldName: OBJECT_FIELDS.TAG_CATEGORY,

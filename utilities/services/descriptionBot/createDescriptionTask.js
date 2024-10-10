@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const {
   Wobj, DescriptionObjectModel, DescriptionStatusModel, App,
 } = require('../../../models');
@@ -8,6 +7,7 @@ const waivioApi = require('../../waivioApi');
 const rewriteDescription = require('./rewriteDescription');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 const { getAllObjectsInListForImport } = require('../../helpers/wObjectHelper');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const processAllListItems = async ({
   authorPermlink, scanEmbedded, user, importId,
@@ -52,7 +52,7 @@ const processAllListItems = async ({
 const createDescriptionList = async ({
   authorPermlink, scanEmbedded, user,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result: task } = await DescriptionStatusModel.create({
     user,
@@ -126,7 +126,7 @@ const fetchAllObjectFromMap = async ({
 };
 
 const createDescriptionMap = async ({ user, authorPermlink, object }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result: task } = await DescriptionStatusModel.create({
     user,

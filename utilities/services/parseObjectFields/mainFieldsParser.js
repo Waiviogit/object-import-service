@@ -1,11 +1,11 @@
 const _ = require('lodash');
-const uuid = require('uuid');
 const { ObjectType } = require('../../../models');
 const { genRandomString } = require('../../helpers/permlinkGenerator');
 const supposedUpdatesTranslate = require('../../../translations/supposedUpdates');
 const indexHandler = require('./indexHandler');
 const { formField } = require('../../helpers/formFieldHelper');
 const { FIELDS_BY_OBJECT_TYPE } = require('../../../constants/objectTypes');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const addSupposedUpdates = async (wobject) => {
   if (!_.get(wobject, 'object_type')) return;
@@ -41,7 +41,7 @@ const addSupposedUpdates = async (wobject) => {
         creator: user,
         locale,
       };
-      if (update.id_path) field[update.id_path] = uuid.v4();
+      if (update.id_path) field[update.id_path] = createUUID();
       fields.push(field);
     });
   });

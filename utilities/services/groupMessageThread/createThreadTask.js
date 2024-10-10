@@ -1,6 +1,8 @@
-const { Wobj } = require('../../../models');
-const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
+const { Wobj, ThreadStatusModel } = require('../../../models');
+const { NotFoundError } = require('../../../constants/httpErrors');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
+const { getObject } = require('../../waivioApi');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const checkObjects = async ({
   groupPermlink,
@@ -18,22 +20,41 @@ const checkObjects = async ({
   if (!page) return NotFoundError('page object not found');
 };
 
+const processGroup = async ({ importId }) => {
+
+};
+
 const createThreadTask = async ({
   groupPermlink,
   pagePermlink,
   limit,
   skip,
-  userName,
+  user,
   avoidRepetition,
+  locale,
 }) => {
-// check objects
   const objectsError = await checkObjects({
     groupPermlink,
     pagePermlink,
   });
   if (objectsError) return { error: objectsError };
 
-  // pageContent
+  const { result: processedPage } = await getObject({ authorPermlink: pagePermlink, locale });
+  const pageContent = processedPage?.pageContent;
+  if (!pageContent) return NotFoundError('page content not found');
+
+  const importId = createUUID();
+  const { result } = await ThreadStatusModel.create({
+    importId,
+    user,
+    avoidRepetition,
+    skip,
+    limit,
+    locale,
+    pageContent,
+  });
+
+  return { result };
 };
 
 module.exports = createThreadTask;

@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const {
   Wobj, AuthorityStatusModel, AuthorityObjectModel, App,
 } = require('../../../models');
@@ -8,6 +7,7 @@ const { parseJson } = require('../../helpers/jsonHelper');
 const claimProcess = require('./claimProcess');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 const { getAllObjectsInList } = require('../../helpers/wObjectHelper');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const getListObjectsFromArr = async ({ authorPermlinks, scanEmbedded }) => {
   const result = [];
@@ -59,7 +59,7 @@ const getListItemsFromMenu = ({ fields }) => fields
 const claimList = async ({
   user, authorPermlink, authority, scanEmbedded, object,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const authorPermlinks = [authorPermlink];
 
@@ -84,7 +84,7 @@ const claimList = async ({
 const claimBusiness = async ({
   user, authorPermlink, authority, scanEmbedded, object,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
   const authorPermlinks = getListItemsFromMenu({ fields: object.fields });
 
   const { result, error: statusError } = await AuthorityStatusModel.create({
@@ -154,7 +154,7 @@ const fetchAllObjectFromMap = async ({ importId, user, authorPermlink }) => {
 const claimMap = async ({
   user, authorPermlink, authority, scanEmbedded, object,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result, error: statusError } = await AuthorityStatusModel.create({
     importId,

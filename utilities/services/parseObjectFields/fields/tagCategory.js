@@ -1,10 +1,10 @@
 const _ = require('lodash');
-const uuid = require('uuid');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const supposedUpdatesTranslate = require('../../../../translations/supposedUpdates');
 const { translate } = require('../../../helpers/translateHelper');
 const { gptTagsFromDescription } = require('../../gptService');
+const { createUUID } = require('../../../helpers/cryptoHelper');
 
 const getTagsFromDescription = async (object, allFields) => {
   if (!object.useGPT) return;
@@ -38,7 +38,7 @@ const getTagsFromDescription = async (object, allFields) => {
         locale: object.locale,
         user: object.user,
         body: categoryName,
-        id: uuid.v4(),
+        id: createUUID(),
       }),
     );
   }
@@ -144,7 +144,7 @@ const createWaivioTags = async (object, allFields) => {
           locale: object.locale,
           user: object.user,
           body: category,
-          id: uuid.v4(),
+          id: createUUID(),
         }),
       );
     }
