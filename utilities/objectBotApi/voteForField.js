@@ -9,6 +9,7 @@ const send = async ({
   voter,
   authorPermlink,
   fieldType,
+  shouldWhiteListVote,
 }) => {
   try {
     const result = await axios.post(
@@ -19,6 +20,7 @@ const send = async ({
         voter,
         authorPermlink,
         fieldType,
+        shouldWhiteListVote,
       },
       {
         headers: {
