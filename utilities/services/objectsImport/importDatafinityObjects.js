@@ -490,7 +490,7 @@ const voteForFields = async ({ fieldsToVote, user, wobject }) => {
       fieldType: field.name,
       shouldWhiteListVote: true,
     });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await setTimeout(4000);
   }
 };
 
@@ -517,7 +517,7 @@ const processField = async ({ datafinityObject, wobject, user }) => {
         },
       },
     });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await setTimeout(4000);
   }
 
   if (sameField) {
