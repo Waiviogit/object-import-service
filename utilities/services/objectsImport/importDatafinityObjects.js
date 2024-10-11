@@ -418,7 +418,12 @@ const getFieldsToVote = async ({ wobject, user }) => {
       el.active_votes,
       (v) => v.voter === user && v.weight > 0,
     );
-    if (votedSingleField) acc.push(el.name);
+    if (votedSingleField) {
+      acc.push(el.name);
+      return acc;
+    }
+
+    if (el.creator === user) acc.push(el.name);
     return acc;
   }, []);
 
