@@ -4,7 +4,7 @@ const { checkVotePower, getMinAmountInWaiv } = require('../utilities/helpers/che
 const { getAccount, getAccountRC } = require('../utilities/hiveApi/userUtil');
 const { getVotingPowers } = require('../utilities/hiveEngine/hiveEngineOperations');
 const {
-  IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY,
+  IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY, MIN_RC_POSTING_DEFAULT,
 } = require('../constants/appData');
 const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
@@ -105,10 +105,10 @@ const guestVotePowerValidation = async ({ account, type }) => {
   return BigNumber(votingPower).gt(power);
 };
 
-const validateRc = async ({ account }) => {
+const validateRc = async ({ account, allowedRc = 1000 }) => {
   const { percentage, error } = await getAccountRC(account);
   if (error) return false;
-  return percentage > 1000;
+  return percentage > allowedRc;
 };
 
 const getVotingPower = async ({ account, amount }) => {
@@ -221,7 +221,42 @@ const validateImportToRun = async ({
   return true;
 };
 
+const getTtlPosting = (rc, minRc) => {
+  const diff = (minRc - rc) || 1;
+  return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
+};
+
+const validatePostingToRun = async ({ user, type, importId }) => {
+  const rcKeys = {
+    [IMPORT_TYPES.THREADS]: IMPORT_REDIS_KEYS.MIN_RC_THREADS,
+  };
+
+  const rcKey = rcKeys[type];
+  if (!rcKey) return;
+  const key = `${rcKey}:${user}`;
+
+  const allowedRC = await redisGetter.get({ key });
+  const minRc = allowedRC || MIN_RC_POSTING_DEFAULT;
+
+  const { percentage } = await getAccountRC(user);
+  const validRc = percentage > minRc;
+
+  if (validRc) return true;
+  const typeToTTL = {
+    [IMPORT_TYPES.THREADS]: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+  };
+
+  const ttlKey = typeToTTL[type];
+  if (!ttlKey) return;
+
+  const ttl = getTtlPosting(percentage, minRc);
+
+  await redisSetter.set({ key: ttlKey, value: '' });
+  await redisSetter.expire({ key: ttlKey, ttl });
+};
+
 module.exports = {
   importAccountValidator,
   validateImportToRun,
+  validatePostingToRun,
 };

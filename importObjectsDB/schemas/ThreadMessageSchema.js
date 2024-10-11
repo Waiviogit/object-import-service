@@ -7,6 +7,7 @@ const ThreadMessageSchema = new Schema({
   importId: { type: String, required: true },
   pagePermlink: { type: String, required: true },
   recipient: { type: String, required: true },
+  alias: { type: String, required: true },
   processed: { type: Boolean, default: false },
 }, { timestamps: false, versionKey: false });
 

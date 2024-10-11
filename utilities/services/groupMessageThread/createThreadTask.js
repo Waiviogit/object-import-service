@@ -22,6 +22,15 @@ const checkObjects = async ({
   if (!page) return NotFoundError('page object not found');
 };
 
+const getStatus = async (user) => {
+  const { result } = await ThreadStatusModel.findOne({
+    filter: { user, status: { $in: [IMPORT_STATUS.WAITING_RECOVER, IMPORT_STATUS.ACTIVE] } },
+    projection: { _id: 1 },
+  });
+  if (result) return IMPORT_STATUS.PENDING;
+  return IMPORT_STATUS.ACTIVE;
+};
+
 const processGroup = async ({ importId, user }) => {
   const userImport = await ThreadStatusModel.getUserImport({ importId, user });
   if (!userImport) return;
@@ -60,18 +69,18 @@ const processGroup = async ({ importId, user }) => {
       pagePermlink,
     }));
 
-  // TODO check if any others import
+  const status = await getStatus(user);
 
   await ThreadMessageModel.insertMany(dataToWrite);
   await ThreadStatusModel.updateOne({
     filter: { importId },
     update: {
       usersTotal: dataToWrite.length,
-      status: IMPORT_STATUS.ACTIVE,
+      status,
     },
   });
 
-  threadMessage({ importId, user });
+  if (status === IMPORT_STATUS.ACTIVE) threadMessage({ importId, user });
 };
 
 const createThreadTask = async ({

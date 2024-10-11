@@ -69,6 +69,11 @@ const findOneToProcess = async ({ importId }) => {
   return result;
 };
 
+const updateImportMessage = async ({ importId, recipient }) => updateOne({
+  filter: { importId, recipient },
+  update: { processed: true },
+});
+
 module.exports = {
   findOne,
   insertMany,
@@ -77,4 +82,5 @@ module.exports = {
   find,
   countDocuments,
   findOneToProcess,
+  updateImportMessage,
 };

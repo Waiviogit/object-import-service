@@ -1,3 +1,4 @@
+const { IMPORT_STATUS } = require('../../constants/appData');
 const { ThreadStatus } = require('../../importObjectsDB').models;
 
 const create = async (doc) => {
@@ -62,6 +63,26 @@ const getUserImport = async ({ user, importId }) => {
   return result;
 };
 
+const getPendingImport = async ({ user }) => {
+  const { result } = await findOne({
+    filter: { user, status: IMPORT_STATUS.PENDING },
+  });
+  if (!result) return;
+  await updateOne({
+    filter: {
+      _id: result._id,
+    },
+    update: { status: IMPORT_STATUS.ACTIVE },
+  });
+
+  return result;
+};
+
+const finishImport = async ({ importId }) => updateOne({
+  filter: { importId },
+  update: { finishedAt: new Date(), status: IMPORT_STATUS.FINISHED },
+});
+
 module.exports = {
   create,
   updateOne,
@@ -70,4 +91,6 @@ module.exports = {
   find,
   findOneAndUpdate,
   getUserImport,
+  getPendingImport,
+  finishImport,
 };
