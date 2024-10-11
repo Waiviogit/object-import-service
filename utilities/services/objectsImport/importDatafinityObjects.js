@@ -412,6 +412,16 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
 
 const getFieldsToVote = async ({ wobject, user }) => {
   /** if field created by user or already has user's vote skip it */
+  const singleFieldsNotVote = _.reduce(wobject.fields, (acc, el) => {
+    if (ARRAY_FIELDS.includes(el.name)) return acc;
+    const votedSingleField = _.find(
+      el.active_votes,
+      (v) => v.voter === user && v.weight > 0,
+    );
+    if (votedSingleField) acc.push(el.name);
+    return acc;
+  }, []);
+
   const filteredFields = _.filter(wobject.fields, (el) => {
     const creatorNotUser = el.creator !== user;
     const userNotHasPositiveVote = !_.find(
@@ -431,10 +441,11 @@ const getFieldsToVote = async ({ wobject, user }) => {
   const fieldsToVote = [];
 
   for (const field of filteredFields) {
-    if (ARRAY_FIELDS.includes(field.name)) {
-      if (field.name === OBJECT_FIELDS.AUTHORITY) continue;
-      if (field?.weight < 0) continue;
+    if (singleFieldsNotVote.includes(field.name)) continue;
+    if (field.name === OBJECT_FIELDS.AUTHORITY) continue;
 
+    if (ARRAY_FIELDS.includes(field.name)) {
+      if (field?.weight < 0) continue;
       fieldsToVote.push(field);
       continue;
     }
