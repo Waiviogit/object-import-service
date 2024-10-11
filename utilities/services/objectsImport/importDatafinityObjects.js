@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const { setTimeout } = require('node:timers/promises');
 const _ = require('lodash');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
@@ -412,7 +413,15 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
 
 const getFieldsToVote = async ({ wobject, user }) => {
   /** if field created by user or already has user's vote skip it */
-  const singleFieldsNotVote = _.reduce(wobject.fields, (acc, el) => {
+
+  // to wait all fields to process
+  await setTimeout(10000);
+
+  const { wobject: object } = await Wobj.getOne({
+    author_permlink: wobject.author_permlink,
+  });
+
+  const singleFieldsNotVote = _.reduce(object.fields, (acc, el) => {
     if (ARRAY_FIELDS.includes(el.name)) return acc;
     const votedSingleField = _.find(
       el.active_votes,
@@ -427,7 +436,7 @@ const getFieldsToVote = async ({ wobject, user }) => {
     return acc;
   }, []);
 
-  const filteredFields = _.filter(wobject.fields, (el) => {
+  const filteredFields = _.filter(object.fields, (el) => {
     const creatorNotUser = el.creator !== user;
     const userNotHasPositiveVote = !_.find(
       el.active_votes,
@@ -440,7 +449,7 @@ const getFieldsToVote = async ({ wobject, user }) => {
   if (!filteredFields?.length) return [];
 
   const { result: originalProcessed } = await getObject({
-    authorPermlink: wobject.author_permlink,
+    authorPermlink: object.author_permlink,
   });
 
   const fieldsToVote = [];
