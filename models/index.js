@@ -20,4 +20,6 @@ module.exports = {
   TagsObjectModel: require('./importDb/TagsObjectModel'),
   RecipeGeneratedModel: require('./importDb/RecipeGeneratedModel'),
   RecipeGenerationStatusModel: require('./importDb/RecipeGenerationStatusModel'),
+  ThreadStatusModel: require('./importDb/ThreadStatusModel'),
+  ThreadMessageModel: require('./importDb/ThreadMessageModel'),
 };

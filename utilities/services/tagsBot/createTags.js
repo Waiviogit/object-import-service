@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const uuid = require('uuid');
 const {
   TagsStatusModel, TagsObjectModel, Wobj,
 } = require('../../../models');
@@ -12,6 +11,7 @@ const { formField } = require('../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../constants/objectTypes');
 const { gptTagsFromDescription } = require('../gptService');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const categoriesByType = {
   product: 'Pros',
@@ -64,7 +64,7 @@ const prepareFields = async ({
       body: categoryName,
       user,
       locale,
-      id: uuid.v4(),
+      id: createUUID(),
     });
     fields.push(category);
   }

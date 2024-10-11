@@ -4,4 +4,5 @@ module.exports = {
   getObjectsFromMap: require('./getObjectsFromMap'),
   getListItemDepartments: require('./getListItemDepartments'),
   getObject: require('./getObject'),
+  getObjectGroup: require('./getObjectGroup'),
 };

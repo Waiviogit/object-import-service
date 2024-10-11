@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
 const {
@@ -8,6 +7,7 @@ const { IMPORT_STATUS } = require('../../../constants/appData');
 const waivioApi = require('../../waivioApi');
 const { getAllObjectsInListForImport } = require('../../helpers/wObjectHelper');
 const createTags = require('./createTags');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const fetchAllObjectFromMap = async ({
   importId, user, authorPermlink, object,
@@ -65,7 +65,7 @@ const fetchAllObjectFromMap = async ({
 const createTagsMap = async ({
   user, authorPermlink, object, locale,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result: task } = await TagsStatusModel.create({
     user,
@@ -128,7 +128,7 @@ const processAllListItems = async ({
 const createTagsList = async ({
   authorPermlink, scanEmbedded, user, locale,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result: task } = await TagsStatusModel.create({
     user,

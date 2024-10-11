@@ -1,4 +1,3 @@
-const crypto = require('node:crypto');
 const { createRecipeObjectsForImport } = require('../recipeGeneration/recipeGeneration');
 const { addDatafinityDataToProducts } = require('../../datafinitiApi/operations');
 const { ImportStatusModel } = require('../../../models');
@@ -6,6 +5,7 @@ const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData
 const { redisSetter } = require('../../redis');
 const { saveObjects } = require('./importDatafinityObjects');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const startSaveObjects = ({ objectType }) => objectType !== OBJECT_TYPES.RECIPE;
 
@@ -29,7 +29,7 @@ const importObjects = async ({
   addDatafinityData,
   objects,
 }) => {
-  const importId = crypto.randomUUID();
+  const importId = createUUID();
   if (addDatafinityData) await addDatafinityDataToProducts(objects);
 
   await ImportStatusModel.create({

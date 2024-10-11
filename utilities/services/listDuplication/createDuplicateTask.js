@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const {
   Wobj, DuplicateListStatusModel, DuplicateListObjectModel, App,
 } = require('../../../models');
@@ -7,6 +6,7 @@ const { NotFoundError, NotAcceptableError } = require('../../../constants/httpEr
 const duplicateProcess = require('./duplicateProcess');
 const { getAllObjectsInListForImport } = require('../../helpers/wObjectHelper');
 const { IMPORT_STATUS } = require('../../../constants/appData');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const getListItems = async ({
   user, authorPermlink, scanEmbedded, importId,
@@ -60,7 +60,7 @@ const getListItems = async ({
 const createDuplicateTask = async ({
   user, authorPermlink, scanEmbedded,
 }) => {
-  const importId = uuid.v4();
+  const importId = createUUID();
 
   const { result: object } = await Wobj.findOne({
     filter: { author_permlink: authorPermlink },

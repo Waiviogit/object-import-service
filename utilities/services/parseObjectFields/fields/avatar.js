@@ -1,10 +1,10 @@
 const _ = require('lodash');
-const uuid = require('uuid');
 const axios = require('axios');
 const { IMAGE_SIZE } = require('../../../../constants/fileFormats');
 const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS } = require('../../../../constants/objectTypes');
 const { isProperResolution, loadImageByUrl } = require('../../../helpers/imageHelper');
+const { createUUID } = require('../../../helpers/cryptoHelper');
 
 const checkForDuplicates = async (urls = []) => {
   try {
@@ -128,7 +128,7 @@ const avatar = async (object) => {
         body: 'Photos',
         user: object.user,
         locale: object.locale,
-        id: uuid.v4(),
+        id: createUUID(),
       });
       fields.push(album);
     }
