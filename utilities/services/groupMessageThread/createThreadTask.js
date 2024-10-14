@@ -49,7 +49,9 @@ const processGroup = async ({ importId, user }) => {
       authorPermlink: groupPermlink,
     });
 
-    users.push(...result.map((el) => ({ recipient: el.name, alias: el.alias })));
+    const filterGuest = result.filter((el) => !el.name.includes('_'));
+
+    users.push(...filterGuest.map((el) => ({ recipient: el.name, alias: el.alias })));
 
     if (error) {
       await setTimeout(15000);
