@@ -34,7 +34,7 @@ const sendThread = async ({ author, body }) => {
     parent_author: post.author,
     parent_permlink: post.permlink,
     title: '',
-    json_metadata: JSON.stringify({ threadType: 'bulkMessage' }),
+    json_metadata: JSON.stringify({ bulkMessage: true }),
     key: process.env.IMPORT_BOT_KEY,
   });
 

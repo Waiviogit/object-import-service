@@ -1,3 +1,4 @@
+const { setTimeout } = require('node:timers/promises');
 const { Wobj, ThreadStatusModel, ThreadMessageModel } = require('../../../models');
 const { NotFoundError } = require('../../../constants/httpErrors');
 const { OBJECT_TYPES } = require('../../../constants/objectTypes');
@@ -48,10 +49,10 @@ const processGroup = async ({ importId, user }) => {
       authorPermlink: groupPermlink,
     });
 
-    users.push(...result.map((el) => el.name));
+    users.push(...result.map((el) => ({ recipient: el.name, alias: el.alias })));
 
     if (error) {
-      await new Promise((r) => setTimeout(r, 15000));
+      await setTimeout(15000);
       continue;
     }
 
@@ -63,11 +64,7 @@ const processGroup = async ({ importId, user }) => {
 
   const dataToWrite = users
     .slice(skip, skip + limit)
-    .map((el) => ({
-      importId,
-      recipient: el,
-      pagePermlink,
-    }));
+    .map((el) => ({ ...el, importId, pagePermlink }));
 
   const status = await getStatus(user);
 
