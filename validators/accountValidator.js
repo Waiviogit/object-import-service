@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const _ = require('lodash');
 const BigNumber = require('bignumber.js');
 const { checkVotePower, getMinAmountInWaiv } = require('../utilities/helpers/checkVotePower');
@@ -10,6 +11,9 @@ const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 const { guestMana } = require('../utilities/guestUser');
+
+// approximate value to calc need rewrite python lib
+const COMMENT_RC_COST = 3080000000;
 
 const isGuestAccount = (account = '') => account.includes('_');
 
@@ -226,33 +230,51 @@ const getTtlPosting = (rc, minRc) => {
   return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
 };
 
-const validatePostingToRun = async ({ user, type, importId }) => {
+const getValidRcComment = ({
+  percentage, current_mana, max_mana, minRc,
+}) => {
+  const currentMana = current_mana > max_mana ? max_mana : current_mana;
+  return percentage > minRc && currentMana > (COMMENT_RC_COST * 2);
+};
+
+const getAllowedRC = async ({ user, type }) => {
   const rcKeys = {
     [IMPORT_TYPES.THREADS]: IMPORT_REDIS_KEYS.MIN_RC_THREADS,
   };
 
   const rcKey = rcKeys[type];
-  if (!rcKey) return;
+  if (!rcKey) return MIN_RC_POSTING_DEFAULT;
   const key = `${rcKey}:${user}`;
 
   const allowedRC = await redisGetter.get({ key });
-  const minRc = allowedRC || MIN_RC_POSTING_DEFAULT;
+  return allowedRC || MIN_RC_POSTING_DEFAULT;
+};
 
-  const { percentage } = await getAccountRC(user);
-  const validRc = percentage > minRc;
-
-  if (validRc) return true;
+const savePostingTtl = async ({
+  user, type, importId, percentage, minRc,
+}) => {
   const typeToTTL = {
     [IMPORT_TYPES.THREADS]: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+    default: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
   };
-
-  const ttlKey = typeToTTL[type];
-  if (!ttlKey) return;
-
+  const ttlKey = typeToTTL[type] || typeToTTL.default;
   const ttl = getTtlPosting(percentage, minRc);
-
   await redisSetter.set({ key: ttlKey, value: '' });
   await redisSetter.expire({ key: ttlKey, ttl });
+};
+
+const validatePostingToRun = async ({ user, type, importId }) => {
+  const minRc = await getAllowedRC({ user, type });
+  const { percentage, current_mana, max_mana } = await getAccountRC(user);
+  const validRc = getValidRcComment({
+    percentage, current_mana, max_mana, minRc,
+  });
+  if (validRc) return true;
+
+  await savePostingTtl({
+    user, type, importId, percentage, minRc,
+  });
+  return false;
 };
 
 module.exports = {
