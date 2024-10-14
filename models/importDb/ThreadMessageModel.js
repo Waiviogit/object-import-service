@@ -69,6 +69,18 @@ const findOneToProcess = async ({ importId }) => {
   return result;
 };
 
+const findOneSame = async ({ recipient, pagePermlink }) => {
+  const { result } = await findOne({
+    filter: {
+      recipient,
+      pagePermlink,
+      processed: true,
+    },
+  });
+
+  return result;
+};
+
 const updateImportMessage = async ({ importId, recipient }) => updateOne({
   filter: { importId, recipient },
   update: { processed: true },
@@ -83,4 +95,5 @@ module.exports = {
   countDocuments,
   findOneToProcess,
   updateImportMessage,
+  findOneSame,
 };

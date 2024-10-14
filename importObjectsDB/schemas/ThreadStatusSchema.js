@@ -16,7 +16,7 @@ const ThreadStatusSchema = new Schema({
   pageContent: { type: String, required: true },
   skip: { type: Number, default: 0 },
   limit: { type: Number, default: 0 },
-  avoidRepetition: { type: Boolean, default: 0 },
+  avoidRepetition: { type: Boolean, default: false },
   usersTotal: { type: Number, default: 0 },
   usersProcessed: { type: Number, default: 0 },
   finishedAt: { type: Date },

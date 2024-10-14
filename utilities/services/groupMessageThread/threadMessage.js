@@ -49,33 +49,43 @@ const threadMessage = async ({ importId, user }) => {
   if (!validRc) return;
 
   const importInfo = await ThreadStatusModel.getUserImport({ user, importId });
-  const { pageContent, status } = importInfo;
+  const { pageContent, status, avoidRepetition } = importInfo;
   if (status !== IMPORT_STATUS.ACTIVE) return;
 
   const messageInfo = await ThreadMessageModel.findOneToProcess({ importId });
   if (!messageInfo) {
     await ThreadStatusModel.finishImport({ importId });
     const pending = await ThreadStatusModel.getPendingImport({ user });
-    if (pending) threadMessage(pending);
+    if (pending) threadMessage({ importId, user });
     return;
   }
 
-  const body = `${messageInfo.alias} (${messageInfo.recipient})\n\n${pageContent}`;
+  const { recipient, alias, pagePermlink } = messageInfo;
+
+  if (avoidRepetition) {
+    const same = await ThreadMessageModel.findOneSame({ recipient, pagePermlink });
+    if (same) {
+      await ThreadMessageModel.updateImportMessage({ importId, recipient });
+      return;
+    }
+  }
+
+  const body = `${alias} (${recipient})\n\n${pageContent}`;
 
   const { result, error } = await sendThread({
     author: user,
     body,
   });
-  if (result) console.log(`[INFO][THREADS]${user} send thread to ${messageInfo.recipient}`);
+  if (result) console.log(`[INFO][THREADS]${user} send thread to ${recipient}`);
 
   if (error) {
-    console.log(`[ERROR][THREADS]${user} failed send thread to ${messageInfo.recipient}`);
+    console.log(`[ERROR][THREADS]${user} failed send thread to ${recipient}`);
     await setTimeout(WAIT_TIME_MS);
     threadMessage({ importId, user });
     return;
   }
 
-  await ThreadMessageModel.updateImportMessage(messageInfo);
+  await ThreadMessageModel.updateImportMessage({ importId, recipient });
   await setTimeout(WAIT_TIME_MS);
   threadMessage({ importId, user });
 };
