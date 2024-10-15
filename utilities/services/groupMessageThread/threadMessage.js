@@ -36,7 +36,7 @@ const sendThread = async ({ author, body }) => {
     parent_permlink: post.permlink,
     title: '',
     json_metadata: JSON.stringify({ bulkMessage: true }),
-    key: process.env.IMPORT_BOT_KEY,
+    key: process.env.FIELD_VOTES_BOT_KEY,
   });
 
   if (error) return { error };
@@ -76,8 +76,9 @@ const threadMessage = async ({ importId, user }) => {
       return;
     }
   }
-
-  const body = `${alias} (${recipient})\n\n${pageContent}`;
+  const body = alias
+    ? `${alias} (@${recipient})\n\n${pageContent}`
+    : `@${recipient}\n\n${pageContent}`;
 
   const { result, error } = await sendThread({
     author: user,

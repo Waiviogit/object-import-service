@@ -64,8 +64,10 @@ const processGroup = async ({ importId, user }) => {
   }
   if (!users.length) return;
 
+  const sliceTo = skip + limit === 0 ? users.length : skip + limit;
+
   const dataToWrite = users
-    .slice(skip, skip + limit)
+    .slice(skip, sliceTo)
     .map((el) => ({ ...el, importId, pagePermlink }));
 
   const status = await getStatus(user);

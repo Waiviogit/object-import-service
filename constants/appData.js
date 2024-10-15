@@ -85,6 +85,15 @@ const notificationsApi = {
     WS_SET_NOTIFICATION: 'setNotification',
     WS_SET_SERVICE_NOTIFICATION: 'setServiceNotification',
   },
+  staging: {
+    HOST: 'https://waiviodev.com',
+    WS: 'wss://waiviodev.com',
+    BASE_URL: '/notifications-api',
+    SET_NOTIFICATION: '/set',
+    STATUS: ['relisted', 'nsfw', 'unavailable'],
+    WS_SET_NOTIFICATION: 'setNotification',
+    WS_SET_SERVICE_NOTIFICATION: 'setServiceNotification',
+  },
   development: {
     HOST: 'http://localhost:4000',
     WS: 'ws://localhost:4000',
