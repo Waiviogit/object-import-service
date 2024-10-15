@@ -99,7 +99,7 @@ const createThreadTask = async ({
 
   const { result: processedPage } = await getObject({ authorPermlink: pagePermlink, locale });
   const pageContent = processedPage?.pageContent;
-  if (!pageContent) return NotFoundError('page content not found');
+  if (!pageContent) return { error: NotFoundError('page content not found') };
 
   const importId = createUUID();
   const { result } = await ThreadStatusModel.create({

@@ -6,6 +6,7 @@ const {
   DescriptionStatusModel,
   TagsStatusModel,
   RecipeGenerationStatusModel,
+  ThreadStatusModel,
 } = require('../../models');
 const { startObjectImport } = require('../services/objectsImport/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
@@ -15,6 +16,7 @@ const duplicateProcess = require('../services/listDuplication/duplicateProcess')
 const rewriteDescription = require('../services/descriptionBot/rewriteDescription');
 const createTags = require('../services/tagsBot/createTags');
 const { generateRecipeAndImage } = require('../services/recipeGeneration/recipeGeneration');
+const threadMessage = require('../services/groupMessageThread/threadMessage');
 
 const tasksToRun = [
   {
@@ -45,6 +47,10 @@ const tasksToRun = [
   {
     model: RecipeGenerationStatusModel,
     processStarter: generateRecipeAndImage,
+  },
+  {
+    model: ThreadStatusModel,
+    processStarter: threadMessage,
   },
 ];
 

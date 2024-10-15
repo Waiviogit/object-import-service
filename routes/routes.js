@@ -6,6 +6,7 @@ const {
   duplicateListController,
   descriptionBotController,
   addTagsController,
+  threadsController,
 } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
@@ -107,5 +108,16 @@ objects.route('/tags-bot/power')
   .put(addTagsController.setVotingPower);
 objects.route('/tags-bot/history')
   .get(addTagsController.getImportHistory);
+
+objects.route('/threads')
+  .post(threadsController.createTask)
+  .get(threadsController.getImportStatistic)
+  .put(threadsController.changeImportDetails)
+  .delete(threadsController.deleteImport);
+objects.route('/threads/rc')
+  .get(threadsController.getRC)
+  .put(threadsController.setRC);
+objects.route('/threads/history')
+  .get(threadsController.getImportHistory);
 
 module.exports = routes;

@@ -5,4 +5,5 @@ module.exports = {
   duplicateListController: require('./duplicateListController'),
   descriptionBotController: require('./descriptionBotController'),
   addTagsController: require('./addTagsController'),
+  threadsController: require('./threadsController'),
 };

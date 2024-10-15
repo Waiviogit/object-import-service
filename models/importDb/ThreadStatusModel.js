@@ -83,6 +83,14 @@ const finishImport = async ({ importId }) => updateOne({
   update: { finishedAt: new Date(), status: IMPORT_STATUS.FINISHED },
 });
 
+const findOneActive = async ({ user }) => {
+  const { result, error } = await findOne({
+    filter: { user, status: IMPORT_STATUS.ACTIVE },
+  });
+  if (!result || error) return;
+  return result;
+};
+
 module.exports = {
   create,
   updateOne,
@@ -93,4 +101,5 @@ module.exports = {
   getUserImport,
   getPendingImport,
   finishImport,
+  findOneActive,
 };

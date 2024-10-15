@@ -3,6 +3,7 @@ exports.authority = require('./authorityValidator');
 exports.departments = require('./departmentsValidator');
 exports.duplicateList = require('./duplicateListValidator');
 exports.addTags = require('./addTagsValidator');
+exports.threadValidator = require('./threadValidator');
 
 exports.validate = (data, schema, next) => {
   const result = schema.validate(data, { abortEarly: false });
