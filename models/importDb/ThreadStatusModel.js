@@ -91,6 +91,11 @@ const findOneActive = async ({ user }) => {
   return result;
 };
 
+const updateUserProcessed = async ({ importId }) => updateOne({
+  filter: { importId },
+  update: { $inc: { usersProcessed: 1 } },
+});
+
 module.exports = {
   create,
   updateOne,
@@ -102,4 +107,5 @@ module.exports = {
   getPendingImport,
   finishImport,
   findOneActive,
+  updateUserProcessed,
 };

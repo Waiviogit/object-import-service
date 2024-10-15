@@ -5,6 +5,7 @@ const { getAccountPosts } = require('../../hiveApi/postUtil');
 const { createUUID } = require('../../helpers/cryptoHelper');
 const { validatePostingToRun } = require('../../../validators/accountValidator');
 const { IMPORT_TYPES, IMPORT_STATUS } = require('../../../constants/appData');
+const { sendUpdateImportForUser } = require('../socketClient');
 
 const THREADS_ACC = 'leothreads';
 
@@ -42,6 +43,12 @@ const sendThread = async ({ author, body }) => {
   if (result) return { result };
 };
 
+const updateImportItems = async ({ user, importId, recipient }) => {
+  await ThreadStatusModel.updateUserProcessed({ importId });
+  await ThreadMessageModel.updateImportMessage({ importId, recipient });
+  await sendUpdateImportForUser({ account: user });
+};
+
 const threadMessage = async ({ importId, user }) => {
   const validRc = await validatePostingToRun({
     user, importId, type: IMPORT_TYPES.THREADS,
@@ -65,7 +72,7 @@ const threadMessage = async ({ importId, user }) => {
   if (avoidRepetition) {
     const same = await ThreadMessageModel.findOneSame({ recipient, pagePermlink });
     if (same) {
-      await ThreadMessageModel.updateImportMessage({ importId, recipient });
+      await updateImportItems({ user, importId, recipient });
       return;
     }
   }
@@ -84,8 +91,7 @@ const threadMessage = async ({ importId, user }) => {
     threadMessage({ importId, user });
     return;
   }
-
-  await ThreadMessageModel.updateImportMessage({ importId, recipient });
+  await updateImportItems({ user, importId, recipient });
   await setTimeout(WAIT_TIME_MS);
   threadMessage({ importId, user });
 };
