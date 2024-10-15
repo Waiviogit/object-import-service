@@ -20,6 +20,9 @@ const getStatistic = async ({
           ],
       },
     },
+    projection: {
+      pageContent: 0,
+    },
     options: {
       sort: history ? { finishedAt: -1 } : { createdAt: -1 },
       skip,

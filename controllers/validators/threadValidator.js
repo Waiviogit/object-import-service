@@ -6,7 +6,7 @@ exports.threadTaskSchema = Joi.object().keys({
   limit: Joi.number().integer().min(0).default(0),
   skip: Joi.number().integer().min(0).default(0),
   user: Joi.string().required(),
-  avoidRepetition: Joi.boolean().default(false),
+  avoidRepetition: Joi.boolean().default(true),
   locale: Joi.string().default('en-US'),
 });
 

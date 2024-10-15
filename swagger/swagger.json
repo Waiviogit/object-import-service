@@ -31,6 +31,10 @@
     {
       "name": "tags-bot",
       "description": "tags-bot"
+    },
+    {
+      "name": "threads-bot",
+      "description": "threads-bot"
     }
   ],
   "schemes": [
@@ -1945,9 +1949,392 @@
           }
         }
       }
+    },
+    "/import-objects-service/threads": {
+      "post": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "starts tags bot",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ThreadCreateBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ThreadStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "get active import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ThreadStatus"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "update import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-put"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ThreadStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "delete claim job",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "delete import",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-delete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ThreadStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/threads/history": {
+      "get": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "get history",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ThreadStatus"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/tags-bot/rc": {
+      "get": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "get import rc",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/import-products-rc"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "update rc",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-rc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/import-products-rc"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "ThreadCreateBody": {
+      "type": "object",
+      "properties": {
+        "groupPermlink": {
+          "type": "string",
+          "description": "The permalink for the group",
+          "example": "example-group-permlink"
+        },
+        "pagePermlink": {
+          "type": "string",
+          "description": "The permalink for the page",
+          "example": "example-page-permlink"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Limit the number of results returned"
+        },
+        "skip": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Number of results to skip"
+        },
+        "user": {
+          "type": "string",
+          "description": "The user making the request",
+          "example": "example-user"
+        },
+        "avoidRepetition": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to avoid repetition in results"
+        },
+        "locale": {
+          "type": "string",
+          "default": "en-US",
+          "description": "Locale setting for the request",
+          "example": "en-US"
+        }
+      },
+      "required": ["groupPermlink", "pagePermlink", "user"]
+    },
+    "ThreadStatus": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "The user making the request",
+          "example": "example-user"
+        },
+        "importId": {
+          "type": "string",
+          "description": "The unique identifier for the import",
+          "example": "123456789"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the import",
+          "enum": ["pending", "active", "onHold", "finished", "deleted", "waitingRecover"],
+          "default": "PENDING"
+        },
+        "locale": {
+          "type": "string",
+          "description": "The locale setting for the import",
+          "example": "en-US"
+        },
+        "groupPermlink": {
+          "type": "string",
+          "description": "The permalink for the group",
+          "example": "example-group-permlink"
+        },
+        "pagePermlink": {
+          "type": "string",
+          "description": "The permalink for the page",
+          "example": "example-page-permlink"
+        },
+        "pageContent": {
+          "type": "string",
+          "description": "The content of the page",
+          "example": "This is the page content."
+        },
+        "skip": {
+          "type": "integer",
+          "description": "Number of results to skip",
+          "default": 0
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Limit the number of results returned",
+          "default": 0
+        },
+        "avoidRepetition": {
+          "type": "boolean",
+          "description": "Whether to avoid repetition in results",
+          "default": true
+        },
+        "usersTotal": {
+          "type": "integer",
+          "description": "Total number of users to process",
+          "default": 0
+        },
+        "usersProcessed": {
+          "type": "integer",
+          "description": "Number of users that have been processed",
+          "default": 0
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the import was finished",
+          "example": "2024-10-15T12:00:00Z"
+        }
+      },
+      "required": ["user", "importId", "status", "groupPermlink", "pagePermlink", "pageContent"]
+    },
     "import-products-power": {
       "type": "object",
       "properties": {
@@ -1955,6 +2342,19 @@
           "type": "string"
         },
         "minVotingPower": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10000
+        }
+      }
+    },
+    "import-products-rc": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "minRc": {
           "type": "number",
           "minimum": 1,
           "maximum": 10000
