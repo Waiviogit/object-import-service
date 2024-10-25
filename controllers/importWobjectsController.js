@@ -252,6 +252,21 @@ const authorizeGuestImportStatus = async (req, res, next) => {
   res.status(200).json(result);
 };
 
+const validateUserImport = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.getPowerSchema,
+    next,
+  );
+
+  const { result: validAcc, error: accError } = await importAccountValidator(
+    value.user,
+    getVoteCostInitial(value.user),
+  );
+  if (!validAcc) return next(accError);
+  return res.status(200).json({ result: true });
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -267,4 +282,5 @@ module.exports = {
   gptQuery,
   authorizeGuestImport,
   authorizeGuestImportStatus,
+  validateUserImport,
 };

@@ -29,6 +29,8 @@ objects.route('/import-products')
   .get(importWobjectsController.getImportStatistic)
   .put(importWobjectsController.changeImportDetails)
   .delete(importWobjectsController.deleteImport);
+objects.route('/import-products/validate')
+  .get(importWobjectsController.validateUserImport);
 objects.route('/import-products/history')
   .get(importWobjectsController.getImportHistory);
 objects.route('/import-products/power')
