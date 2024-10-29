@@ -40,14 +40,16 @@ const processGroup = async ({ importId, user }) => {
   } = userImport;
 
   const users = [];
-
+  let nextCursor;
   while (true) {
-    const lastName = users.at(-1) ?? '';
-    const { result, hasMore, error } = await getObjectGroup({
-      lastName,
+    const {
+      result, hasMore, nextCursor: cursor, error,
+    } = await getObjectGroup({
+      nextCursor,
       limit: 50,
       authorPermlink: groupPermlink,
     });
+    nextCursor = cursor;
 
     const filterGuest = result.filter((el) => !el.name.includes('_'));
 
