@@ -2311,6 +2311,11 @@
           "description": "Limit the number of results returned",
           "default": 0
         },
+        "dailyLimit": {
+          "type": "integer",
+          "description": "Daily limit of users",
+          "default": 0
+        },
         "avoidRepetition": {
           "type": "boolean",
           "description": "Whether to avoid repetition in results",

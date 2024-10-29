@@ -19,6 +19,7 @@ const ThreadStatusSchema = new Schema({
   avoidRepetition: { type: Boolean, default: true },
   usersTotal: { type: Number, default: 0 },
   usersProcessed: { type: Number, default: 0 },
+  dailyLimit: { type: Number, default: 0 },
   finishedAt: { type: Date },
 }, { timestamps: true, versionKey: false });
 

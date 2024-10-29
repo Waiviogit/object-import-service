@@ -3,11 +3,12 @@ const { ThreadStatusModel, ThreadMessageModel } = require('../../../models');
 const { broadcastComment } = require('../../hiveApi/broadcastUtil');
 const { getAccountPosts } = require('../../hiveApi/postUtil');
 const { createUUID } = require('../../helpers/cryptoHelper');
-const { validatePostingToRun } = require('../../../validators/accountValidator');
-const { IMPORT_TYPES, IMPORT_STATUS } = require('../../../constants/appData');
+const { validatePostingToRun, checkAndIncrementDailyLimit, setContinueTTlByAnotherKeyExpire } = require('../../../validators/accountValidator');
+const { IMPORT_TYPES, IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../constants/appData');
 const { sendUpdateImportForUser } = require('../socketClient');
 
 const THREADS_ACC = 'leothreads';
+const KEY_DAILY_LIMIT = 'dailyLimitImport';
 
 const WAIT_TIME_MS = 5000;
 const PERMLINK_MAX_LEN = 255;
@@ -56,7 +57,9 @@ const threadMessage = async ({ importId, user }) => {
   if (!validRc) return;
 
   const importInfo = await ThreadStatusModel.getUserImport({ user, importId });
-  const { pageContent, status, avoidRepetition } = importInfo;
+  const {
+    pageContent, status, avoidRepetition, dailyLimit,
+  } = importInfo;
   if (status !== IMPORT_STATUS.ACTIVE) return;
 
   const messageInfo = await ThreadMessageModel.findOneToProcess({ importId });
@@ -73,9 +76,27 @@ const threadMessage = async ({ importId, user }) => {
     const same = await ThreadMessageModel.findOneSame({ recipient, pagePermlink });
     if (same) {
       await updateImportItems({ user, importId, recipient });
+      threadMessage({ importId, user });
       return;
     }
   }
+  // check daily limit if limit exceed set ttl continue import
+  if (dailyLimit > 0) {
+    const key = `${KEY_DAILY_LIMIT}:${user}:${importId}`;
+    const { limitExceeded } = await checkAndIncrementDailyLimit({
+      key,
+      limit: dailyLimit,
+    });
+    if (limitExceeded) {
+      const keyToContinue = `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`;
+      await setContinueTTlByAnotherKeyExpire({
+        keyForTTL: key,
+        keyToContinue,
+      });
+      return;
+    }
+  }
+
   const body = alias
     ? `${alias} (@${recipient})\n\n${pageContent}`
     : `@${recipient}\n\n${pageContent}`;
@@ -92,6 +113,7 @@ const threadMessage = async ({ importId, user }) => {
     threadMessage({ importId, user });
     return;
   }
+  // here incr sent messages
   await updateImportItems({ user, importId, recipient });
   await setTimeout(WAIT_TIME_MS);
   threadMessage({ importId, user });

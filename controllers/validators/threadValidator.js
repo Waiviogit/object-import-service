@@ -8,6 +8,7 @@ exports.threadTaskSchema = Joi.object().keys({
   user: Joi.string().required(),
   avoidRepetition: Joi.boolean().default(true),
   locale: Joi.string().default('en-US'),
+  dailyLimit: Joi.number().integer().min(0).default(0),
 });
 
 exports.minRcSchema = Joi.object().keys({

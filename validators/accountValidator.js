@@ -277,8 +277,38 @@ const validatePostingToRun = async ({ user, type, importId }) => {
   return false;
 };
 
+const checkAndIncrementDailyLimit = async ({ key, limit }) => {
+  let count = await redisGetter.get({ key });
+
+  if (!count) {
+    await redisSetter.set({ key, value: 1 });
+    await redisSetter.expire({ key, ttl: 86400 });
+    return { currentCount: 1, limitExceeded: false };
+  }
+
+  count = parseInt(count, 10);
+
+  if (count < limit) {
+    // Increment the count
+    const newCount = await redisSetter.incr({ key });
+    return { currentCount: newCount, limitExceeded: false };
+  }
+  // Limit reached
+  return { currentCount: count, limitExceeded: true };
+};
+
+const setContinueTTlByAnotherKeyExpire = async ({ keyForTTL, keyToContinue }) => {
+  const ttl = await redisGetter.ttl({ key: keyForTTL });
+  if (ttl < 0) return; // -1 constant -2 don't exist
+
+  await redisSetter.set({ key: keyToContinue, value: '' });
+  await redisSetter.expire({ key: keyToContinue, ttl });
+};
+
 module.exports = {
   importAccountValidator,
   validateImportToRun,
   validatePostingToRun,
+  checkAndIncrementDailyLimit,
+  setContinueTTlByAnotherKeyExpire,
 };
