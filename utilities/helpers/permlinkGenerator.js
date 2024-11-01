@@ -28,22 +28,13 @@ exports.permlinkGenerator = (string) => {
 
 exports.generateUniquePermlink = async (name) => {
   let permlink;
-  let wobj;
+  let isPermlinkUnique = false;
 
-  do {
+  while (!isPermlinkUnique) {
     permlink = this.permlinkGenerator(name);
-    const { wobject, error } = await Wobj.getOne({ author_permlink: permlink });
-
-    if (error) {
-      break;
-    }
-
-    if (!wobject) {
-      break;
-    }
-
-    wobj = wobject;
-  } while (permlink === wobj.author_permlink);
+    const existingObject = await Wobj.checkObjectExistByPermlink({ author_permlink: permlink });
+    isPermlinkUnique = !existingObject;
+  }
 
   return permlink;
 };

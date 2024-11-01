@@ -90,6 +90,22 @@ const find = async ({ filter, projection, options }) => {
   }
 };
 
+const checkObjectExistByPermlink = async ({ author_permlink }) => {
+  try {
+    const result = await WObjectModel.findOne({ author_permlink }, { author_permlink: 1 }).lean();
+    return result;
+  } catch (error) {
+    return null;
+  }
+};
+
 module.exports = {
-  getOne, getField, findSameFieldBody, findOneByNameAndObjectType, findOneByProductId, findOne, find
+  getOne,
+  getField,
+  findSameFieldBody,
+  findOneByNameAndObjectType,
+  findOneByProductId,
+  findOne,
+  find,
+  checkObjectExistByPermlink,
 };
