@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const uuid = require('uuid');
 const {
   Wobj, DepartmentsObjectModel, DepartmentsStatusModel,
 } = require('../../../models');
@@ -7,6 +6,7 @@ const { OBJECT_TYPES } = require('../../../constants/objectTypes');
 const { NotFoundError, NotAcceptableError } = require('../../../constants/httpErrors');
 const importDepartments = require('./importDepartments');
 const { getListItemDepartments } = require('../../waivioApi');
+const { createUUID } = require('../../helpers/cryptoHelper');
 
 const uniqueByTwoKeys = (arr) => arr.reduce((acc, curr) => {
   const found = acc.find((item) => item.authorPermlink === curr.authorPermlink
@@ -80,7 +80,7 @@ const createDepartmentsList = async ({ user, authorPermlink, scanEmbedded }) => 
     authorPermlink, scanEmbedded,
   });
   if (!objectsWithDepartments?.length) return { error: new NotFoundError('Objects in list not found') };
-  const importId = uuid.v4();
+  const importId = createUUID();
   const { result, error } = await saveDocuments({
     docs: objectsWithDepartments, user, importId, authorPermlink,
   });

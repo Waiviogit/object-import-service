@@ -24,7 +24,9 @@ const IMPORT_REDIS_KEYS = {
   CONTINUE_DUPLICATE: 'continue_duplicate',
   CONTINUE_DESCRIPTION: 'continue_description',
   CONTINUE_TAGS: 'continue_tags',
+  CONTINUE_THREADS: 'continue_threads',
   MIN_POWER: 'min_power',
+  MIN_RC_THREADS: 'min_rc_threads',
   MIN_POWER_AUTHORITY: 'min_power_authority',
   MIN_POWER_DEPARTMENTS: 'min_power_departments',
   MIN_POWER_DUPLICATE: 'min_power_duplicate',
@@ -69,6 +71,7 @@ const AMAZON_ASINS = [
 ];
 
 const DEFAULT_VOTE_POWER_IMPORT = 3000;
+const MIN_RC_POSTING_DEFAULT = 7500;
 
 const ONE_PERCENT_VOTE_RECOVERY = Math.round((60 * 60 * 24) / 20);
 
@@ -76,6 +79,15 @@ const notificationsApi = {
   production: {
     HOST: 'https://www.waivio.com',
     WS: 'wss://www.waivio.com',
+    BASE_URL: '/notifications-api',
+    SET_NOTIFICATION: '/set',
+    STATUS: ['relisted', 'nsfw', 'unavailable'],
+    WS_SET_NOTIFICATION: 'setNotification',
+    WS_SET_SERVICE_NOTIFICATION: 'setServiceNotification',
+  },
+  staging: {
+    HOST: 'https://waiviodev.com',
+    WS: 'wss://waiviodev.com',
     BASE_URL: '/notifications-api',
     SET_NOTIFICATION: '/set',
     STATUS: ['relisted', 'nsfw', 'unavailable'],
@@ -100,6 +112,7 @@ const IMPORT_TYPES = {
   DUPLICATE: 'duplicate',
   DESCRIPTION: 'description',
   TAGS: 'tags',
+  THREADS: 'threads',
 };
 
 module.exports = {
@@ -115,4 +128,5 @@ module.exports = {
   notificationsApi: notificationsApi[process.env.NODE_ENV || 'development'],
   AMAZON_ASINS,
   IMPORT_TYPES,
+  MIN_RC_POSTING_DEFAULT,
 };

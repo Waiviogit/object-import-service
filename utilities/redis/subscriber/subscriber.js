@@ -7,6 +7,7 @@ const importDepartments = require('../../services/departmentsService/importDepar
 const duplicateProcess = require('../../services/listDuplication/duplicateProcess');
 const rewriteDescription = require('../../services/descriptionBot/rewriteDescription');
 const createTags = require('../../services/tagsBot/createTags');
+const threadMessage = require('../../services/groupMessageThread/threadMessage');
 
 const subscriber = redis.createClient({ db: config.redis.lastBlock });
 
@@ -66,6 +67,12 @@ const subscribeVoteRenew = async (channel, message) => {
       break;
     case IMPORT_REDIS_KEYS.CONTINUE_TAGS:
       createTags({
+        user: commands[1],
+        importId: commands[2],
+      });
+      break;
+    case IMPORT_REDIS_KEYS.CONTINUE_THREADS:
+      threadMessage({
         user: commands[1],
         importId: commands[2],
       });

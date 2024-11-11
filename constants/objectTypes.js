@@ -18,6 +18,8 @@ const OBJECT_TYPES = {
   MAP: 'map',
   LINK: 'link',
   RECIPE: 'recipe',
+  GROUP: 'group',
+  PAGE: 'page',
 };
 
 const DATAFINITY_IDS = 'keys';

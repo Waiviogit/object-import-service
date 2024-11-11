@@ -1,10 +1,11 @@
+/* eslint-disable camelcase */
 const _ = require('lodash');
 const BigNumber = require('bignumber.js');
 const { checkVotePower, getMinAmountInWaiv } = require('../utilities/helpers/checkVotePower');
 const { getAccount, getAccountRC } = require('../utilities/hiveApi/userUtil');
 const { getVotingPowers } = require('../utilities/hiveEngine/hiveEngineOperations');
 const {
-  IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY,
+  IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY, MIN_RC_POSTING_DEFAULT,
 } = require('../constants/appData');
 const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
@@ -12,6 +13,9 @@ const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/
 const { guestMana } = require('../utilities/guestUser');
 
 const POSTING_AUTHORITIES_ERROR = 'There is no data import authorization. Please go to the Data Import page and activate it.';
+
+// approximate value to calc need rewrite python lib
+const COMMENT_RC_COST = 3080000000;
 
 const isGuestAccount = (account = '') => account.includes('_');
 
@@ -107,10 +111,10 @@ const guestVotePowerValidation = async ({ account, type }) => {
   return BigNumber(votingPower).gt(power);
 };
 
-const validateRc = async ({ account }) => {
+const validateRc = async ({ account, allowedRc = 1000 }) => {
   const { percentage, error } = await getAccountRC(account);
   if (error) return false;
-  return percentage > 1000;
+  return percentage > allowedRc;
 };
 
 const getVotingPower = async ({ account, amount }) => {
@@ -223,7 +227,90 @@ const validateImportToRun = async ({
   return true;
 };
 
+const getTtlPosting = (rc, minRc) => {
+  const diff = (minRc - rc) || 1;
+  return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
+};
+
+const getValidRcComment = ({
+  percentage, current_mana, max_mana, minRc,
+}) => {
+  const currentMana = current_mana > max_mana ? max_mana : current_mana;
+  return percentage > minRc && currentMana > (COMMENT_RC_COST * 2);
+};
+
+const getAllowedRC = async ({ user, type }) => {
+  const rcKeys = {
+    [IMPORT_TYPES.THREADS]: IMPORT_REDIS_KEYS.MIN_RC_THREADS,
+  };
+
+  const rcKey = rcKeys[type];
+  if (!rcKey) return MIN_RC_POSTING_DEFAULT;
+  const key = `${rcKey}:${user}`;
+
+  const allowedRC = await redisGetter.get({ key });
+  return allowedRC || MIN_RC_POSTING_DEFAULT;
+};
+
+const savePostingTtl = async ({
+  user, type, importId, percentage, minRc,
+}) => {
+  const typeToTTL = {
+    [IMPORT_TYPES.THREADS]: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+    default: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+  };
+  const ttlKey = typeToTTL[type] || typeToTTL.default;
+  const ttl = getTtlPosting(percentage, minRc);
+  await redisSetter.set({ key: ttlKey, value: '' });
+  await redisSetter.expire({ key: ttlKey, ttl });
+};
+
+const validatePostingToRun = async ({ user, type, importId }) => {
+  const minRc = await getAllowedRC({ user, type });
+  const { percentage, current_mana, max_mana } = await getAccountRC(user);
+  const validRc = getValidRcComment({
+    percentage, current_mana, max_mana, minRc,
+  });
+  if (validRc) return true;
+
+  await savePostingTtl({
+    user, type, importId, percentage, minRc,
+  });
+  return false;
+};
+
+const checkAndIncrementDailyLimit = async ({ key, limit }) => {
+  let count = await redisGetter.get({ key });
+
+  if (!count) {
+    await redisSetter.set({ key, value: 1 });
+    await redisSetter.expire({ key, ttl: 86400 });
+    return { currentCount: 1, limitExceeded: false };
+  }
+
+  count = parseInt(count, 10);
+
+  if (count < limit) {
+    // Increment the count
+    const newCount = await redisSetter.incr({ key });
+    return { currentCount: newCount, limitExceeded: false };
+  }
+  // Limit reached
+  return { currentCount: count, limitExceeded: true };
+};
+
+const setContinueTTlByAnotherKeyExpire = async ({ keyForTTL, keyToContinue }) => {
+  const ttl = await redisGetter.ttl({ key: keyForTTL });
+  if (ttl < 0) return; // -1 constant -2 don't exist
+
+  await redisSetter.set({ key: keyToContinue, value: '' });
+  await redisSetter.expire({ key: keyToContinue, ttl });
+};
+
 module.exports = {
   importAccountValidator,
   validateImportToRun,
+  validatePostingToRun,
+  checkAndIncrementDailyLimit,
+  setContinueTTlByAnotherKeyExpire,
 };

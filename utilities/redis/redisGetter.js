@@ -9,6 +9,7 @@ const getHashAll = async function (key, client = importWobjectsDataClient) {
 
 const get = async ({ key, client = importWobjectsDataClient }) => client
   .getAsync(key);
+const ttl = async ({ key, client = importWobjectsDataClient }) => client.ttlAsync(key);
 
 const getQueueLength = async (qname = 'import_wobjects', client = importRsmqClient) => {
   try {
@@ -19,4 +20,6 @@ const getQueueLength = async (qname = 'import_wobjects', client = importRsmqClie
   }
 };
 
-module.exports = { getHashAll, get, getQueueLength };
+module.exports = {
+  getHashAll, get, getQueueLength, ttl,
+};

@@ -27,3 +27,35 @@ exports.broadcastJson = async ({
     return { error };
   }
 };
+
+exports.broadcastComment = async ({
+  parent_author,
+  parent_permlink,
+  author,
+  permlink,
+  title,
+  body,
+  json_metadata,
+  key,
+}) => {
+  try {
+    const client = await getClient('test:hive:post');
+    return {
+      result: await client.broadcast.comment(
+        {
+          parent_author,
+          parent_permlink,
+          author,
+          permlink,
+          title,
+          body,
+          json_metadata,
+        },
+        PrivateKey.fromString(key),
+      ),
+    };
+  } catch (error) {
+    console.error(error.message);
+    return { error };
+  }
+};
