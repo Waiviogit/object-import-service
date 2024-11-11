@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const { setTimeout } = require('node:timers/promises');
 const _ = require('lodash');
 const {
   DatafinityObject, Wobj, ObjectType, ImportStatusModel,
@@ -204,6 +205,9 @@ const startObjectImport = async ({
     });
 
     if (!importedObject.fields.length) {
+      const fieldsToVote = await getFieldsToVote({ wobject, user });
+      if (fieldsToVote.length) await voteForFields({ fieldsToVote, user, wobject });
+
       const { startAuthorPermlink } = importedObject;
 
       await DatafinityObject.removeOne(importedObject._id);
@@ -407,33 +411,75 @@ const checkFieldConnectedObject = async ({ datafinityObject }) => {
   return true;
 };
 
-const getFieldsToVote = async ({ wobject, field, user }) => {
+const getFieldsToVote = async ({ wobject, user }) => {
   /** if field created by user or already has user's vote skip it */
-  const fieldsToVote = _.filter(wobject.fields, (el) => {
-    const sameName = el.name === field.name;
+
+  // to wait all fields to process
+  await setTimeout(10000);
+
+  const { wobject: object } = await Wobj.getOne({
+    author_permlink: wobject.author_permlink,
+  });
+
+  const singleFieldsNotVote = _.reduce(object.fields, (acc, el) => {
+    if (ARRAY_FIELDS.includes(el.name)) return acc;
+    const votedSingleField = _.find(
+      el.active_votes,
+      (v) => v.voter === user && v.weight > 0,
+    );
+    if (votedSingleField) {
+      acc.push(el.name);
+      return acc;
+    }
+
+    if (el.creator === user) acc.push(el.name);
+    return acc;
+  }, []);
+
+  const filteredFields = _.filter(object.fields, (el) => {
     const creatorNotUser = el.creator !== user;
     const userNotHasPositiveVote = !_.find(
       el.active_votes,
       (v) => v.voter === user && v.weight > 0,
     );
 
-    return sameName && creatorNotUser && userNotHasPositiveVote;
+    return creatorNotUser && userNotHasPositiveVote;
   });
-  if (!fieldsToVote?.length) return [];
 
-  /** we need vote all fields if it is array fields */
-  if (ARRAY_FIELDS.includes(field.name)) return fieldsToVote;
-  if (fieldsToVote?.length === 1) return fieldsToVote;
+  if (!filteredFields?.length) return [];
 
   const { result: originalProcessed } = await getObject({
-    authorPermlink: wobject.author_permlink,
+    authorPermlink: object.author_permlink,
   });
 
-  /** for single fields full object on processed is only news feed we don't have it on import */
-  const fieldToVote = _.find(fieldsToVote, (f) => f.body === originalProcessed[field.name]);
+  const fieldsToVote = [];
 
-  return _.compact([fieldToVote]);
+  for (const field of filteredFields) {
+    if (singleFieldsNotVote.includes(field.name)) continue;
+    if (field.name === OBJECT_FIELDS.AUTHORITY) continue;
+
+    if (ARRAY_FIELDS.includes(field.name)) {
+      if (field?.weight < 0) continue;
+      fieldsToVote.push(field);
+      continue;
+    }
+
+    const singleFields = _.filter(filteredFields, (el) => el.name === field.name);
+    if (singleFields?.length === 1) {
+      fieldsToVote.push(field);
+      continue;
+    }
+
+    const alreadyIn = _.find(fieldsToVote, (el) => el.name === field.name);
+    if (alreadyIn) continue;
+
+    const fieldToVote = _.find(fieldsToVote, (f) => f.body === originalProcessed[field.name]);
+    if (fieldToVote) fieldsToVote.push(fieldToVote);
+  }
+
+  return _.compact(fieldsToVote);
 };
+
 const voteForFields = async ({ fieldsToVote, user, wobject }) => {
   for (const field of fieldsToVote) {
     await voteForField.send({
@@ -444,7 +490,7 @@ const voteForFields = async ({ fieldsToVote, user, wobject }) => {
       fieldType: field.name,
       shouldWhiteListVote: true,
     });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await setTimeout(4000);
   }
 };
 
@@ -471,13 +517,11 @@ const processField = async ({ datafinityObject, wobject, user }) => {
         },
       },
     });
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await setTimeout(4000);
   }
 
   if (sameField) {
     console.error(`same field: ${datafinityObject.fields[0]?.name}`);
-    const fieldsToVote = await getFieldsToVote({ wobject, user, field });
-    if (fieldsToVote.length) await voteForFields({ fieldsToVote, user, wobject });
   }
 
   const { result, error } = await DatafinityObject.findOneAndModify(

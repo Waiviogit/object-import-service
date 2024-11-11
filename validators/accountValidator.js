@@ -12,6 +12,8 @@ const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importD
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 const { guestMana } = require('../utilities/guestUser');
 
+const POSTING_AUTHORITIES_ERROR = 'There is no data import authorization. Please go to the Data Import page and activate it.';
+
 // approximate value to calc need rewrite python lib
 const COMMENT_RC_COST = 3080000000;
 
@@ -26,7 +28,7 @@ const guestImportAccountValidator = async (account) => {
   const postingAuthorities = manaRecord.importAuthorization;
 
   if (!postingAuthorities) {
-    return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
+    return { result: false, error: { status: '409', message: POSTING_AUTHORITIES_ERROR } };
   }
 
   return { result: true };
@@ -59,7 +61,7 @@ const importAccountValidator = async (user, voteCost) => {
   const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
 
   if (!postingAuthorities) {
-    return { result: false, error: { status: '409', message: 'Posting authorities not delegated' } };
+    return { result: false, error: { status: '409', message: POSTING_AUTHORITIES_ERROR } };
   }
 
   return { result: true };

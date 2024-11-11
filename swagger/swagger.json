@@ -428,6 +428,42 @@
         }
       }
     },
+    "/import-objects-service/import-products/validate": {
+      "get": {
+        "tags": [
+          "import"
+        ],
+        "summary": "get asins query by uri",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "description": "get asins query by uri",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
     "/import-objects-service/authority": {
       "post": {
         "tags": [
