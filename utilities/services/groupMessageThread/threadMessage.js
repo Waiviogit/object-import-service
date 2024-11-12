@@ -66,7 +66,7 @@ const threadMessage = async ({ importId, user }) => {
   if (!messageInfo) {
     await ThreadStatusModel.finishImport({ importId });
     const pending = await ThreadStatusModel.getPendingImport({ user });
-    if (pending) threadMessage({ importId, user });
+    if (pending) threadMessage({ importId: pending.importId, user });
     return;
   }
 
