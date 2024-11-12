@@ -51,7 +51,7 @@ const updateImport = async ({
 
   if (status === IMPORT_STATUS.ACTIVE) {
     const active = await ThreadStatusModel.findOneActive({ user });
-    if (!active) threadMessage({ user, importId });
+    if (active) threadMessage({ user, importId });
   }
 
   return {
