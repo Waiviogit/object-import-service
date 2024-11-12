@@ -28,7 +28,7 @@ const createTask = async (req, res, next) => {
 const setRC = async (req, res, next) => {
   const value = validators.validate(
     req.body,
-    validators.importWobjects.minRcSchema,
+    validators.threadValidator.minRcSchema,
     next,
   );
 
