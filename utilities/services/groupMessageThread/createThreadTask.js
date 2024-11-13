@@ -94,6 +94,7 @@ const createThreadTask = async ({
   user,
   avoidRepetition,
   locale,
+  dailyLimit,
 }) => {
   const objectsError = await checkObjects({
     groupPermlink,
@@ -116,6 +117,7 @@ const createThreadTask = async ({
     groupPermlink,
     pagePermlink,
     pageContent,
+    dailyLimit,
   });
 
   processGroup({ importId, user });
