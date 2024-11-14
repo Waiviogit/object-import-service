@@ -56,6 +56,7 @@ exports.WHITE_LIST = [
   'zapweb3',
   'dailydining',
   'waivio_nowayjose-cuisin',
+  'waivio_jennadenise',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
