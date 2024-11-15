@@ -22,4 +22,6 @@ module.exports = {
   RecipeGenerationStatusModel: require('./importDb/RecipeGenerationStatusModel'),
   ThreadStatusModel: require('./importDb/ThreadStatusModel'),
   ThreadMessageModel: require('./importDb/ThreadMessageModel'),
+  PostImportModel: require('./importDb/PostImportModel'),
+  PostStatusModel: require('./importDb/PostStatusModel'),
 };

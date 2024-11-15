@@ -242,6 +242,7 @@ const getValidRcComment = ({
 const getAllowedRC = async ({ user, type }) => {
   const rcKeys = {
     [IMPORT_TYPES.THREADS]: IMPORT_REDIS_KEYS.MIN_RC_THREADS,
+    [IMPORT_TYPES.POST_IMPORT]: IMPORT_REDIS_KEYS.MIN_RC_POST_IMPORT,
   };
 
   const rcKey = rcKeys[type];
@@ -257,10 +258,24 @@ const savePostingTtl = async ({
 }) => {
   const typeToTTL = {
     [IMPORT_TYPES.THREADS]: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+    [IMPORT_TYPES.POST_IMPORT]: `${IMPORT_REDIS_KEYS.CONTINUE_POST_IMPORT}:${user}:${importId}`,
     default: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
   };
   const ttlKey = typeToTTL[type] || typeToTTL.default;
   const ttl = getTtlPosting(percentage, minRc);
+  await redisSetter.set({ key: ttlKey, value: '' });
+  await redisSetter.expire({ key: ttlKey, ttl });
+};
+
+const setContinueTtl = async ({
+  user, importId, type, ttl,
+}) => {
+  const typeToTTL = {
+    [IMPORT_TYPES.THREADS]: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+    [IMPORT_TYPES.POST_IMPORT]: `${IMPORT_REDIS_KEYS.CONTINUE_POST_IMPORT}:${user}:${importId}`,
+    default: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
+  };
+  const ttlKey = typeToTTL[type] || typeToTTL.default;
   await redisSetter.set({ key: ttlKey, value: '' });
   await redisSetter.expire({ key: ttlKey, ttl });
 };
@@ -313,4 +328,5 @@ module.exports = {
   validatePostingToRun,
   checkAndIncrementDailyLimit,
   setContinueTTlByAnotherKeyExpire,
+  setContinueTtl,
 };

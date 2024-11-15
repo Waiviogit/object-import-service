@@ -43,6 +43,7 @@
     "openai": "^4.56.1",
     "redis": "^2.8.0",
     "rsmq": "^0.10.0",
+    "speakingurl": "^14.0.1",
     "swagger-ui-express": "^4.5.0",
     "unidecode": "^1.1.0",
     "ws": "^8.13.0"

@@ -25,8 +25,10 @@ const IMPORT_REDIS_KEYS = {
   CONTINUE_DESCRIPTION: 'continue_description',
   CONTINUE_TAGS: 'continue_tags',
   CONTINUE_THREADS: 'continue_threads',
+  CONTINUE_POST_IMPORT: 'continue_post_import',
   MIN_POWER: 'min_power',
   MIN_RC_THREADS: 'min_rc_threads',
+  MIN_RC_POST_IMPORT: 'min_rc_post_import',
   MIN_POWER_AUTHORITY: 'min_power_authority',
   MIN_POWER_DEPARTMENTS: 'min_power_departments',
   MIN_POWER_DUPLICATE: 'min_power_duplicate',
@@ -113,6 +115,7 @@ const IMPORT_TYPES = {
   DESCRIPTION: 'description',
   TAGS: 'tags',
   THREADS: 'threads',
+  POST_IMPORT: 'postImport',
 };
 
 module.exports = {
