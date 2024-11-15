@@ -57,6 +57,7 @@ exports.WHITE_LIST = [
   'dailydining',
   'waivio_nowayjose-cuisin',
   'waivio_jennadenise',
+  'waivio_girlitsmolly',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
