@@ -58,6 +58,7 @@ exports.WHITE_LIST = [
   'waivio_nowayjose-cuisin',
   'waivio_jennadenise',
   'waivio_girlitsmolly',
+  'nowayjosecusine',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
