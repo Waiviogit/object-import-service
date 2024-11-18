@@ -4,7 +4,9 @@ const {
 const { createUUID } = require('../../helpers/cryptoHelper');
 const importPost = require('./postImport');
 
-const createPostTask = async ({ posts, user, dailyLimit }) => {
+const createPostTask = async ({
+  posts, user, dailyLimit, host,
+}) => {
   const importId = createUUID();
 
   const { result } = await PostStatusModel.create({
@@ -12,6 +14,7 @@ const createPostTask = async ({ posts, user, dailyLimit }) => {
     user,
     postsTotal: posts.length,
     dailyLimit,
+    host,
   });
   await PostImportModel.insertMany(posts);
   importPost({ importId, user });

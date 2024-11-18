@@ -5,6 +5,7 @@ module.exports = {
   GuestManaModel: require('./waivioDb/GuestManaModel'),
   ServiceBotModel: require('./waivioDb/ServiceBotModel'),
   App: require('./waivioDb/AppModel'),
+  UserModel: require('./waivioDb/UserModel'),
   DatafinityObject: require('./importDb/DatafinityObjectModel'),
   ImportStatusModel: require('./importDb/ImportStatusModel'),
   AuthorityStatusModel: require('./importDb/AuthorityStatusModel'),

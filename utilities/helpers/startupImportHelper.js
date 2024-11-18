@@ -7,6 +7,7 @@ const {
   TagsStatusModel,
   RecipeGenerationStatusModel,
   ThreadStatusModel,
+  PostStatusModel,
 } = require('../../models');
 const { startObjectImport } = require('../services/objectsImport/importDatafinityObjects');
 const { IMPORT_STATUS } = require('../../constants/appData');
@@ -17,6 +18,7 @@ const rewriteDescription = require('../services/descriptionBot/rewriteDescriptio
 const createTags = require('../services/tagsBot/createTags');
 const { generateRecipeAndImage } = require('../services/recipeGeneration/recipeGeneration');
 const threadMessage = require('../services/groupMessageThread/threadMessage');
+const importPost = require('../services/postsBot/postImport');
 
 const tasksToRun = [
   {
@@ -51,6 +53,10 @@ const tasksToRun = [
   {
     model: ThreadStatusModel,
     processStarter: threadMessage,
+  },
+  {
+    model: PostStatusModel,
+    processStarter: importPost,
   },
 ];
 

@@ -25,6 +25,7 @@ module.exports = {
   closeMongoConnections,
   models: {
     WObject: require('./schemas/wObjectSchema'),
+    User: require('./schemas/UserSchema'),
     ObjectType: require('./schemas/ObjectTypeSchema'),
     Department: require('./schemas/DepartmentSchema'),
     GuestMana: require('./schemas/GuestManaSchema'),

@@ -2183,7 +2183,273 @@
         }
       }
     },
-    "/import-objects-service/tags-bot/rc": {
+    "/import-objects-service/threads/rc": {
+      "get": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "get import rc",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/import-products-rc"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "update rc",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-rc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/import-products-rc"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/post-import": {
+      "post": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "starts tags bot",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PostCreateBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PostImportStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "get active import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PostImportStatus"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "update import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-put"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PostImportStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "delete claim job",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "delete import",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/import-products-in-delete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PostImportStatus"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/post-import/history": {
+      "get": {
+        "tags": [
+          "threads-bot"
+        ],
+        "summary": "get history",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PostImportStatus"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/post-import/rc": {
       "get": {
         "tags": [
           "threads-bot"
@@ -2254,6 +2520,43 @@
     }
   },
   "definitions": {
+    "PostCreateBody": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "The user making the request",
+          "example": "example-user"
+        },
+        "host": {
+          "type": "string"
+        },
+        "dailyLimit": {
+          "type": "integer"
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["groupPermlink", "pagePermlink", "user"]
+    },
     "ThreadCreateBody": {
       "type": "object",
       "properties": {
@@ -2279,6 +2582,9 @@
           "default": 0,
           "description": "Number of results to skip"
         },
+        "dailyLimit": {
+          "type": "integer"
+        },
         "user": {
           "type": "string",
           "description": "The user making the request",
@@ -2297,6 +2603,56 @@
         }
       },
       "required": ["groupPermlink", "pagePermlink", "user"]
+    },
+    "PostImportStatus" : {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "The user making the request",
+          "example": "example-user"
+        },
+        "importId": {
+          "type": "string",
+          "description": "The unique identifier for the import",
+          "example": "123456789"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the import",
+          "enum": ["pending", "active", "onHold", "finished", "deleted", "waitingRecover"],
+          "default": "PENDING"
+        },
+        "dailyLimit": {
+          "type": "integer",
+          "description": "Daily limit of users",
+          "default": 0
+        },
+        "postsTotal": {
+          "type": "integer",
+          "default": 0
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postsProcessed": {
+          "type": "integer",
+          "default": 0
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-10-15T12:00:00Z"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-10-15T12:00:00Z"
+        }
+      }
     },
     "ThreadStatus": {
       "type": "object",
@@ -2366,6 +2722,11 @@
           "type": "integer",
           "description": "Number of users that have been processed",
           "default": 0
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-10-15T12:00:00Z"
         },
         "finishedAt": {
           "type": "string",

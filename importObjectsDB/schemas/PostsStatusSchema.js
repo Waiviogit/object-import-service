@@ -10,6 +10,7 @@ const PostsStatusSchema = new Schema({
   status: {
     type: String, required: true, enum: Object.values(IMPORT_STATUS), default: IMPORT_STATUS.PENDING,
   },
+  host: { type: String },
   posts: { type: [String] },
   postsTotal: { type: Number, default: 0 },
   postsProcessed: { type: Number, default: 0 },

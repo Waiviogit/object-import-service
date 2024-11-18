@@ -59,3 +59,18 @@ exports.broadcastComment = async ({
     return { error };
   }
 };
+
+exports.postWithOptions = async ({ comment, options, key }) => {
+  try {
+    const client = await getClient('test:hive:post');
+    return {
+      result: await client.broadcast
+        .commentWithOptions(comment, options, PrivateKey.fromString(key)),
+    };
+  } catch (error) {
+    if (error.message === 'Invalid parameters') {
+      return { error: { message: 'Invalid parameters', status: 422 } };
+    }
+    return { error };
+  }
+};
