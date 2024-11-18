@@ -36,6 +36,7 @@ const IMPORT_REDIS_KEYS = {
   MIN_POWER_TAGS: 'min_power_tags',
   STOP_FOR_RECOVER: 'stop_for_recover',
   PENDING: 'pending',
+  POSTING_HOST: 'post_import_host',
 };
 
 const IMPORT_GLOBAL_SETTINGS = {

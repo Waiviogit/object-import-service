@@ -35,6 +35,10 @@
     {
       "name": "threads-bot",
       "description": "threads-bot"
+    },
+    {
+      "name": "post-import",
+      "description": "post-import"
     }
   ],
   "schemes": [
@@ -2407,7 +2411,7 @@
     "/import-objects-service/post-import/history": {
       "get": {
         "tags": [
-          "threads-bot"
+          "post-import"
         ],
         "summary": "get history",
         "produces": [
@@ -2452,7 +2456,7 @@
     "/import-objects-service/post-import/rc": {
       "get": {
         "tags": [
-          "threads-bot"
+          "post-import"
         ],
         "summary": "get import rc",
         "produces": [
@@ -2483,7 +2487,7 @@
       },
       "put": {
         "tags": [
-          "threads-bot"
+          "post-import"
         ],
         "summary": "update rc",
         "produces": [
@@ -2510,6 +2514,90 @@
             "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/import-products-rc"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/import-objects-service/post-import/host": {
+      "get": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "get import host",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "post-import"
+        ],
+        "summary": "set host",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -2555,7 +2643,6 @@
           }
         }
       },
-      "required": ["groupPermlink", "pagePermlink", "user"]
     },
     "ThreadCreateBody": {
       "type": "object",

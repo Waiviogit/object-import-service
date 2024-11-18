@@ -10,3 +10,8 @@ exports.postImportSchema = Joi.object().keys({
     tags: Joi.array().items(Joi.string()),
   })),
 });
+
+exports.postHostSchema = Joi.object().keys({
+  host: Joi.string(),
+  user: Joi.string().required(),
+});

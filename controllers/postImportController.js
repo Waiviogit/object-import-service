@@ -62,6 +62,40 @@ const getRC = async (req, res, next) => {
   return res.status(200).json({ minRc: MIN_RC_POSTING_DEFAULT, user: value.user });
 };
 
+const setHost = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.threadValidator.postHostSchema,
+    next,
+  );
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  if (!value) return;
+  await redisSetter.set({
+    key: `${IMPORT_REDIS_KEYS.POSTING_HOST}:${value.user}`,
+    value: value.host,
+  });
+
+  return res.status(200).json(value);
+};
+
+const getHost = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.importWobjects.postHostSchema,
+    next,
+  );
+  if (!value) return;
+
+  const key = `${IMPORT_REDIS_KEYS.POSTING_HOST}:${value.user}`;
+  const host = await redisGetter.get({ key });
+  return res.status(200).json({ host: host ?? '' });
+};
+
 const getImportHistory = async (req, res, next) => {
   const value = validators.validate(
     req.query,
@@ -137,4 +171,6 @@ module.exports = {
   getImportStatistic,
   deleteImport,
   changeImportDetails,
+  getHost,
+  setHost,
 };

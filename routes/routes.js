@@ -131,6 +131,9 @@ objects.route('/post-import')
 objects.route('/post-import/rc')
   .get(postImportController.getRC)
   .put(postImportController.setRC);
+objects.route('/post-import/host')
+  .get(postImportController.getHost)
+  .put(postImportController.setHost);
 objects.route('/post-import/history')
   .get(postImportController.getImportHistory);
 
