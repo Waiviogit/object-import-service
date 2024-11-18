@@ -11,6 +11,7 @@ const { IMPORT_TYPES, IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../../con
 const { postWithOptions } = require('../../hiveApi/broadcastUtil');
 const { createPostPermlink } = require('../../helpers/permlinkGenerator');
 const { createGuestPost } = require('../../objectBotApi/guestPost');
+const { sendUpdateImportForUser } = require('../socketClient');
 
 const KEY_DAILY_LIMIT = 'dailyLimitPostsImport';
 const CONTINUE_TTL_SEC = 60 * 5;
@@ -93,6 +94,7 @@ const importPost = async ({ importId, user }) => {
   const { result: post } = await PostImportModel.findOne({ filter: { importId } });
   if (!post) {
     await PostStatusModel.finishImport({ importId });
+    await sendUpdateImportForUser({ account: user });
     const pending = await PostStatusModel.getPendingImport({ user });
     if (pending) importPost({ importId: pending.importId, user });
   }
@@ -131,6 +133,7 @@ const importPost = async ({ importId, user }) => {
     filter: { importId },
     update: { $inc: { postsProcessed: 1 }, $addToSet: { posts: `${result.author}/${result.permlink}` } },
   });
+  await sendUpdateImportForUser({ account: user });
   await setContinueTtl({
     user, importId, type: IMPORT_TYPES.POST_IMPORT, ttl: CONTINUE_TTL_SEC,
   });
