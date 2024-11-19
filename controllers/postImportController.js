@@ -86,7 +86,7 @@ const setHost = async (req, res, next) => {
 const getHost = async (req, res, next) => {
   const value = validators.validate(
     req.query,
-    validators.postImportValidator.postHostSchema,
+    validators.importWobjects.getPowerSchema,
     next,
   );
   if (!value) return;
