@@ -65,7 +65,7 @@ const getRC = async (req, res, next) => {
 const setHost = async (req, res, next) => {
   const value = validators.validate(
     req.body,
-    validators.threadValidator.postHostSchema,
+    validators.postImportValidator.postHostSchema,
     next,
   );
   const { error: authError } = await authorise({
@@ -86,7 +86,7 @@ const setHost = async (req, res, next) => {
 const getHost = async (req, res, next) => {
   const value = validators.validate(
     req.query,
-    validators.importWobjects.postHostSchema,
+    validators.postImportValidator.postHostSchema,
     next,
   );
   if (!value) return;
