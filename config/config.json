@@ -30,7 +30,8 @@
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
       "CREATE_OBJECT_ROUTE": "/create-object",
       "APPEND_OBJECT_ROUTE": "/append-object",
-      "VOTE_ROUTE": "/vote-field"
+      "VOTE_ROUTE": "/vote-field",
+      "CREATE_COMMENT": "/guest-create-comment"
     }
   },
   "staging": {
@@ -64,7 +65,8 @@
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
       "CREATE_OBJECT_ROUTE": "/create-object",
       "APPEND_OBJECT_ROUTE": "/append-object",
-      "VOTE_ROUTE": "/vote-field"
+      "VOTE_ROUTE": "/vote-field",
+      "CREATE_COMMENT": "/guest-create-comment"
     }
   },
   "development": {
@@ -98,7 +100,8 @@
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
       "CREATE_OBJECT_ROUTE": "/create-object",
       "APPEND_OBJECT_ROUTE": "/append-object",
-      "VOTE_ROUTE": "/vote-field"
+      "VOTE_ROUTE": "/vote-field",
+      "CREATE_COMMENT": "/guest-create-comment"
     }
   },
   "test": {
@@ -132,7 +135,8 @@
       "CREATE_OBJECT_TYPE_ROUTE": "/create-object-type",
       "CREATE_OBJECT_ROUTE": "/create-object",
       "APPEND_OBJECT_ROUTE": "/append-object",
-      "VOTE_ROUTE": "/vote-field"
+      "VOTE_ROUTE": "/vote-field",
+      "CREATE_COMMENT": "/guest-create-comment"
     }
   }
 }

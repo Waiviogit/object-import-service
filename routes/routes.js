@@ -7,6 +7,7 @@ const {
   descriptionBotController,
   addTagsController,
   threadsController,
+  postImportController,
 } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
@@ -121,5 +122,19 @@ objects.route('/threads/rc')
   .put(threadsController.setRC);
 objects.route('/threads/history')
   .get(threadsController.getImportHistory);
+
+objects.route('/post-import')
+  .post(postImportController.createTask)
+  .get(postImportController.getImportStatistic)
+  .put(postImportController.changeImportDetails)
+  .delete(postImportController.deleteImport);
+objects.route('/post-import/rc')
+  .get(postImportController.getRC)
+  .put(postImportController.setRC);
+objects.route('/post-import/host')
+  .get(postImportController.getHost)
+  .put(postImportController.setHost);
+objects.route('/post-import/history')
+  .get(postImportController.getImportHistory);
 
 module.exports = routes;

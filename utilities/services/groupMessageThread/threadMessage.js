@@ -65,6 +65,7 @@ const threadMessage = async ({ importId, user }) => {
   const messageInfo = await ThreadMessageModel.findOneToProcess({ importId });
   if (!messageInfo) {
     await ThreadStatusModel.finishImport({ importId });
+    await sendUpdateImportForUser({ account: user });
     const pending = await ThreadStatusModel.getPendingImport({ user });
     if (pending) threadMessage({ importId: pending.importId, user });
     return;

@@ -5,6 +5,7 @@ module.exports = {
   GuestManaModel: require('./waivioDb/GuestManaModel'),
   ServiceBotModel: require('./waivioDb/ServiceBotModel'),
   App: require('./waivioDb/AppModel'),
+  UserModel: require('./waivioDb/UserModel'),
   DatafinityObject: require('./importDb/DatafinityObjectModel'),
   ImportStatusModel: require('./importDb/ImportStatusModel'),
   AuthorityStatusModel: require('./importDb/AuthorityStatusModel'),
@@ -22,4 +23,6 @@ module.exports = {
   RecipeGenerationStatusModel: require('./importDb/RecipeGenerationStatusModel'),
   ThreadStatusModel: require('./importDb/ThreadStatusModel'),
   ThreadMessageModel: require('./importDb/ThreadMessageModel'),
+  PostImportModel: require('./importDb/PostImportModel'),
+  PostStatusModel: require('./importDb/PostStatusModel'),
 };

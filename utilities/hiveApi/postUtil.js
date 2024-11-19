@@ -18,3 +18,17 @@ exports.getAccountPosts = async ({
     return { error };
   }
 };
+
+exports.getPost = async ({ author, permlink }) => {
+  try {
+    const client = await getClient('test:hive:post');
+    const post = await client.database.call('get_content', [author, permlink]);
+
+    if (post.author) {
+      return { post };
+    }
+    return { error: { message: 'Post not found!', status: 404 } };
+  } catch (e) {
+    return { error: { message: 'Post not found!', status: 404 } };
+  }
+};

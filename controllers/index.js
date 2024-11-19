@@ -6,4 +6,5 @@ module.exports = {
   descriptionBotController: require('./descriptionBotController'),
   addTagsController: require('./addTagsController'),
   threadsController: require('./threadsController'),
+  postImportController: require('./postImportController'),
 };
