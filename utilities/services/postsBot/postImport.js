@@ -44,7 +44,7 @@ const publishPost = async ({
     const beneficiaryAcc = await UserModel.getGuestBeneficiaryAccount({ name: author });
 
     beneficiaries.push({
-      account: beneficiaryAcc ?? 'waivio.hpower',
+      account: beneficiaryAcc || 'waivio.hpower',
       weight: 9700,
     });
   }
@@ -127,7 +127,7 @@ const importPost = async ({ importId, user }) => {
     });
     return;
   }
-  console.log(`[INFO][POST_IMPORT]${user} published post ${result}`);
+  console.log(`[INFO][POST_IMPORT]${user} published post ${JSON.stringify(result)}`);
   await PostImportModel.deleteOne({ filter: { _id: post._id } });
   await PostStatusModel.updateOne({
     filter: { importId },

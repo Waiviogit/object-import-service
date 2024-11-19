@@ -11,6 +11,7 @@ const { redisGetter, redisSetter } = require('../utilities/redis');
 const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 const { guestMana } = require('../utilities/guestUser');
+const { getCurrentMana, MANA_CONSUMPTION } = require('../utilities/guestUser/guestMana');
 
 const POSTING_AUTHORITIES_ERROR = 'There is no data import authorization. Please go to the Data Import page and activate it.';
 
@@ -280,7 +281,31 @@ const setContinueTtl = async ({
   await redisSetter.expire({ key: ttlKey, ttl });
 };
 
+const validateGuestPostingToRun = async ({ user, type, importId }) => {
+  const minRc = await getAllowedRC({ user, type });
+
+  const mana = await getCurrentMana(user); // mana max is 1000
+  const adjustedMana = mana * 10;
+
+  const consumptionTypes = {
+    [IMPORT_TYPES.THREADS]: MANA_CONSUMPTION.COMMENT,
+    [IMPORT_TYPES.POST_IMPORT]: MANA_CONSUMPTION.POST,
+  };
+
+  const requiredMana = consumptionTypes[type] || consumptionTypes[IMPORT_TYPES.POST_IMPORT];
+
+  if (adjustedMana > minRc && mana > requiredMana) return true;
+
+  await savePostingTtl({
+    user, type, importId, percentage: adjustedMana, minRc,
+  });
+
+  return false;
+};
+
 const validatePostingToRun = async ({ user, type, importId }) => {
+  if (user.includes('_')) return validateGuestPostingToRun({ user, type, importId });
+
   const minRc = await getAllowedRC({ user, type });
   const { percentage, current_mana, max_mana } = await getAccountRC(user);
   const validRc = getValidRcComment({

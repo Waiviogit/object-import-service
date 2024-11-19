@@ -3,6 +3,8 @@ const { GuestManaModel } = require('../../models');
 const MANA_CONSUMPTION = {
   FIELD_VOTE: 2,
   FIELD: 1,
+  POST: 100,
+  COMMENT: 25,
 };
 
 // if become global set to redis
@@ -79,4 +81,5 @@ module.exports = {
   setImportStatus,
   getImportStatus,
   getManaRecord,
+  MANA_CONSUMPTION,
 };
