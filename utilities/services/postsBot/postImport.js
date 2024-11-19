@@ -97,6 +97,7 @@ const importPost = async ({ importId, user }) => {
     await sendUpdateImportForUser({ account: user });
     const pending = await PostStatusModel.getPendingImport({ user });
     if (pending) importPost({ importId: pending.importId, user });
+    return;
   }
 
   if (dailyLimit > 0) {
