@@ -37,6 +37,7 @@ const IMPORT_REDIS_KEYS = {
   STOP_FOR_RECOVER: 'stop_for_recover',
   PENDING: 'pending',
   POSTING_HOST: 'post_import_host',
+  LAST_POSTING_TIME: 'last_posting_time',
 };
 
 const IMPORT_GLOBAL_SETTINGS = {

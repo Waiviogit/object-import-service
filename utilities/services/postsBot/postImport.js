@@ -12,9 +12,24 @@ const { postWithOptions } = require('../../hiveApi/broadcastUtil');
 const { createPostPermlink } = require('../../helpers/permlinkGenerator');
 const { createGuestPost } = require('../../objectBotApi/guestPost');
 const { sendUpdateImportForUser } = require('../socketClient');
+const { redisSetter, redisGetter } = require('../../redis');
 
 const KEY_DAILY_LIMIT = 'dailyLimitPostsImport';
 const CONTINUE_TTL_SEC = 60 * 5;
+
+const setLastPostingTime = async ({ user }) => {
+  const key = `${IMPORT_REDIS_KEYS.LAST_POSTING_TIME}:${user}`;
+  await redisSetter.set({ key, value: Date.now() });
+};
+
+const validateLastPostingTime = async ({ user }) => {
+  const key = `${IMPORT_REDIS_KEYS.LAST_POSTING_TIME}:${user}`;
+  const now = Date.now();
+  const value = await redisGetter.get({ key });
+  if (!value) return true;
+  const diffInSec = Math.round((now - parseInt(value, 10)) / 1000);
+  return diffInSec > CONTINUE_TTL_SEC;
+};
 
 const publishPost = async ({
   author, body, title, tags, host,
@@ -100,6 +115,14 @@ const importPost = async ({ importId, user }) => {
     return;
   }
 
+  const validTime = await validateLastPostingTime({ user });
+  if (!validTime) {
+    await setContinueTtl({
+      user, importId, type: IMPORT_TYPES.POST_IMPORT, ttl: CONTINUE_TTL_SEC,
+    });
+    return;
+  }
+
   if (dailyLimit > 0) {
     const key = `${KEY_DAILY_LIMIT}:${user}:${importId}`;
     const { limitExceeded } = await checkAndIncrementDailyLimit({
@@ -132,12 +155,15 @@ const importPost = async ({ importId, user }) => {
   await PostImportModel.deleteOne({ filter: { _id: post._id } });
   await PostStatusModel.updateOne({
     filter: { importId },
-    update: { $inc: { postsProcessed: 1 }, $addToSet: { posts: `${result.author}/${result.permlink}` } },
+    update: {
+      $inc: { postsProcessed: 1 },
+      $addToSet: { posts: `${result.author}/${result.permlink}` },
+    },
   });
   await sendUpdateImportForUser({ account: user });
-  await setContinueTtl({
-    user, importId, type: IMPORT_TYPES.POST_IMPORT, ttl: CONTINUE_TTL_SEC,
-  });
+
+  await setLastPostingTime({ user });
+  importPost({ importId, user });
 };
 
 module.exports = importPost;
