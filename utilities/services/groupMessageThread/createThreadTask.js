@@ -40,25 +40,24 @@ const processGroup = async ({ importId, user }) => {
   } = userImport;
 
   const users = [];
-  let nextCursor;
+  let cursor;
   while (true) {
     const {
-      result, hasMore, nextCursor: cursor, error,
+      result, hasMore, nextCursor, error,
     } = await getObjectGroup({
-      nextCursor,
+      cursor,
       limit: 50,
       authorPermlink: groupPermlink,
     });
-    nextCursor = cursor;
-
-    const filterGuest = result.filter((el) => !el.name.includes('_'));
-
-    users.push(...filterGuest.map((el) => ({ recipient: el.name, alias: el.alias })));
+    cursor = nextCursor;
 
     if (error) {
       await setTimeout(15000);
       continue;
     }
+
+    const filterGuest = result.filter((el) => !el.name.includes('_'));
+    users.push(...filterGuest.map((el) => ({ recipient: el.name, alias: el.alias })));
 
     // name push
     if (!hasMore) break;
