@@ -5,7 +5,7 @@ exports.postImportSchema = Joi.object().keys({
   host: Joi.string().hostname(),
   dailyLimit: Joi.number().integer().min(0).default(0),
   posts: Joi.array().items(Joi.object().keys({
-    title: Joi.string().required(),
+    title: Joi.string().max(255).required(),
     body: Joi.string().required(),
     tags: Joi.array().items(Joi.string()),
   })),
