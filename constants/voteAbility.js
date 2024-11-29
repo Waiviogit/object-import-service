@@ -59,6 +59,7 @@ exports.WHITE_LIST = [
   'waivio_jennadenise',
   'waivio_girlitsmolly',
   'nowayjosecusine',
+  'manuphotos',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
