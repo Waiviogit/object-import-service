@@ -60,6 +60,7 @@ exports.WHITE_LIST = [
   'waivio_girlitsmolly',
   'nowayjosecusine',
   'manuphotos',
+  'waivio_brookie-mackenzi',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
