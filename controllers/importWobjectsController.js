@@ -240,12 +240,6 @@ const authorizeGuestImportStatus = async (req, res, next) => {
     next,
   );
 
-  const { error: authError } = await authorise({
-    username: value.account,
-    ...getAccessTokensFromReq(req),
-  });
-  if (authError) return next(authError);
-
   if (!value) return;
   const { result, error } = await guestMana.getImportStatus(value);
   if (error) return next(error);
