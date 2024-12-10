@@ -62,18 +62,12 @@ const setImportStatus = async ({ account, importAuthorization }) => {
   };
 };
 
-const getImportStatus = async ({ account }) => {
-  const record = await getManaRecord(account);
-
-  if (!record) return { error: { status: 404, message: 'not Found' } };
-
-  return {
-    result: {
-      account: record.account,
-      importAuthorization: record.importAuthorization,
-    },
-  };
-};
+const getImportStatus = async ({ account }) => ({
+  result: {
+    account,
+    importAuthorization: true,
+  },
+});
 
 module.exports = {
   getCurrentMana,
