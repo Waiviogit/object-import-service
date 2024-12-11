@@ -37,7 +37,7 @@ const importAccountValidator = async (user, voteCost) => {
   const { result: abilityToVote, error: engineError } = await checkVotePower(user, voteCost);
   if (engineError) {
     console.log(user, 'checkVotePower Error');
-    return { result: false, error: { status: '409', message: 'Hive Engine facing problems. Please try again later.' } };
+    return { result: false, error: { status: '409', message: engineError.message || 'Hive Engine facing problems. Please try again later.' } };
   }
 
   if (!abilityToVote) {

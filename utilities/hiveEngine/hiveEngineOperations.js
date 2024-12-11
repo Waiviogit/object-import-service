@@ -21,10 +21,18 @@ exports.calculateHiveEngineVote = async ({
     commentContract.getVotingPower({ rewardPoolId: poolId, account }),
   ]);
 
-  for (const req of requests) {
+  for (const [index, req] of requests.entries()) {
     if (_.has(req, 'error') || _.isEmpty(req)) {
+      const errorMessages = {
+        0: 'No info About SMT pool',
+        1: 'No info about user WAIV balance',
+        2: 'No info about current price',
+        3: 'No info about user voting power',
+      };
+      const message = errorMessages[index];
+
       return {
-        engineVotePrice: 0, rshares: 0, rewards, error: req?.error ?? {},
+        engineVotePrice: 0, rshares: 0, rewards, error: req?.error ?? { message },
       };
     }
   }
