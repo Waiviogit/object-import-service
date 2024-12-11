@@ -97,6 +97,7 @@ const createCompanyId = async (object, apiKey) => {
 
   createdFieldsCount++;
   await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
+  console.log(`field created ${object.author_permlink} fields created ${createdFieldsCount}`);
   await setTimeout(1000);
 };
 
@@ -115,8 +116,6 @@ const addCompanyId = async (apiKey) => {
       for (const object of objects) {
         await createCompanyId(object, apiKey);
       }
-
-      console.log(`createdFieldsCount: ${createdFieldsCount}`);
     }
     console.log('Task Finished');
   } catch (error) {
