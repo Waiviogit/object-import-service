@@ -25,6 +25,12 @@ const guestImportAccountValidator = async (account) => {
 
   if (!abilityToVote) return { result: false, error: { status: '409', message: 'Not enough vote power' } };
 
+  const manaRecord = await guestMana.getManaRecord(account);
+  const postingAuthorities = manaRecord.importAuthorization;
+  if (!postingAuthorities) {
+    return { result: false, error: { status: '409', message: POSTING_AUTHORITIES_ERROR } };
+  }
+
   return { result: true };
 };
 
@@ -183,7 +189,9 @@ const validateGuestImportToRun = async ({
   const validMana = await guestMana.validateMana({ account: user });
   const validPercent = await guestVotePowerValidation({ account: user, type });
 
-  if (!validMana || !validPercent) {
+  const manaRecord = await guestMana.getManaRecord(user);
+  const authorizedImport = manaRecord.importAuthorization;
+  if (!validMana || !validPercent || !authorizedImport) {
     await setTtlToContinue({
       user, importId, type, authorPermlink,
     });
