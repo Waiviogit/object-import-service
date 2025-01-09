@@ -61,6 +61,7 @@ exports.WHITE_LIST = [
   'nowayjosecusine',
   'manuphotos',
   'waivio_brookie-mackenzi',
+  'treasure.trove',
 ];
 
 exports.WHITE_LIST_KEY = 'white_list_import';
