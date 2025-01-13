@@ -261,9 +261,9 @@ const savePostingTtl = async ({
     default: `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`,
   };
   const ttlKey = typeToTTL[type] || typeToTTL.default;
-  const ttl = getTtlPosting(percentage, minRc);
-  await redisSetter.set({ key: ttlKey, value: '' });
-  await redisSetter.expire({ key: ttlKey, ttl });
+  const ttlSeconds = getTtlPosting(percentage, minRc);
+
+  await redisSetter.setEx({ key: ttlKey, value: '', ttlSeconds });
 };
 
 const setContinueTtl = async ({
@@ -321,8 +321,7 @@ const checkAndIncrementDailyLimit = async ({ key, limit }) => {
   let count = await redisGetter.get({ key });
 
   if (!count) {
-    await redisSetter.set({ key, value: 1 });
-    await redisSetter.expire({ key, ttl: 86400 });
+    await redisSetter.setEx({ key, value: 1, ttlSeconds: 86400 });
     return { currentCount: 1, limitExceeded: false };
   }
 
@@ -338,11 +337,10 @@ const checkAndIncrementDailyLimit = async ({ key, limit }) => {
 };
 
 const setContinueTTlByAnotherKeyExpire = async ({ keyForTTL, keyToContinue }) => {
-  const ttl = await redisGetter.ttl({ key: keyForTTL });
-  if (ttl < 0) return; // -1 constant -2 don't exist
+  let ttlSeconds = await redisGetter.ttl({ key: keyForTTL });
+  if (ttlSeconds < 0) ttlSeconds = 1; // -1 constant -2 don't exist
 
-  await redisSetter.set({ key: keyToContinue, value: '' });
-  await redisSetter.expire({ key: keyToContinue, ttl });
+  await redisSetter.setEx({ key: keyToContinue, value: '', ttlSeconds });
 };
 
 module.exports = {

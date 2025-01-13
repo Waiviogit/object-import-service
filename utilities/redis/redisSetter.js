@@ -25,6 +25,19 @@ const incr = async ({ key, client = importWobjectsDataClient }) => client
 const expire = async ({ key, ttl, client = importWobjectsDataClient }) => client
   .expireAsync(key, ttl);
 
+const setEx = async ({
+  key,
+  value,
+  ttlSeconds,
+  client = importWobjectsDataClient,
+}) => {
+  try {
+    await client.setAsync(key, value, 'EX', ttlSeconds);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 module.exports = {
   setImportWobjData,
   delImportWobjData,
@@ -32,4 +45,5 @@ module.exports = {
   set,
   expire,
   incr,
+  setEx,
 };

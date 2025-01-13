@@ -90,10 +90,7 @@ const threadMessage = async ({ importId, user }) => {
     });
     if (limitExceeded) {
       const keyToContinue = `${IMPORT_REDIS_KEYS.CONTINUE_THREADS}:${user}:${importId}`;
-      await setContinueTTlByAnotherKeyExpire({
-        keyForTTL: key,
-        keyToContinue,
-      });
+      await setContinueTTlByAnotherKeyExpire({ keyForTTL: key, keyToContinue });
       return;
     }
   }
