@@ -1,4 +1,4 @@
-const { importWobjectsDataClient } = require('./redis');
+const { importWobjectsDataClient, botsData } = require('./redis');
 const { importRsmqClient } = require('./rsmq');
 
 const getHashAll = async function (key, client = importWobjectsDataClient) {
@@ -20,6 +20,17 @@ const getQueueLength = async (qname = 'import_wobjects', client = importRsmqClie
   }
 };
 
+const sismember = async ({
+  key, member, client = botsData,
+}) => {
+  try {
+    const result = await client.sismemberAsync(key, member);
+    return !!result;
+  } catch (error) {
+    return false;
+  }
+};
+
 module.exports = {
-  getHashAll, get, getQueueLength, ttl,
+  getHashAll, get, getQueueLength, ttl, sismember,
 };

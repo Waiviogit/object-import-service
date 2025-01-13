@@ -14,7 +14,7 @@ const delImportWobjData = async (key) => {
   }
 };
 
-const sadd = async ({ key, data, client = botsData }) => client.saddAsync(key, ...data);
+const sadd = async ({ key, member, client = botsData }) => client.saddAsync(key, member);
 
 const set = async ({ key, value, client = importWobjectsDataClient }) => client
   .setAsync(key, value);

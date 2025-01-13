@@ -9,11 +9,12 @@ const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
-const { getVoteCostInitial, bufferToArray, filterImportObjects } = require('../utilities/helpers/importDatafinityHelper');
+const { bufferToArray, filterImportObjects } = require('../utilities/helpers/importDatafinityHelper');
 const { getNotPublishedAsins } = require('../utilities/services/parseAsinsByUri');
 const { restGptQuery } = require('../utilities/services/gptService');
 const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 const { guestMana } = require('../utilities/guestUser');
+const { VOTE_COST } = require('../constants/voteAbility');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -65,7 +66,7 @@ const importObjectsFromTextOrJson = async (req, res, next) => {
 
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
-    getVoteCostInitial(value.user),
+    VOTE_COST.INITIAL,
   );
   if (!validAcc) return next(accError);
 
@@ -255,7 +256,7 @@ const validateUserImport = async (req, res, next) => {
 
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
-    getVoteCostInitial(value.user),
+    VOTE_COST.INITIAL,
   );
   if (!validAcc) return next(accError);
   return res.status(200).json({ result: true });
