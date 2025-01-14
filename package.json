@@ -13,7 +13,8 @@
     "getQueueAttributes": "node ./utilities/redis/rsmq/getQueueAttributes.js",
     "deleteQueueMessage": "node ./utilities/redis/rsmq/deleteQueueMessage.js",
     "setQueueVT": "node ./utilities/redis/rsmq/setQueueVT.js",
-    "addCompanyId": "node ./utilities/tasks/addCompanyId/run.js"
+    "addCompanyId": "node utilities/tasks/addCompanyId/run.js",
+    "addWhiteList": "node utilities/tasks/addWhiteList/run.js"
   },
   "dependencies": {
     "@hiveio/dhive": "^1.2.3",

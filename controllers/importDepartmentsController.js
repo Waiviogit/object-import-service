@@ -2,10 +2,11 @@ const validators = require('./validators');
 const departmentsService = require('../utilities/services/departmentsService');
 const { authorise } = require('../utilities/authorization/authorizeUser');
 const { importAccountValidator } = require('../validators/accountValidator');
-const { getVoteCostInitial } = require('../utilities/helpers/importDatafinityHelper');
+
 const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT } = require('../constants/appData');
 const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
+const { VOTE_COST } = require('../constants/voteAbility');
 
 const importDepartments = async (req, res, next) => {
   const value = validators.validate(
@@ -23,7 +24,7 @@ const importDepartments = async (req, res, next) => {
 
   const { result: validAcc, error: accError } = await importAccountValidator(
     value.user,
-    getVoteCostInitial(value.user),
+    VOTE_COST.INITIAL,
   );
   if (!validAcc) return next(accError);
 

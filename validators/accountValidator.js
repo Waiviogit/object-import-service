@@ -8,10 +8,11 @@ const {
   IMPORT_REDIS_KEYS, DEFAULT_VOTE_POWER_IMPORT, IMPORT_TYPES, ONE_PERCENT_VOTE_RECOVERY, MIN_RC_POSTING_DEFAULT,
 } = require('../constants/appData');
 const { redisGetter, redisSetter } = require('../utilities/redis');
-const { getVoteCost, isUserInWhitelist } = require('../utilities/helpers/importDatafinityHelper');
 const { getTokenBalances, getRewardPool } = require('../utilities/hiveEngineApi/tokensContract');
 const { guestMana } = require('../utilities/guestUser');
 const { getCurrentMana, MANA_CONSUMPTION } = require('../utilities/guestUser/guestMana');
+const { checkWhiteList } = require('../utilities/helpers/whiteListHelper');
+const { VOTE_COST } = require('../constants/voteAbility');
 
 const POSTING_AUTHORITIES_ERROR = 'There is no data import authorization. Please go to the Data Import page and activate it.';
 
@@ -35,7 +36,7 @@ const guestImportAccountValidator = async (account) => {
 };
 
 const importAccountValidator = async (user, voteCost) => {
-  if (isUserInWhitelist(user)) return { result: true };
+  if (await checkWhiteList(user)) return { result: true };
 
   if (isGuestAccount(user)) return guestImportAccountValidator(user);
 
@@ -203,7 +204,7 @@ const validateGuestImportToRun = async ({
 const validateImportToRun = async ({
   user, importId, type, authorPermlink,
 }) => {
-  if (isUserInWhitelist(user)) return true;
+  if (await checkWhiteList(user)) return true;
 
   if (isGuestAccount(user)) {
     return validateGuestImportToRun({
@@ -211,7 +212,7 @@ const validateImportToRun = async ({
     });
   }
 
-  const { result: validAcc } = await importAccountValidator(user, getVoteCost(user));
+  const { result: validAcc } = await importAccountValidator(user, VOTE_COST.USUAL);
   const validVotePower = await votePowerValidation(
     { account: user, type },
   );

@@ -1,6 +1,4 @@
 const _ = require('lodash');
-
-const { WHITE_LIST, VOTE_COST } = require('../../constants/voteAbility');
 const {
   OBJECT_TYPES, PARENT_ASIN_FIELDS, OBJECT_FIELDS, VIRTUAL_FIELDS,
 } = require('../../constants/objectTypes');
@@ -16,18 +14,6 @@ const { createUUID } = require('./cryptoHelper');
 
 const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
 const SET_UNIQ_FIELDS_AUTHORITY = ['name', 'body', 'locale', 'creator'];
-
-const getVoteCost = (account) => {
-  if (_.includes(WHITE_LIST, account)) return VOTE_COST.FOR_WHITE_LIST;
-  return VOTE_COST.USUAL;
-};
-
-const getVoteCostInitial = (account) => {
-  if (_.includes(WHITE_LIST, account)) return VOTE_COST.INITIAL_FOR_WHITE_LIST;
-  return VOTE_COST.INITIAL;
-};
-
-const isUserInWhitelist = (account) => _.includes(WHITE_LIST, account);
 
 const checkBookInProduct = (products) => {
   let book = false;
@@ -396,13 +382,11 @@ const checkRatingFields = async ({ dbObject, dfObject }) => {
 
 module.exports = {
   filterImportObjects,
-  getVoteCost,
   bufferToArray,
   prepareObjectForImport,
   specialFieldsHelper,
   validateSameFields,
   checkAddress,
-  getVoteCostInitial,
   capitalizeEachWord,
   checkObjectExist,
   createReversedJSONStringArray,
@@ -412,5 +396,4 @@ module.exports = {
   isValidHttpUrl,
   getProductRating,
   checkRatingFields,
-  isUserInWhitelist,
 };
