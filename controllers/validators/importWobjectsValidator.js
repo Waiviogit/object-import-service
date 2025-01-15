@@ -59,3 +59,8 @@ exports.authorizeGuestUser = Joi.object().keys({
 exports.authorizeGuestUserStatus = Joi.object().keys({
   account: Joi.string().required(),
 });
+
+exports.generateRecipeSchema = Joi.object().keys({
+  user: Joi.string().required(),
+  description: Joi.string().required(),
+});

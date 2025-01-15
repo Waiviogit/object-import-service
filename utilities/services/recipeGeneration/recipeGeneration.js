@@ -28,7 +28,7 @@ categories - provide a list of categories to which this recipe can be assigned, 
 fieldCalories - total calories in recipe in calories
 fieldCookingTime - total cooking time in minutes and hours
 fieldBudget - cost to prepare, $ under 10$ , $$ under 100$, $$$ under 1000$
-fieldRecipeIngredients - list of recipe ingredients
+fieldRecipeIngredients - list of recipe ingredients, each starts with corresponding emoji
 example:
 { 
     "name" : "Greek Beef Stuffed Onions",
@@ -37,7 +37,41 @@ example:
     "fieldCalories": "291 Calories",
     "fieldCookingTime": "15 mins",
     "fieldBudget": "$",
-    "fieldRecipeIngredients": ["2 eggs", "¼ teaspoon water", "1 teaspoon olive oil", "1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "kosher salt and freshly ground black pepper to taste", "1 pinch cayenne pepper"],
+    "fieldRecipeIngredients": ["🥚 2 eggs", "💧 ¼ teaspoon water", "🫒 1 teaspoon olive oil", "🧀 1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "🌶️ kosher salt and freshly ground black pepper to taste", "🌶️ 1 pinch cayenne pepper"],
+}
+value of each field of an object should be in ${language} language
+return it like a string don't use code snippet symbols 
+`;
+
+const systemPromptDescription = (language = 'English') => `you are prompted to generate a recipe from the given description. 
+The response format should be a json object according to the following scheme: 
+{ 
+    "name" : "string",
+    "fieldDescription": "string",
+    "categories": "string[]",
+    "fieldCalories": "string",
+    "fieldCookingTime": "string",
+    "fieldBudget": "string",
+    "fieldRecipeIngredients": "string[]",
+}
+
+where: 
+name - name of recipe 
+fieldDescription - make description of a recipe, don't write recipe itself
+categories - provide a list of categories to which this recipe can be assigned, using a minimum of 5 and a maximum of 10 items, all in plural form.
+fieldCalories - total calories in recipe in calories, if not mention in description make an assumption
+fieldCookingTime - total cooking time in minutes and hours, if not mention in description make an assumption
+fieldBudget - cost to prepare, $ under 10$ , $$ under 100$, $$$ under 1000$ 
+fieldRecipeIngredients - list of recipe ingredients, if not mention in description make an assumption, each starts with corresponding emoji
+example:
+{ 
+    "name" : "Greek Beef Stuffed Onions",
+    "fieldDescription": "Greek Beef Stuffed Onions are a delightful Mediterranean dish that combines tender onions filled with a savory mixture of ground beef, herbs, and spices. To prepare, large onions are hollowed out, parboiled until soft, and then filled with a delicious stuffing made from ground beef, rice, garlic, fresh parsley, mint, cinnamon, and a hint of tomato. The stuffed onions are then baked in a rich tomato sauce until the beef is fully cooked and the flavors meld together beautifully. This dish is perfect as a main course or a hearty side, offering a unique and comforting taste of Greek cuisine. Serve hot, garnished with a sprinkle of fresh herbs and a drizzle of extra virgin olive oil for an authentic touch.",
+    "categories": ["Breakfasts","Eggs", "Omelet Recipes"],
+    "fieldCalories": "291 Calories",
+    "fieldCookingTime": "15 mins",
+    "fieldBudget": "$",
+    "fieldRecipeIngredients": ["🥚 2 eggs", "💧 ¼ teaspoon water", "🫒 1 teaspoon olive oil", "🧀 1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "🌶️ kosher salt and freshly ground black pepper to taste", "🌶️ 1 pinch cayenne pepper"],
 }
 value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
@@ -48,10 +82,10 @@ const imagePrompt = ({ name }) => `use your knowledge of the following dish and 
 const formatResponseToValidJson = (string = '') => string
   .replace(/```/gm, '')
   .replace('json', '')
-  .replace(/^"|"$/gm, '') // Remove the outermost quotes
-  .replace(/\\"/gm, '"') // Replace escaped quotes with actual quotes
-  .replace(/\\n/gm, '')
-  .replace(/\\\\/gm, '\\');
+  .replace(/^"|"$/g, '') // Remove the outermost quotes
+  .replace(/\\"/g, '"') // Replace escaped quotes with actual quotes
+  .replace(/\\n/g, '\n') // Convert escaped newlines into actual newlines
+  .replace(/\\\\/g, '\\');// Replace double backslashes with single backslashes
 
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
@@ -198,9 +232,23 @@ const createRecipeObjectsForImport = async ({
   generateRecipeAndImage({ importId });
 };
 
+const generateObjectByDescription = async ({ description = '' }) => {
+  const { result, error } = await gptSystemUserPrompt({
+    systemPrompt: systemPromptDescription(),
+    userPrompt: description,
+  });
+  if (error) return null;
+  const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
+  if (!formatedResponse) return null;
+  if (formatedResponse.fieldDescription) formatedResponse.fieldDescription += GPT_CRAFTED;
+
+  return formatedResponse;
+};
+
 module.exports = {
   generateRecipeImage,
   generateRecipe,
   createRecipeObjectsForImport,
   generateRecipeAndImage,
+  generateObjectByDescription,
 };

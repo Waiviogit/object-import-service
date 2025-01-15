@@ -389,6 +389,52 @@
         }
       }
     },
+    "/import-objects-service/import-products/recipe-generation": {
+      "post": {
+        "tags": [
+          "import"
+        ],
+        "summary": "generate recipe object for import",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "description": "update import minVotingPower",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/recipeObject"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
     "/import-objects-service/amazon-asins": {
       "post": {
         "tags": [
@@ -3206,6 +3252,43 @@
         },
         "importAuthorization": {
           "type": "boolean"
+        }
+      }
+    },
+    "recipeObject": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "fieldDescription": {
+              "type": "string"
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "fieldCalories": {
+              "type": "string"
+            },
+            "fieldCookingTime": {
+              "type": "string"
+            },
+            "fieldBudget": {
+              "type": "string"
+            },
+            "fieldRecipeIngredients": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     }

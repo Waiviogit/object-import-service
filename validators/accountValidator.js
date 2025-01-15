@@ -339,9 +339,11 @@ const checkAndIncrementDailyLimit = async ({ key, limit }) => {
 
 const setContinueTTlByAnotherKeyExpire = async ({ keyForTTL, keyToContinue }) => {
   let ttlSeconds = await redisGetter.ttl({ key: keyForTTL });
-  if (ttlSeconds < 0) ttlSeconds = 1; // -1 constant -2 don't exist
+  if (ttlSeconds <= 0) {
+    ttlSeconds = 1;
+  } // -1 constant -2 don't exist
 
-  await redisSetter.setEx({ key: keyToContinue, value: '', ttlSeconds });
+  await redisSetter.setEx({ key: keyToContinue, value: '', ttlSeconds: ttlSeconds + 30 });
 };
 
 module.exports = {

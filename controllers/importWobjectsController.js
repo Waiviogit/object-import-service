@@ -15,6 +15,7 @@ const { restGptQuery } = require('../utilities/services/gptService');
 const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 const { guestMana } = require('../utilities/guestUser');
 const { VOTE_COST } = require('../constants/voteAbility');
+const { generateObjectByDescription } = require('../utilities/services/recipeGeneration/recipeGeneration');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -262,6 +263,26 @@ const validateUserImport = async (req, res, next) => {
   return res.status(200).json({ result: true });
 };
 
+const generateRecipeFromDescription = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.generateRecipeSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { user, description } = value;
+
+  const { error: authError } = await authorise({
+    username: user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const result = await generateObjectByDescription({ description });
+  return res.status(200).json({ result });
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -278,4 +299,5 @@ module.exports = {
   authorizeGuestImport,
   authorizeGuestImportStatus,
   validateUserImport,
+  generateRecipeFromDescription,
 };
