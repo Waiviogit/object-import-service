@@ -229,14 +229,16 @@ const validateImportToRun = async ({
 
 const getTtlPosting = (rc, minRc) => {
   const diff = (minRc - rc) || 1;
-  return Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
+  const value = Math.round(ONE_PERCENT_VOTE_RECOVERY * (diff / 100));
+  if (value > 0) return value;
+  return 60 * 10;
 };
 
 const getValidRcComment = ({
   percentage, current_mana, max_mana, minRc,
 }) => {
   const currentMana = current_mana > max_mana ? max_mana : current_mana;
-  return percentage > minRc && currentMana > (COMMENT_RC_COST * 2);
+  return percentage > minRc && currentMana > (COMMENT_RC_COST * 1.2);
 };
 
 const getAllowedRC = async ({ user, type }) => {
