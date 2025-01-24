@@ -32,6 +32,11 @@ const getStatus = async (user) => {
   return IMPORT_STATUS.ACTIVE;
 };
 
+const getSliceTo = ({ skip, limit, resulLength }) => {
+  if (skip + limit === 0 || limit === 0) return resulLength;
+  return skip + limit;
+};
+
 const processGroup = async ({ importId, user }) => {
   const userImport = await ThreadStatusModel.getUserImport({ importId, user });
   if (!userImport) return;
@@ -65,7 +70,7 @@ const processGroup = async ({ importId, user }) => {
   }
   if (!users.length) return;
 
-  const sliceTo = skip + limit === 0 ? users.length : skip + limit;
+  const sliceTo = getSliceTo({ skip, limit, resulLength: users.length });
 
   const dataToWrite = users
     .slice(skip, sliceTo)
