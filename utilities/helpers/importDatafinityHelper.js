@@ -10,6 +10,7 @@ const { Wobj, DatafinityObject } = require('../../models');
 const { AMAZON_ASINS } = require('../../constants/appData');
 const { broadcastJson } = require('../hiveApi/broadcastUtil');
 const { createUUID } = require('./cryptoHelper');
+const { FIELDS_NAMES } = require('../../constants/wobjectsData');
 
 const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
 const SET_UNIQ_FIELDS_AUTHORITY = ['name', 'body', 'locale', 'creator'];
@@ -230,7 +231,10 @@ const validateSameFieldsProductId = ({ fieldData, foundedFields }) => {
 };
 
 const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
-  const sameAuthor = _.find(foundedFields, (el) => el.creator === fieldData.creator);
+  const sameAuthor = _.find(
+    foundedFields,
+    (el) => el.creator === fieldData.creator && el.name === FIELDS_NAMES.DESCRIPTION,
+  );
   if (sameAuthor) return true;
 
   return validateSameFieldDefault({ fieldData, foundedFields });
