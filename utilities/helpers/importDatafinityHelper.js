@@ -9,7 +9,6 @@ const { formField } = require('./formFieldHelper');
 const { Wobj, DatafinityObject } = require('../../models');
 const { AMAZON_ASINS } = require('../../constants/appData');
 const { broadcastJson } = require('../hiveApi/broadcastUtil');
-const { GPT_CRAFTED } = require('../../constants/openai');
 const { createUUID } = require('./cryptoHelper');
 
 const SET_UNIQ_FIELDS = ['name', 'body', 'locale'];
@@ -231,11 +230,8 @@ const validateSameFieldsProductId = ({ fieldData, foundedFields }) => {
 };
 
 const validateSameFieldDescription = ({ fieldData, foundedFields }) => {
-  const chatGptRegEx = new RegExp(GPT_CRAFTED);
-
-  const wroteByGpt = foundedFields
-    .find((f) => f.name === OBJECT_FIELDS.DESCRIPTION && chatGptRegEx.test(f.body));
-  if (wroteByGpt) return true;
+  const sameAuthor = _.find(foundedFields, (el) => el.creator === fieldData.creator);
+  if (sameAuthor) return true;
 
   return validateSameFieldDefault({ fieldData, foundedFields });
 };

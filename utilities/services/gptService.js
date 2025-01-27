@@ -1,6 +1,6 @@
 const OpenAI = require('openai');
 const _ = require('lodash');
-const { GPT_CRAFTED, QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
+const { QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -18,7 +18,7 @@ const checkAiResponse = (answer = '') => answer.toLowerCase().includes('as an ai
 const gptCreateCompletion = async ({ content = '' }) => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       messages: [{
         role: 'user',
         content,
@@ -36,7 +36,7 @@ const gptCreateCompletion = async ({ content = '' }) => {
 const gptCreateCompletion4 = async ({ content = '' }) => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o',
       messages: [{
         role: 'user',
         content,
@@ -54,7 +54,7 @@ const gptCreateCompletion4 = async ({ content = '' }) => {
 const gptCreateCompletionBot = async ({ content = '' }) => {
   try {
     const response = await openaiBot.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o',
       messages: [{
         role: 'user',
         content,
@@ -73,7 +73,7 @@ const gptCreateCompletionBot = async ({ content = '' }) => {
 const gptTagsFromDescription = async ({ content = '', createdTags, language }) => {
   try {
     const response = await openaiBot.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o',
       messages: [{
         role: 'system',
         content: `from the given string you need to come up with 10 tags close in meaning use single word if possible ${language ? `in ${language} language` : ''}. in the process of selecting tags they should all be in lower case, don't use names of cities, countries and other territories as tags, do not use special characters, also be guided by the fact that the tags should be popular ${createdTags?.length ? `we already have this tags ${createdTags.join(',')}, don't use them` : ''}. Please provide a response in the following format: ["tag1", "tag2", "tag3", "tag4", "tag5"]`,
@@ -97,7 +97,7 @@ const gptTagsFromDescription = async ({ content = '', createdTags, language }) =
 const gptSystemUserPrompt = async ({ systemPrompt, userPrompt }) => {
   try {
     const response = await openaiBot.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o',
       messages: [{
         role: 'system',
         content: systemPrompt,
@@ -122,7 +122,7 @@ const makeDescription = async (description = '') => {
     content: `Create description for product max 3 paragraph from following text: ${description}`,
   });
   if (!result || error) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeProductDescription = async (product = '') => {
@@ -139,7 +139,7 @@ const makeProductDescription = async (product = '') => {
 
   if (!result || error) return '';
   if (checkAiResponse(result)) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeBusinessDescription = async (business = {}) => {
@@ -156,7 +156,7 @@ const makeBusinessDescription = async (business = {}) => {
 
   if (!result || error) return '';
   if (checkAiResponse(result)) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeLinkDescription = async (url) => {
@@ -173,7 +173,7 @@ const makeLinkDescription = async (url) => {
 
   if (!result || error) return '';
   if (checkAiResponse(result)) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeAuthorDescription = async ({ author = '', book = '' }) => {
@@ -190,7 +190,7 @@ const makeAuthorDescription = async ({ author = '', book = '' }) => {
 
   if (!result || error) return '';
   if (checkAiResponse(result)) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeBookDescription = async ({ author = '', book = '' }) => {
@@ -207,7 +207,7 @@ const makeBookDescription = async ({ author = '', book = '' }) => {
 
   if (!result || error) return '';
   if (checkAiResponse(result)) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const makeDescriptionBasedOnReviews = async ({ reviews, name }) => {
@@ -218,7 +218,7 @@ const makeDescriptionBasedOnReviews = async ({ reviews, name }) => {
   });
 
   if (!result || error) return '';
-  return `${result}${GPT_CRAFTED}`;
+  return result;
 };
 
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });

@@ -7,7 +7,6 @@ const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 const { IMAGE_SIZE } = require('../../../constants/fileFormats');
 const { loadImageByUrl } = require('../../helpers/imageHelper');
-const { GPT_CRAFTED } = require('../../../constants/openai');
 
 const systemPrompt = (language) => `you are prompted to generate a recipe from the given name. 
 The response format should be a json object according to the following scheme: 
@@ -97,7 +96,6 @@ const generateRecipe = async (name, locale) => {
   if (error) return null;
   const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
   if (!formatedResponse) return null;
-  if (formatedResponse.fieldDescription) formatedResponse.fieldDescription += GPT_CRAFTED;
 
   return formatedResponse;
 };
@@ -240,7 +238,6 @@ const generateObjectByDescription = async ({ description = '' }) => {
   if (error) return null;
   const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
   if (!formatedResponse) return null;
-  if (formatedResponse.fieldDescription) formatedResponse.fieldDescription += GPT_CRAFTED;
 
   return formatedResponse;
 };
