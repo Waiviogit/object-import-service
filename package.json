@@ -14,7 +14,8 @@
     "deleteQueueMessage": "node ./utilities/redis/rsmq/deleteQueueMessage.js",
     "setQueueVT": "node ./utilities/redis/rsmq/setQueueVT.js",
     "addCompanyId": "node utilities/tasks/addCompanyId/run.js",
-    "addWhiteList": "node utilities/tasks/addWhiteList/run.js"
+    "addWhiteList": "node utilities/tasks/addWhiteList/run.js",
+    "addNegativeRatingLinks": "node utilities/tasks/addNegativeRatingLinks/run.js"
   },
   "dependencies": {
     "@hiveio/dhive": "^1.2.3",
