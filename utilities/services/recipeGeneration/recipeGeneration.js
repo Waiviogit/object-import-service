@@ -18,6 +18,7 @@ The response format should be a json object according to the following scheme:
     "fieldCookingTime": "string",
     "fieldBudget": "string",
     "fieldRecipeIngredients": "string[]",
+    "fieldNutrition": "string",
 }
 
 where: 
@@ -28,6 +29,7 @@ fieldCalories - total calories in recipe in calories
 fieldCookingTime - total cooking time in minutes and hours
 fieldBudget - cost to prepare, $ under 10$ , $$ under 100$, $$$ under 1000$
 fieldRecipeIngredients - list of recipe ingredients, each starts with corresponding emoji
+fieldNutrition - Proteins, fats and carbohydrates per serving
 example:
 { 
     "name" : "Greek Beef Stuffed Onions",
@@ -37,6 +39,7 @@ example:
     "fieldCookingTime": "15 mins",
     "fieldBudget": "$",
     "fieldRecipeIngredients": ["🥚 2 eggs", "💧 ¼ teaspoon water", "🫒 1 teaspoon olive oil", "🧀 1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "🌶️ kosher salt and freshly ground black pepper to taste", "🌶️ 1 pinch cayenne pepper"],
+    "fieldNutrition": "Proteins: 18g, Fats: 16g, Carbohydrates: 18g",
 }
 value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
@@ -52,6 +55,7 @@ The response format should be a json object according to the following scheme:
     "fieldCookingTime": "string",
     "fieldBudget": "string",
     "fieldRecipeIngredients": "string[]",
+    "fieldNutrition": "string",
 }
 
 where: 
@@ -62,6 +66,7 @@ fieldCalories - total calories in recipe in calories, if not mention in descript
 fieldCookingTime - total cooking time in minutes and hours, if not mention in description make an assumption
 fieldBudget - cost to prepare, $ under 10$ , $$ under 100$, $$$ under 1000$ 
 fieldRecipeIngredients - list of recipe ingredients, if not mention in description make an assumption, each starts with corresponding emoji
+fieldNutrition - Proteins, fats and carbohydrates per serving
 example:
 { 
     "name" : "Greek Beef Stuffed Onions",
@@ -71,6 +76,7 @@ example:
     "fieldCookingTime": "15 mins",
     "fieldBudget": "$",
     "fieldRecipeIngredients": ["🥚 2 eggs", "💧 ¼ teaspoon water", "🫒 1 teaspoon olive oil", "🧀 1 ounce freshly grated Parmigiano-Reggiano cheese, or a little less", "🌶️ kosher salt and freshly ground black pepper to taste", "🌶️ 1 pinch cayenne pepper"],
+    "fieldNutrition": "Proteins: 18g, Fats: 16g, Carbohydrates: 18g",
 }
 value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
@@ -133,7 +139,7 @@ const deleteRecipePreprocessedData = async (importId) => {
   await RecipeGeneratedModel.deleteManyById(importId);
 };
 
-const recipeFields = ['fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients'];
+const recipeFields = ['fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients', 'fieldNutrition'];
 
 const formUpdateData = (importRecipe, generatedRecipe, locale) => {
   const updateData = {};

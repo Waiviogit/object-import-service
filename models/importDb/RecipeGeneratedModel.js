@@ -115,6 +115,7 @@ const getCompleted = async (importId) => {
       fieldBudget: 1,
       categories: 1,
       fieldCalories: 1,
+      fieldNutrition: 1,
       fieldCookingTime: 1,
       fieldRecipeIngredients: 1,
       primaryImageURLs: 1,

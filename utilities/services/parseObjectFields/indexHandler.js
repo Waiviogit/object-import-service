@@ -35,4 +35,5 @@ module.exports = {
   cookingTime: require('./fields/cookingTime'),
   recipeIngredients: require('./fields/recipeIngredients'),
   addToList: require('./fields/addToList'),
+  nutrition: require('./fields/nutrition'),
 };
