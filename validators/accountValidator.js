@@ -35,6 +35,17 @@ const guestImportAccountValidator = async (account) => {
   return { result: true };
 };
 
+const checkPostingAuthorities = async (user) => {
+  const { account, error } = await getAccount(user);
+  if (error) {
+    console.log(user, 'getAccount Error');
+    return false;
+  }
+
+  const accountAuths = _.get(account, 'posting.account_auths', []);
+  return !!accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
+};
+
 const importAccountValidator = async (user, voteCost) => {
   if (await checkWhiteList(user)) return { result: true };
 
@@ -52,18 +63,9 @@ const importAccountValidator = async (user, voteCost) => {
     return { result: false, error: { status: '409', message: 'Not enough vote power' } };
   }
   console.log(user, 'getAccount');
-  const { account, error } = await getAccount(user);
-  if (error) {
-    console.log(user, 'getAccount Error');
-    return { result: false, error };
-  }
 
-  const accountAuths = _.get(account, 'posting.account_auths', []);
-  const postingAuthorities = accountAuths.find((el) => el[0] === process.env.FIELD_VOTES_BOT);
-
-  if (!postingAuthorities) {
-    return { result: false, error: { status: '409', message: POSTING_AUTHORITIES_ERROR } };
-  }
+  const validPosting = await checkPostingAuthorities(user);
+  if (!validPosting) return { result: false, error: { status: '409', message: POSTING_AUTHORITIES_ERROR } };
 
   return { result: true };
 };
@@ -355,4 +357,6 @@ module.exports = {
   checkAndIncrementDailyLimit,
   setContinueTTlByAnotherKeyExpire,
   setContinueTtl,
+  checkPostingAuthorities,
+  isGuestAccount,
 };

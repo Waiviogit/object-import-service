@@ -15,7 +15,7 @@ const { sendUpdateImportForUser } = require('../socketClient');
 const { redisSetter, redisGetter } = require('../../redis');
 
 const KEY_DAILY_LIMIT = 'dailyLimitPostsImport';
-const CONTINUE_TTL_SEC = 60 * 5;
+const CONTINUE_TTL_SEC = (60 * 5) + 30;
 
 const setLastPostingTime = async ({ user }) => {
   const key = `${IMPORT_REDIS_KEYS.LAST_POSTING_TIME}:${user}`;

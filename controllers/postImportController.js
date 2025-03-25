@@ -5,6 +5,8 @@ const { redisSetter, redisGetter } = require('../utilities/redis');
 const { IMPORT_REDIS_KEYS, MIN_RC_POSTING_DEFAULT } = require('../constants/appData');
 const createPostTask = require('../utilities/services/postsBot/createPostTask');
 const postImportManage = require('../utilities/services/postsBot/postImportManage');
+const { isGuestAccount, checkPostingAuthorities } = require('../validators/accountValidator');
+const { NotAcceptableError } = require('../constants/httpErrors');
 
 const createTask = async (req, res, next) => {
   const value = validators.validate(
@@ -19,6 +21,11 @@ const createTask = async (req, res, next) => {
     ...getAccessTokensFromReq(req),
   });
   if (authError) return next(authError);
+
+  if (!isGuestAccount(value.user)) {
+    const validPostingAuthorities = await checkPostingAuthorities(value.user);
+    if (!validPostingAuthorities) return next(new NotAcceptableError('Posting authorities not found'));
+  }
 
   const { result, error } = await createPostTask(value);
   if (error) return next(error);
