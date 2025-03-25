@@ -33,7 +33,7 @@ const generateTempPath = () => path.join(TEMP_DIR, `${crypto.randomUUID()}.mp4`)
 const checkFileSize = async (filePath) => {
   const stats = await fsp.stat(filePath);
   if (stats.size > MAX_FILE_SIZE) {
-    await fsp.unlink(filePath);
+    await safeDeleteFile(filePath);
     throw new Error(`Video file is too large (max ${MAX_FILE_SIZE_MB}MB)`);
   }
 };
@@ -47,7 +47,6 @@ const downloadVideoAsBase64 = async (url) => {
       noCheckCertificates: true,
       noWarnings: true,
       preferFreeFormats: true,
-      // addHeader: ['referer:youtube.com', 'user-agent:googlebot']
     });
 
     const videoSize = info.filesize || info.filesize_approx;
@@ -61,7 +60,6 @@ const downloadVideoAsBase64 = async (url) => {
         noCheckCertificates: true,
         noWarnings: true,
         preferFreeFormats: true,
-        // addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
       },
     );
 
