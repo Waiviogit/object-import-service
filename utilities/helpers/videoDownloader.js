@@ -1,12 +1,23 @@
 const youtubedl = require('youtube-dl-exec');
 const fsp = require('fs/promises');
 const crypto = require('crypto');
+const path = require('path');
 const { filetypemime } = require('magic-bytes.js');
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_FILE_SIZE_MB = MAX_FILE_SIZE / (1024 * 1024);
 
-const generateTempPath = () => `./temp_${crypto.randomUUID()}.mp4`;
+const TEMP_DIR = path.join(process.cwd(), 'temp');
+
+const ensureTempDir = async () => {
+  try {
+    await fsp.access(TEMP_DIR);
+  } catch {
+    await fsp.mkdir(TEMP_DIR, { recursive: true });
+  }
+};
+
+const generateTempPath = () => path.join(TEMP_DIR, `${crypto.randomUUID()}.mp4`);
 
 const checkFileSize = async (filePath) => {
   const stats = await fsp.stat(filePath);
@@ -17,6 +28,7 @@ const checkFileSize = async (filePath) => {
 };
 
 const downloadVideoAsBase64 = async (url) => {
+  await ensureTempDir();
   const tempPath = generateTempPath();
   try {
     const info = await youtubedl(url, {
