@@ -17,6 +17,17 @@ const ensureTempDir = async () => {
   }
 };
 
+const safeDeleteFile = async (filePath) => {
+  try {
+    await fsp.access(filePath);
+    await fsp.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Error deleting file:', error);
+    }
+  }
+};
+
 const generateTempPath = () => path.join(TEMP_DIR, `${crypto.randomUUID()}.mp4`);
 
 const checkFileSize = async (filePath) => {
@@ -60,10 +71,10 @@ const downloadVideoAsBase64 = async (url) => {
     const mime = filetypemime(videoBuffer);
     const base64String = videoBuffer.toString('base64');
 
-    await fsp.unlink(tempPath);
+    await safeDeleteFile(tempPath);
     return { result: base64String, mime: mime?.[0] || '' };
   } catch (error) {
-    await fsp.unlink(tempPath);
+    await safeDeleteFile(tempPath);
     console.error('Error downloading YouTube video:', error);
     return { error };
   }
