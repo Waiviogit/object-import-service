@@ -42,6 +42,9 @@ objects.route('/asins-not-published')
   .post(importWobjectsController.getNotPublished);
 objects.route('/gpt-query')
   .post(importWobjectsController.gptQuery);
+objects.route('/video-analyses')
+  .post(importWobjectsController.videoAnalyze);
+
 objects.route('/guest/authorize-import')
   .post(importWobjectsController.authorizeGuestImport);
 objects.route('/guest/authorize-import')

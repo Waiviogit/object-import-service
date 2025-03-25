@@ -16,6 +16,7 @@ const { getAccessTokensFromReq } = require('../utilities/helpers/reqHelper');
 const { guestMana } = require('../utilities/guestUser');
 const { VOTE_COST } = require('../constants/voteAbility');
 const { generateObjectByDescription } = require('../utilities/services/recipeGeneration/recipeGeneration');
+const gemeniService = require('../utilities/services/gemeniService');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -216,6 +217,19 @@ const gptQuery = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
+const videoAnalyze = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.videoAnalyzeSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { result, error } = await gemeniService.analyzeVideo(value);
+  if (error) return next(error);
+  res.status(200).json({ result });
+};
+
 const authorizeGuestImport = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -300,4 +314,5 @@ module.exports = {
   authorizeGuestImportStatus,
   validateUserImport,
   generateRecipeFromDescription,
+  videoAnalyze,
 };
