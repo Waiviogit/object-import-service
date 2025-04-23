@@ -51,8 +51,8 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
       const {
         title: fieldTitle,
         image_id: imageId,
-        product_id: productId,
-        id: groupId,
+        product_id: groupId,
+        id: productId,
         price,
       } = variant;
 
@@ -76,15 +76,15 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         fieldTitle,
         primaryImageURLs: [avatar],
         waivio_product_ids: [{
-          key: `shopify-${host}`,
+          key: `shopify-${host}`, // https://mysite.myshopify.com/products/${value}
           value: `${handle}?variant=${productId}`,
         },
         {
-          key: 'shopify',
+          key: `shopify-cart-${host}`,
           value: productId,
         },
         ],
-        groupId: groupId.toString(),
+        groupId: groupId.toString(), // we can fetch product from shopify api by group id
         waivio_tags: categoryItems,
         object_type: objectType,
         merchants,
@@ -93,10 +93,10 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         mostRecentPriceAmount: price,
         ...(weight > 0 && { productWeight: { value: weight, unit: weightUnit } }),
         waivio_options: options,
-        imageURLs,
-
-        // use gpt for description
-        useGPT: true,
+        fieldDescription: description,
+        // can be added later
+        // imageURLs,
+        // useGPT: true,
       });
     }
   }
