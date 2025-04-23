@@ -78,7 +78,12 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         waivio_product_ids: [{
           key: `shopify-${host}`,
           value: `${handle}?variant=${productId}`,
-        }],
+        },
+        {
+          key: 'shopify',
+          value: productId,
+        },
+        ],
         groupId: groupId.toString(),
         waivio_tags: categoryItems,
         object_type: objectType,
