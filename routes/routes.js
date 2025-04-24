@@ -8,6 +8,7 @@ const {
   addTagsController,
   threadsController,
   postImportController,
+  shopifyController,
 } = require('../controllers');
 const { upload, textOrJsonUpload } = require('../validators/fileValidator');
 
@@ -141,5 +142,13 @@ objects.route('/post-import/host')
   .put(postImportController.setHost);
 objects.route('/post-import/history')
   .get(postImportController.getImportHistory);
+
+objects.route('/shopify/sync')
+  .get(shopifyController.getApps)
+  .post(shopifyController.createTask)
+  .put(shopifyController.resumeSynchronization)
+  .delete(shopifyController.stopSynchronization);
+objects.route('/shopify/credentials')
+  .post(shopifyController.addCredentials);
 
 module.exports = routes;

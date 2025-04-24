@@ -100,6 +100,8 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
       });
     }
   }
+
+  return resultArray;
 };
 
 // (async () => {
