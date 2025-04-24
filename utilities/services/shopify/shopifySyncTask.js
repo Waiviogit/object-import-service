@@ -97,6 +97,7 @@ const startSyncTask = async ({
     userName, hostName, authority, locale,
   });
   await runShopifyObjectsImport({ userName, hostName });
+  return { result: shop };
 };
 
 const stopSyncTask = async ({ userName, hostName }) => {
