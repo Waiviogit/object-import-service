@@ -1,7 +1,5 @@
 const _ = require('lodash');
-const jsdom = require('jsdom');
-
-const { JSDOM } = jsdom;
+const parse5 = require('parse5');
 
 const getObjectTypeFromName = (name) => {
   const bookTypes = ['paperback', 'hardcover', 'kindle'];
@@ -20,16 +18,37 @@ const extractImageSrc = (htmlString) => {
   return imageSrcs;
 };
 
+const getTextContent = (node) => {
+  if (node.nodeName === '#text') {
+    return node.value;
+  }
+  if (node.childNodes) {
+    return node.childNodes.map(getTextContent).join('');
+  }
+  return '';
+};
+
+const removeImgNodes = (node) => {
+  if (node.childNodes) {
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      const child = node.childNodes[i];
+      if (child.tagName === 'img') {
+        node.childNodes.splice(i, 1);
+      } else {
+        removeImgNodes(child);
+      }
+    }
+  }
+};
+
 const getDescriptionFromHtml = (htmlString) => {
-  const dom = new JSDOM(htmlString);
+  const document = parse5.parse(htmlString);
 
-  const images = dom.window.document.querySelectorAll('img');
-  images.forEach((image) => {
-    image.remove();
-  });
+  // Remove all img nodes
+  removeImgNodes(document);
 
-  const text = dom.window.document.body.textContent;
-  if ((text?.length || 0) > 15) return dom.serialize();
+  const text = getTextContent(document);
+  if ((text?.length || 0) > 15) return parse5.serialize(document);
   return '';
 };
 
