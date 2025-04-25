@@ -1,5 +1,7 @@
 const _ = require('lodash');
-// const objectMock = require('./mockData');
+const jsdom = require('jsdom');
+
+const { JSDOM } = jsdom;
 
 const getObjectTypeFromName = (name) => {
   const bookTypes = ['paperback', 'hardcover', 'kindle'];
@@ -16,6 +18,19 @@ const extractImageSrc = (htmlString) => {
   }
 
   return imageSrcs;
+};
+
+const getDescriptionFromHtml = (htmlString) => {
+  const dom = new JSDOM(htmlString);
+
+  const images = dom.window.document.querySelectorAll('img');
+  images.forEach((image) => {
+    image.remove();
+  });
+
+  const text = dom.window.document.body.textContent;
+  if ((text?.length || 0) > 15) return dom.serialize();
+  return '';
 };
 
 const mapShopifyProducts = ({ objects = [], currency, host }) => {
@@ -39,6 +54,7 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
     if (object.vendor) merchants.push({ name: object.vendor });
 
     const imageURLs = extractImageSrc(description);
+    const fieldDescription = getDescriptionFromHtml(description);
 
     const mainImage = image.src;
     for (const variant of object.variants) {
@@ -93,20 +109,14 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         mostRecentPriceAmount: price,
         ...(weight > 0 && { productWeight: { value: weight, unit: weightUnit } }),
         waivio_options: options,
-        fieldDescription: description,
-        // can be added later
-        // imageURLs,
-        // useGPT: true,
+        ...(fieldDescription && { fieldDescription }),
+        useGPT: !!fieldDescription,
+        imageURLs,
       });
     }
   }
 
   return resultArray;
 };
-
-// (async () => {
-//   mapShopifyProducts({ objects: [objectMock], currency: 'UAH', host: 'waiviodev.com' });
-//   console.log();
-// })();
 
 module.exports = mapShopifyProducts;
