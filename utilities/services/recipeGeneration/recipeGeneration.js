@@ -198,7 +198,12 @@ const generateRecipeAndImage = async ({ importId }) => {
   const docsToImport = await RecipeGeneratedModel.getCompleted(importId);
 
   if (!docsToImport?.length) {
+    // finish import 0 objects
     await deleteRecipePreprocessedData(importId);
+    await ImportStatusModel.updateOne({
+      filter: { importId },
+      update: { status: IMPORT_STATUS.FINISHED },
+    });
     return;
   }
 
