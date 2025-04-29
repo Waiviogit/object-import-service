@@ -149,6 +149,7 @@ objects.route('/shopify/sync')
   .put(shopifyController.resumeSynchronization)
   .delete(shopifyController.stopSynchronization);
 objects.route('/shopify/credentials')
-  .post(shopifyController.addCredentials);
+  .post(shopifyController.addCredentials)
+  .get(shopifyController.getCredentials);
 
 module.exports = routes;

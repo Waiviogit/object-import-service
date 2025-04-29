@@ -1,10 +1,10 @@
-const { NotAcceptableError } = require('../../../constants/httpErrors');
+const { NotAcceptableError, NotFoundError } = require('../../../constants/httpErrors');
 const { createClient, validateCredentials } = require('./shopifyApi');
 const { encryptData, decryptKey } = require('../../helpers/encryptionHelper');
 const { ShopifyKeysModel, ShopifySyncModel } = require('../../../models');
 
 const createShopifyKeys = async ({
-  userName, accessToken, apiKey, apiSecretKey, hostName,
+  userName, accessToken, apiKey, apiSecretKey, hostName, waivioHostName,
 }) => {
   const { result: client, error: clientError } = await createClient({
     accessToken, apiKey, apiSecretKey, hostName,
@@ -17,26 +17,44 @@ const createShopifyKeys = async ({
   const apiSecretKeyEn = encryptData({ data: apiSecretKey });
 
   const { result, error } = await ShopifyKeysModel.createShopifyKeys({
-    userName, accessToken: accessTokenEn, apiKey, apiSecretKey: apiSecretKeyEn, hostName,
+    userName, accessToken: accessTokenEn, apiKey, apiSecretKey: apiSecretKeyEn, hostName, waivioHostName,
   });
   if (error) return { error: new NotAcceptableError('Can\'t save keys') };
   // here we need to create additional doc to status sync on host, create only if don't exist
-  const syncdoc = await ShopifySyncModel.createSyncDoc({ userName, hostName });
+  const syncdoc = await ShopifySyncModel.createSyncDoc({ userName, hostName, waivioHostName });
   return { result: syncdoc };
 };
 
-const getDecryptedClient = async ({ userName, hostName }) => {
-  const encryptedObject = await ShopifyKeysModel.findOneByUserNameHost({ userName, hostName });
-  if (!encryptedObject) return { error: { message: 'Not found' } };
+const getShopifyCredentials = async ({ userName, waivioHostName }) => {
+  const encryptedObject = await ShopifyKeysModel.findOneByUserNameHost({ userName, waivioHostName });
+  if (!encryptedObject) return { error: new NotFoundError() };
 
   const {
-    accessToken, apiKey, apiSecretKey, hostName: host,
+    accessToken, apiKey, apiSecretKey, hostName,
   } = encryptedObject;
   const decryptedObject = {
     accessToken: decryptKey(accessToken),
     apiKey,
     apiSecretKey: decryptKey(apiSecretKey),
-    hostName: host,
+    hostName,
+    waivioHostName,
+  };
+
+  return { result: decryptedObject };
+};
+
+const getDecryptedClient = async ({ userName, waivioHostName }) => {
+  const encryptedObject = await ShopifyKeysModel.findOneByUserNameHost({ userName, waivioHostName });
+  if (!encryptedObject) return { error: new NotFoundError() };
+
+  const {
+    accessToken, apiKey, apiSecretKey, hostName,
+  } = encryptedObject;
+  const decryptedObject = {
+    accessToken: decryptKey(accessToken),
+    apiKey,
+    apiSecretKey: decryptKey(apiSecretKey),
+    hostName,
   };
 
   const { result: client, error: clientError } = await createClient(decryptedObject);
@@ -48,4 +66,5 @@ const getDecryptedClient = async ({ userName, hostName }) => {
 module.exports = {
   createShopifyKeys,
   getDecryptedClient,
+  getShopifyCredentials,
 };

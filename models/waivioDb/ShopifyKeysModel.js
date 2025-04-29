@@ -27,8 +27,8 @@ const find = async ({ filter, projection, options }) => {
   }
 };
 
-const findOneByUserNameHost = async ({ userName, hostName }) => {
-  const { result } = await findOne({ filter: { userName, hostName } });
+const findOneByUserNameHost = async ({ userName, waivioHostName }) => {
+  const { result } = await findOne({ filter: { userName, waivioHostName } });
   return result;
 };
 

@@ -6,7 +6,7 @@ const { NotAcceptableError } = require('../constants/httpErrors');
 const {
   startSyncTask, stopSyncTask, getAppsList, resumeSyncTask,
 } = require('../utilities/services/shopify/shopifySyncTask');
-const { createShopifyKeys } = require('../utilities/services/shopify/shopifyEncryption');
+const { createShopifyKeys, getShopifyCredentials } = require('../utilities/services/shopify/shopifyEncryption');
 
 const createTask = async (req, res, next) => {
   const value = validators.validate(
@@ -47,6 +47,25 @@ const addCredentials = async (req, res, next) => {
   if (authError) return next(authError);
 
   const { result, error } = await createShopifyKeys(value);
+  if (error) return next(error);
+  return res.status(200).json(result);
+};
+
+const getCredentials = async (req, res, next) => {
+  const value = validators.validate(
+    req.query,
+    validators.shopifyValidator.getCredentialsSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { error: authError } = await authorise({
+    username: value.userName,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const { result, error } = await getShopifyCredentials(value);
   if (error) return next(error);
   return res.status(200).json(result);
 };
@@ -112,4 +131,5 @@ module.exports = {
   stopSynchronization,
   getApps,
   resumeSynchronization,
+  getCredentials,
 };

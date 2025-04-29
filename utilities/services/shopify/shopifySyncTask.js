@@ -14,18 +14,18 @@ const SYNC_STATUS = {
   ON_HOLD: 'onHold',
 };
 
-const runShopifyObjectsImport = async ({ userName, hostName }) => {
-  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, hostName });
+const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
+  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
   if (!shop) return;
   const {
-    sinceId, status, authority, locale,
+    sinceId, status, authority, locale, hostName,
   } = shop;
   if (status !== SYNC_STATUS.ACTIVE) return;
-  const { result: client, error: clientError } = await getDecryptedClient({ userName, hostName });
+  const { result: client, error: clientError } = await getDecryptedClient({ userName, waivioHostName });
   if (clientError) {
     await ShopifySyncModel.updateStatus({
       userName,
-      hostName,
+      waivioHostName,
       status: SYNC_STATUS.ON_HOLD,
     });
     return;
@@ -38,7 +38,7 @@ const runShopifyObjectsImport = async ({ userName, hostName }) => {
   if (fetchProductError || settingsError) {
     await ShopifySyncModel.updateStatus({
       userName,
-      hostName,
+      waivioHostName,
       status: SYNC_STATUS.ON_HOLD,
     });
     return;
@@ -47,7 +47,7 @@ const runShopifyObjectsImport = async ({ userName, hostName }) => {
   if (!products.length) {
     await ShopifySyncModel.updateStatus({
       userName,
-      hostName,
+      waivioHostName,
       status: SYNC_STATUS.PENDING,
     });
     return;
@@ -60,7 +60,7 @@ const runShopifyObjectsImport = async ({ userName, hostName }) => {
     host: hostName,
     currency: shopSettings.currency,
   });
-  await ShopifySyncModel.updateSinceId({ userName, hostName, sinceId: lastId });
+  await ShopifySyncModel.updateSinceId({ userName, waivioHostName, sinceId: lastId });
   // run new objects import
 
   await importObjects({
@@ -70,17 +70,17 @@ const runShopifyObjectsImport = async ({ userName, hostName }) => {
     objects: mappedProducts,
     onStop: JSON.stringify({
       method: HOOK_ACTION.SHOPIFY_SYNC,
-      args: [{ userName, hostName }],
+      args: [{ userName, waivioHostName }],
     }),
     onFinish: JSON.stringify({
       method: HOOK_ACTION.SHOPIFY_SYNC,
-      args: [{ userName, hostName }],
+      args: [{ userName, waivioHostName }],
     }),
   });
 };
 
 const startSyncTask = async ({
-  userName, hostName, authority, locale,
+  userName, waivioHostName, authority, locale,
 }) => {
   const { result: validAcc, error: accError } = await importAccountValidator(
     userName,
@@ -88,37 +88,37 @@ const startSyncTask = async ({
   );
   if (accError) return { error: accError };
 
-  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, hostName });
+  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
   if (shop.status !== SYNC_STATUS.PENDING) return { error: NotAcceptableError('Sync task already in progress') };
 
-  const { result, error: clientError } = await getDecryptedClient({ userName, hostName });
+  const { result, error: clientError } = await getDecryptedClient({ userName, waivioHostName });
   if (clientError) return { error: clientError };
   await ShopifySyncModel.updateBeforeImport({
-    userName, hostName, authority, locale,
+    userName, waivioHostName, authority, locale,
   });
-  await runShopifyObjectsImport({ userName, hostName });
+  await runShopifyObjectsImport({ userName, waivioHostName });
   return { result: shop };
 };
 
-const stopSyncTask = async ({ userName, hostName }) => {
-  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, hostName });
+const stopSyncTask = async ({ userName, waivioHostName }) => {
+  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
   if (!shop) return { error: new NotFoundError() };
 
-  const result = await ShopifySyncModel.stopSyncTask({ userName, hostName });
+  const result = await ShopifySyncModel.stopSyncTask({ userName, waivioHostName });
   return { result };
 };
 
-const resumeSyncTask = async ({ userName, hostName }) => {
-  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, hostName });
+const resumeSyncTask = async ({ userName, waivioHostName }) => {
+  const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
   if (!shop) return { error: new NotFoundError() };
 
   if (shop.status !== SYNC_STATUS.ON_HOLD) return { error: NotAcceptableError('Nothing to resume') };
 
   await ShopifySyncModel.updateBeforeImport({
-    userName, hostName, authority: shop.authority, locale: shop.locale,
+    userName, waivioHostName, authority: shop.authority, locale: shop.locale,
   });
-  await runShopifyObjectsImport({ userName, hostName });
-  const updatedShop = await ShopifySyncModel.findOneByUserNameHost({ userName, hostName });
+  await runShopifyObjectsImport({ userName, waivioHostName });
+  const updatedShop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
 
   return {
     result: updatedShop,

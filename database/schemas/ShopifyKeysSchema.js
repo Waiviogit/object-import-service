@@ -9,14 +9,14 @@ const EncryptedSchema = new Schema({
 
 const ShopifyKeysSchema = new Schema({
   userName: { type: String, required: true },
+  waivioHostName: { type: String, required: true },
   hostName: { type: String, required: true },
   apiKey: { type: String, required: true },
   storefrontToken: { type: String },
   accessToken: { type: EncryptedSchema, required: true },
   apiSecretKey: { type: EncryptedSchema, required: true },
-
 }, { versionKey: false });
 
-ShopifyKeysSchema.index({ userName: 1, hostName: 1 }, { unique: true });
+ShopifyKeysSchema.index({ userName: 1, waivioHostName: 1 }, { unique: true });
 
 module.exports = mongoose.model('shopify_keys', ShopifyKeysSchema);

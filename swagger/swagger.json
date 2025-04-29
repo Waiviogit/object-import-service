@@ -222,6 +222,45 @@
             "description": "Validation error"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "get credentials",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "userName",
+            "in": "query",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "waivioHostName",
+            "in": "query",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-credentials-params"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
       }
     },
     "/import-objects-service/guest/authorize-import": {
@@ -2843,6 +2882,9 @@
         },
         "hostName": {
           "type": "string"
+        } ,
+        "waivioHostName": {
+          "type": "string"
         }
       }
     },
@@ -2852,7 +2894,7 @@
         "userName": {
           "type": "string"
         },
-        "hostName": {
+        "waivioHostName": {
           "type": "string"
         },
         "authority": {
@@ -2872,6 +2914,9 @@
         "hostName": {
           "type": "string"
         },
+        "waivioHostName": {
+          "type": "string"
+        },
         "accessToken": {
           "type": "string"
         },
@@ -2889,7 +2934,7 @@
         "userName": {
           "type": "string"
         },
-        "hostName": {
+        "waivioHostName": {
           "type": "string"
         }
       }

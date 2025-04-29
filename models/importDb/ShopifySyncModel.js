@@ -45,40 +45,40 @@ const create = async (doc) => {
   }
 };
 
-const createSyncDoc = async ({ userName, hostName }) => {
-  const { result } = await findOne({ filter: { userName, hostName } });
+const createSyncDoc = async ({ userName, hostName, waivioHostName }) => {
+  const { result } = await findOne({ filter: { userName, hostName, waivioHostName } });
   if (result) return result;
-  const { result: created } = await create({ userName, hostName });
+  const { result: created } = await create({ userName, hostName, waivioHostName });
   return created;
 };
 
-const findOneByUserNameHost = async ({ userName, hostName }) => {
-  const { result } = await findOne({ filter: { userName, hostName } });
+const findOneByUserNameHost = async ({ userName, waivioHostName }) => {
+  const { result } = await findOne({ filter: { userName, waivioHostName } });
   return result;
 };
 
-const updateSinceId = async ({ userName, hostName, sinceId }) => updateOne({
-  filter: { userName, hostName },
+const updateSinceId = async ({ userName, waivioHostName, sinceId }) => updateOne({
+  filter: { userName, waivioHostName },
   update: { sinceId },
 });
 
 const updateBeforeImport = async ({
-  userName, hostName, authority, locale,
+  userName, waivioHostName, authority, locale,
 }) => updateOne({
-  filter: { userName, hostName },
+  filter: { userName, waivioHostName },
   update: { authority, locale, status: 'active' },
 });
 
 const updateStatus = async ({
-  userName, hostName, status,
+  userName, waivioHostName, status,
 }) => updateOne({
-  filter: { userName, hostName },
+  filter: { userName, waivioHostName },
   update: { status },
 });
 
-const stopSyncTask = async ({ userName, hostName }) => {
+const stopSyncTask = async ({ userName, waivioHostName }) => {
   const { result } = await findOneAndUpdate({
-    filter: { userName, hostName },
+    filter: { userName, waivioHostName },
     update: { status: 'pending', sinceId: 0 },
     options: { new: true },
   });
