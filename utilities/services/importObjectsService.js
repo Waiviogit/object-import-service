@@ -100,13 +100,14 @@ const runImportWobjectsQueue = async () => {
               await messageCreateAppendWobj({ redisData, messageId });
               break;
           }
-          await redisQueue.deleteMessage({
-            client: importRsmqClient,
-            qname: IMPORT_WOBJECTS_QNAME,
-            id: messageId,
-          });
+
           await redisSetter.delImportWobjData(message);
         }
+        await redisQueue.deleteMessage({
+          client: importRsmqClient,
+          qname: IMPORT_WOBJECTS_QNAME,
+          id: messageId,
+        });
       }
     }
   }
@@ -249,40 +250,37 @@ const addField = async ({
     permlink: field.permlink,
     author_permlink: wobject.author_permlink,
   });
+  if (existField) return;
+  const redisExistField = await redisGetter.getHashAll(`append:${wobject.author_permlink}_${field.permlink}`);
+  if (redisExistField) return;
 
-  if (!existField) {
-    const redisExistField = await redisGetter.getHashAll(`append:${wobject.author_permlink}_${field.permlink}`);
+  const data = {
+    author: field.creator,
+    permlink: field.permlink,
+    parentPermlink: wobject.author_permlink,
+    parentAuthor: existWobj ? existWobj.author : '',
+    body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
+    title: 'New field on wobject',
+    field: JSON.stringify({ ..._.omit(field, ['creator', 'permlink']), locale: field.locale || 'en-US' }),
+    ...(importingAccount && { importingAccount }),
+    ...(importId && { importId }),
+  };
 
-    if (!redisExistField) {
-      const data = {
-        author: field.creator,
-        permlink: field.permlink,
-        parentPermlink: wobject.author_permlink,
-        parentAuthor: existWobj ? existWobj.author : '',
-        body: `${field.creator}" added "${field.name}" (${field.locale || 'en-US'}):\n${field.body}`,
-        title: 'New field on wobject',
-        field: JSON.stringify({ ..._.omit(field, ['creator', 'permlink']), locale: field.locale || 'en-US' }),
-        ...(importingAccount && { importingAccount }),
-        ...(importId && { importId }),
-      };
+  if (immediately) {
+    console.log('add field immediately');
+    data.field = JSON.parse(data.field);
+    appendObject.send(data);
+  } else {
+    console.log(`add field "${field.name}" Redis: ${field.creator}`);
+    await redisSetter.setImportWobjData(`append:${wobject.author_permlink}_${field.permlink}`, data);
+    const { error: sendMessError } = await redisQueue.sendMessage({
+      client: importRsmqClient,
+      qname: IMPORT_WOBJECTS_QNAME,
+      message: `append:${wobject.author_permlink}_${field.permlink}`,
+    });
 
-      if (immediately) {
-        console.log('add field immediately');
-        data.field = JSON.parse(data.field);
-        appendObject.send(data);
-      } else {
-        console.log(`add field "${field.name}" Redis: ${field.creator}`);
-        await redisSetter.setImportWobjData(`append:${wobject.author_permlink}_${field.permlink}`, data);
-        const { error: sendMessError } = await redisQueue.sendMessage({
-          client: importRsmqClient,
-          qname: IMPORT_WOBJECTS_QNAME,
-          message: `append:${wobject.author_permlink}_${field.permlink}`,
-        });
-
-        if (sendMessError) {
-          console.error(sendMessError);
-        }
-      }
+    if (sendMessError) {
+      console.error(sendMessError);
     }
   }
 };
