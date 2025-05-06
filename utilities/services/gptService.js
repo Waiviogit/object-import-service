@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const _ = require('lodash');
 const { QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
+const { loadBase64Image } = require('../helpers/imageHelper');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -242,6 +243,31 @@ const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
     return { error };
   }
 };
+
+const gptImage1Generate = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
+  try {
+    const response = await openaiBot.images.generate(
+      {
+        prompt,
+        n,
+        size,
+        model: 'gpt-image-1',
+        output_format: 'webp',
+        quality: 'medium',
+      },
+      {
+        timeout: 60000,
+      },
+    );
+    const result = _.get(response, 'data', []);
+
+    const yo = await loadBase64Image(result);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 
 module.exports = {
   makeDescription,

@@ -88,7 +88,33 @@ const loadImageByUrl = async (url, size) => {
   }
 };
 
+const loadBase64Image = async (base64, size) => {
+  try {
+    const bodyFormData = new FormData();
+
+    bodyFormData.append('file', base64);
+    if (size) {
+      bodyFormData.append('size', size);
+    }
+    const resp = await axios.post(
+      process.env.SAVE_IMAGE_URL,
+      bodyFormData,
+      {
+        headers: bodyFormData.getHeaders(),
+        timeout: 15000,
+      },
+    );
+    const result = _.get(resp, 'data.image');
+    if (!result) return { error: new Error('Internal server error') };
+    return { result };
+  } catch (error) {
+    console.error(error.message);
+    return { error };
+  }
+};
+
 module.exports = {
   isProperResolution,
   loadImageByUrl,
+  loadBase64Image,
 };
