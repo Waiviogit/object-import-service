@@ -1,7 +1,9 @@
 const { ImportStatusModel, DatafinityObject } = require('../../models');
-const { IMPORT_STATUS, IMPORT_REDIS_KEYS } = require('../../constants/appData');
+const { IMPORT_STATUS, IMPORT_REDIS_KEYS, HOOK_ACTION } = require('../../constants/appData');
 const { startObjectImport } = require('./objectsImport/importDatafinityObjects');
 const { redisGetter } = require('../redis');
+const { runShopifyObjectsImport } = require('./shopify/shopifySyncTask');
+const { parseJson } = require('../helpers/jsonHelper');
 
 const getStatistic = async ({
   user, history = false, skip, limit,
@@ -81,6 +83,19 @@ const updateImport = async ({
   };
 };
 
+const onStopActions = {
+  [HOOK_ACTION.SHOPIFY_SYNC]: runShopifyObjectsImport,
+};
+
+const runOnStop = async (onStop) => {
+  const parsed = parseJson(onStop, null);
+  if (!parsed) return;
+  const { method, args } = parsed;
+  const handler = onStopActions[method];
+  if (!handler) return;
+  handler(...args);
+};
+
 const deleteImport = async ({ user, importId }) => {
   const { result, error } = await ImportStatusModel.updateOne({
     filter: { user, importId },
@@ -92,6 +107,7 @@ const deleteImport = async ({ user, importId }) => {
     .deleteMany({
       filter: { user, importId },
     });
+  if (result.onStop) runOnStop(result.onStop);
   if (datafinityDeleteError) {
     await ImportStatusModel.updateOne({
       filter: { user, importId },

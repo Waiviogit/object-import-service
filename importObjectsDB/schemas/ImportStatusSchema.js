@@ -21,6 +21,8 @@ const ImportStatusSchema = new Schema({
   locale: { type: String },
   translate: { type: Boolean },
   useGPT: { type: Boolean },
+  onFinish: { type: String },
+  onStop: { type: String },
 }, { timestamps: true, versionKey: false });
 
 ImportStatusSchema.index({ user: 1, importId: 1 }, { unique: true });

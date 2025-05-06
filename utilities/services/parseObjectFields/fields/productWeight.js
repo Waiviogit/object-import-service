@@ -3,6 +3,19 @@ const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS, WEIGHT_UNITS } = require('../../../../constants/objectTypes');
 
 module.exports = (object) => {
+  if (object.productWeight) {
+    const { value, unit } = object.productWeight;
+    return formField({
+      fieldName: OBJECT_FIELDS.WEIGHT,
+      body: JSON.stringify({
+        value: parseFloat(value),
+        unit: WEIGHT_UNITS.find((el) => el.includes(unit)) || 'lb',
+      }),
+      user: object.user,
+      locale: object.locale,
+    });
+  }
+
   const objWeight = _.get(object, 'weight', '');
 
   if (objWeight) {

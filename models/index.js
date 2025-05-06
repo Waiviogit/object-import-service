@@ -6,6 +6,7 @@ module.exports = {
   ServiceBotModel: require('./waivioDb/ServiceBotModel'),
   App: require('./waivioDb/AppModel'),
   UserModel: require('./waivioDb/UserModel'),
+  ShopifyKeysModel: require('./waivioDb/ShopifyKeysModel'),
   DatafinityObject: require('./importDb/DatafinityObjectModel'),
   ImportStatusModel: require('./importDb/ImportStatusModel'),
   AuthorityStatusModel: require('./importDb/AuthorityStatusModel'),
@@ -25,4 +26,5 @@ module.exports = {
   ThreadMessageModel: require('./importDb/ThreadMessageModel'),
   PostImportModel: require('./importDb/PostImportModel'),
   PostStatusModel: require('./importDb/PostStatusModel'),
+  ShopifySyncModel: require('./importDb/ShopifySyncModel'),
 };

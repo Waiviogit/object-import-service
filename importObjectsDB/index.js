@@ -19,5 +19,6 @@ module.exports = {
     ThreadMessage: require('./schemas/ThreadMessageSchema'),
     PostsStatus: require('./schemas/PostsStatusSchema'),
     PostImport: require('./schemas/PostImportSchema'),
+    ShopifySync: require('./schemas/ShopifySyncShema'),
   },
 };

@@ -31,5 +31,6 @@ module.exports = {
     GuestMana: require('./schemas/GuestManaSchema'),
     ServiceBot: require('./schemas/ServiceBotSchema'),
     App: require('./schemas/AppSchema'),
+    ShopifyKeys: require('./schemas/ShopifyKeysSchema'),
   },
 };

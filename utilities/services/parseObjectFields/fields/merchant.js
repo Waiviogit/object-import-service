@@ -5,7 +5,7 @@ const { checkObjectExist } = require('../../../helpers/importDatafinityHelper');
 const { parseJson } = require('../../../helpers/jsonHelper');
 
 module.exports = async (object, allFields) => {
-  if (!object.merchants) return;
+  if (!object?.merchants?.length) return;
   const merchantDatafinitiy = _.find(object.merchants, (m) => !!m.name);
   if (!merchantDatafinitiy) return;
 
