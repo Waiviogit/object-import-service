@@ -56,6 +56,10 @@ const productSchema = {
       type: Type.STRING,
       description: 'Product description; empty string if not found',
     },
+    fieldRating: {
+      type: Type.STRING,
+      description: 'Product rating, min 0 max 5',
+    },
     categories: {
       type: Type.ARRAY,
       items: {

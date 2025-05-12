@@ -327,6 +327,9 @@ const isValidHttpUrl = (string) => {
 };
 
 const getProductRating = (product) => {
+  if (product?.fieldRating) {
+    return Math.round((parseFloat(product.fieldRating) * 2)) || 0;
+  }
   const featuresRating = (product?.features ?? []).find((el) => el.key === 'Overall Rating');
   if (featuresRating) {
     return Math.round((_.sum((featuresRating?.value ?? []).map((el) => +el)) ?? 0
