@@ -4,6 +4,10 @@ const { productSchema } = require('../../constants/jsonShemaForAi');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
 
+const timeout = (ms = 60 * 1000) => new Promise((_, reject) => {
+  setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
+});
+
 const getPictureBase64ByUrl = async (url) => {
   try {
     const result = await fetch(url);
@@ -34,11 +38,14 @@ const getObjectForImportFromImage = async ({ url }) => {
       responseSchema: productSchema,
     };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-preview-04-17',
-      contents: [prompt, pictureData],
-      config,
-    });
+    const response = await Promise.race([
+      ai.models.generateContent({
+        model: 'gemini-2.5-flash-preview-04-17',
+        contents: [prompt, pictureData],
+        config,
+      }),
+      timeout(),
+    ]);
 
     const result = JSON.parse(response.text);
 
@@ -57,10 +64,13 @@ const promptWithVideoBase64 = async ({ prompt, videoBase64, mime }) => {
       },
     };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: [prompt, video],
-    });
+    const response = await Promise.race([
+      ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [prompt, video],
+      }),
+      timeout(),
+    ]);
 
     return { result: response.text };
   } catch (error) {
@@ -77,10 +87,13 @@ const promptWithVideoUrl = async ({ prompt, url }) => {
       },
     };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: [prompt, video],
-    });
+    const response = await Promise.race([
+      ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [prompt, video],
+      }),
+      timeout(),
+    ]);
 
     return { result: response.text };
   } catch (error) {

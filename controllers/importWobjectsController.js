@@ -230,6 +230,19 @@ const videoAnalyze = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
+const imageProductAnalyze = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.imageProductAnalyzeSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { result, error } = await gemeniService.getObjectForImportFromImage(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
 const authorizeGuestImport = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -315,4 +328,5 @@ module.exports = {
   validateUserImport,
   generateRecipeFromDescription,
   videoAnalyze,
+  imageProductAnalyze,
 };
