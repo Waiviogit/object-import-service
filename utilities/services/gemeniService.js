@@ -1,8 +1,52 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const { downloadVideoAsBase64 } = require('../helpers/videoDownloader');
+const { productSchema } = require('../../constants/jsonShemaForAi');
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
+
+const getPictureBase64ByUrl = async (url) => {
+  try {
+    const result = await fetch(url);
+    const arrayBuffer = await result.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    return buffer.toString('base64');
+  } catch (error) {
+    return null;
+  }
+};
+
+const getObjectForImportFromImage = async ({ url }) => {
+  try {
+    const picture = await getPictureBase64ByUrl(url);
+    if (!picture) {
+      return { error: { status: 500, message: 'Problem with downloading picture' } };
+    }
+    const pictureData = {
+      inlineData: {
+        data: picture,
+        mimeType: 'image/webp',
+      },
+    };
+    const prompt = 'Analyze this product image and generate a detailed JSON object containing: product name, description, category, price range, key features, materials, dimensions, and any visible brand information. Format the response according to the provided schema.';
+
+    const config = {
+      responseMimeType: 'application/json',
+      responseSchema: productSchema,
+    };
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-preview-04-17',
+      contents: [prompt, pictureData],
+      config,
+    });
+
+    const result = JSON.parse(response.text);
+
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
 
 const promptWithVideoBase64 = async ({ prompt, videoBase64, mime }) => {
   try {
@@ -13,9 +57,12 @@ const promptWithVideoBase64 = async ({ prompt, videoBase64, mime }) => {
       },
     };
 
-    const result = await model.generateContent([prompt, video]);
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [prompt, video],
+    });
 
-    return { result: result.response.text() };
+    return { result: response.text };
   } catch (error) {
     return { error };
   }
@@ -30,9 +77,12 @@ const promptWithVideoUrl = async ({ prompt, url }) => {
       },
     };
 
-    const result = await model.generateContent([prompt, video]);
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [prompt, video],
+    });
 
-    return { result: result.response.text() };
+    return { result: response.text };
   } catch (error) {
     return { error };
   }
@@ -56,4 +106,5 @@ const analyzeVideo = async ({ prompt, url }) => {
 module.exports = {
   promptWithVideoBase64,
   analyzeVideo,
+  getObjectForImportFromImage,
 };

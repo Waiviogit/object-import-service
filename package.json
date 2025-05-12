@@ -18,7 +18,7 @@
     "addNegativeRatingLinks": "node utilities/tasks/addNegativeRatingLinks/run.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
+    "@google/genai": "^0.13.0",
     "@hiveio/dhive": "^1.2.3",
     "axios": "^1.6.2",
     "bignumber.js": "^9.1.0",
