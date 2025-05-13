@@ -238,6 +238,12 @@ const imageProductAnalyze = async (req, res, next) => {
   );
   if (!value) return;
 
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
   const { result, error } = await gemeniService.getObjectForImportFromImage(value);
   if (error) return next(error);
   res.status(200).json(result);
