@@ -1,8 +1,43 @@
 const { GoogleGenAI } = require('@google/genai');
+const AWS = require('@aws-sdk/client-s3');
 const { downloadVideoAsBase64 } = require('../helpers/videoDownloader');
 const { productSchema } = require('../../constants/jsonShemaForAi');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
+
+const s3 = new AWS.S3({
+  forcePathStyle: false,
+  endpoint: 'https://nyc3.digitaloceanspaces.com',
+  region: 'nyc3',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const AWSS3_IMAGE_PARAMS = {
+  Bucket: 'waivio',
+  ACL: 'public-read',
+  ContentType: 'image/webp',
+  ContentEncoding: 'base64',
+};
+
+const deleteFromS3 = async (key) => {
+  try {
+    const deletedObject = await s3.deleteObject({
+      ...AWSS3_IMAGE_PARAMS,
+      Key: key,
+    });
+    if (deletedObject?.$metadata?.httpStatusCode !== 204) {
+      return { error: 'Error deleting image' };
+    }
+    return { success: true };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const extractHash = (url) => url.split('/').pop();
 
 const timeout = (ms = 60 * 1000) => new Promise((_, reject) => {
   setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
@@ -48,9 +83,11 @@ const getObjectForImportFromImage = async ({ url }) => {
     ]);
 
     const result = JSON.parse(response.text);
+    await deleteFromS3(extractHash(url));
 
     return { result };
   } catch (error) {
+    await deleteFromS3(extractHash(url));
     return { error };
   }
 };
