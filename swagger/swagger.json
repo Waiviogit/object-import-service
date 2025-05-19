@@ -3426,7 +3426,10 @@
           "type": "string"
         },
         "lists": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "objectsCount": {
           "type": "number"
