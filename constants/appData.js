@@ -120,6 +120,16 @@ const IMPORT_TYPES = {
   POST_IMPORT: 'postImport',
 };
 
+const HOOK_ACTION = {
+  SHOPIFY_SYNC: 'runShopifyObjectsImport',
+};
+
+const REDIS_CHANNEL = {
+  // use for message from parser
+  DATAFINITY_OBJECT: 'datafinityObject',
+  FINISH_IMPORT_EVENT: 'finishObjectsImport',
+};
+
 module.exports = {
   appData,
   uploadPath,
@@ -134,4 +144,6 @@ module.exports = {
   AMAZON_ASINS,
   IMPORT_TYPES,
   MIN_RC_POSTING_DEFAULT,
+  HOOK_ACTION,
+  REDIS_CHANNEL,
 };

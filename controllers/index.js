@@ -7,4 +7,5 @@ module.exports = {
   addTagsController: require('./addTagsController'),
   threadsController: require('./threadsController'),
   postImportController: require('./postImportController'),
+  shopifyController: require('./shopifyController'),
 };

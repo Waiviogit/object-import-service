@@ -5,6 +5,7 @@ exports.duplicateList = require('./duplicateListValidator');
 exports.addTags = require('./addTagsValidator');
 exports.threadValidator = require('./threadValidator');
 exports.postImportValidator = require('./postImportValidator');
+exports.shopifyValidator = require('./shopifyValidator');
 
 exports.validate = (data, schema, next) => {
   const result = schema.validate(data, { abortEarly: false });
