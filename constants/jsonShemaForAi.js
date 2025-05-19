@@ -84,7 +84,8 @@ const productSchema = {
         },
         description: 'Options for product. Empty array if not found',
       },
-      description: 'Array of product option objects',
+      description: 'Array of product option objects. identify all product options that are visually highlighted or marked as "selected" (for example, by a checkmark, a border, a glow, a different background color, or any other visual cue that suggests selection).'
+          + 'If no options in a category are selected, choose the first option (from left to right or top to bottom, as shown in the image) for that category.',
     },
     features: {
       type: Type.ARRAY,
