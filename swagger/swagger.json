@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "API for import objects",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "title": "Waivio import service",
     "termsOfService": "https://hive.blog/@waivio"
   },
