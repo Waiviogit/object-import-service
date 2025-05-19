@@ -45,6 +45,8 @@ objects.route('/gpt-query')
   .post(importWobjectsController.gptQuery);
 objects.route('/video-analyses')
   .post(importWobjectsController.videoAnalyze);
+objects.route('/product-image-analyses')
+  .post(importWobjectsController.imageProductAnalyze);
 
 objects.route('/guest/authorize-import')
   .post(importWobjectsController.authorizeGuestImport);

@@ -56,6 +56,11 @@ exports.videoAnalyzeSchema = Joi.object().keys({
   url: Joi.string().uri().required(),
 });
 
+exports.imageProductAnalyzeSchema = Joi.object().keys({
+  url: Joi.string().uri().required(),
+  user: Joi.string().required(),
+});
+
 exports.authorizeGuestUser = Joi.object().keys({
   account: Joi.string().required(),
   importAuthorization: Joi.boolean().required(),
