@@ -41,15 +41,17 @@ const findByUserNameHost = async ({ userName, hostName }) => {
 };
 
 const createShopifyKeys = async ({
-  userName, accessToken, apiKey, apiSecretKey, hostName,
+  userName, accessToken, apiKey, apiSecretKey, waivioHostName, hostName,
 }) => updateOne({
   filter: {
-    userName, hostName,
+    userName, waivioHostName,
   },
   update: {
     accessToken,
     apiKey,
     apiSecretKey,
+    waivioHostName,
+    hostName,
   },
   options: { upsert: true },
 });
