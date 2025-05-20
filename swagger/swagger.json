@@ -50,7 +50,7 @@
     "http"
   ],
   "paths": {
-    "/import-objects-service/shopify/sync-task": {
+    "/import-objects-service/shopify/sync": {
       "post": {
         "tags": [
           "shopify"
