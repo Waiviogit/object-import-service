@@ -89,7 +89,9 @@ const stopSyncTask = async ({ userName, waivioHostName }) => {
 const findByUserName = async ({ userName }) => {
   const { result } = await find({
     filter: { userName },
-    projection: { userName: 1, hostName: 1, status: 1 },
+    projection: {
+      userName: 1, hostName: 1, status: 1, waivioHostName: 1,
+    },
     options: { sort: { _id: -1 } },
   });
 
