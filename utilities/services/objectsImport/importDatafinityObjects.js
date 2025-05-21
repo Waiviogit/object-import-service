@@ -54,7 +54,15 @@ const saveObjects = async ({
     // get status for long imports
     const importTask = await ImportStatusModel.findOneByImportId(importId);
     if (!importTask) return;
-    if (importTask.status === IMPORT_STATUS.DELETED) return;
+    if (importTask.status === IMPORT_STATUS.DELETED) {
+      if (importTask.onFinish) {
+        await redisSetter.publish({
+          message: importTask.onFinish,
+          channel: REDIS_CHANNEL.FINISH_IMPORT_EVENT,
+        });
+      }
+      return;
+    }
 
     const result = await DatafinityObject.create(object);
     if (result?.error) continue;
