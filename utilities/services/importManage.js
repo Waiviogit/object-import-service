@@ -108,7 +108,9 @@ const deleteImport = async ({ user, importId }) => {
     .deleteMany({
       filter: { user, importId },
     });
-  if (result.onStop) runOnStop(result.onStop);
+
+  const task = await ImportStatusModel.findOneByImportId(importId);
+  if (task.onStop) runOnStop(task.onStop);
   if (datafinityDeleteError) {
     await ImportStatusModel.updateOne({
       filter: { user, importId },
