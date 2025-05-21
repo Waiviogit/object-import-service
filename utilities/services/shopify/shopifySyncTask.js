@@ -50,6 +50,7 @@ const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
       waivioHostName,
       status: SYNC_STATUS.PENDING,
     });
+    await ShopifySyncModel.updateSinceId({ userName, waivioHostName, sinceId: 0 });
     return;
   }
 
