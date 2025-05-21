@@ -57,9 +57,9 @@ const findOneByUserNameHost = async ({ userName, waivioHostName }) => {
   return result;
 };
 
-const updateSinceId = async ({ userName, waivioHostName, sinceId }) => updateOne({
+const updateNextPageParam = async ({ userName, waivioHostName, nextPageParam }) => updateOne({
   filter: { userName, waivioHostName },
-  update: { sinceId },
+  update: { nextPageParam },
 });
 
 const updateBeforeImport = async ({
@@ -101,9 +101,9 @@ const findByUserName = async ({ userName }) => {
 module.exports = {
   createSyncDoc,
   findOneByUserNameHost,
-  updateSinceId,
   updateBeforeImport,
   updateStatus,
   stopSyncTask,
   findByUserName,
+  updateNextPageParam,
 };

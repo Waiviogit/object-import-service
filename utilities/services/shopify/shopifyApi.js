@@ -25,18 +25,17 @@ const createClient = ({
   }
 };
 
-const getShopifyProducts = async ({ client, limit = 10, sinceId }) => {
+const getShopifyProducts = async ({ client, limit = 10, nextPageParam }) => {
   try {
     const response = await client.get({
       path: 'products',
       query: {
         limit, // Number of products per page
-        ...(sinceId && { since_id: sinceId }), // Skip products before this ID
+        ...(nextPageParam && { page_info: nextPageParam }),
       },
     });
-    console.log(JSON.stringify(response.body.products, null, 2));
 
-    return { result: response.body.products };
+    return { result: response.body.products, pageInfo: response.pageInfo };
   } catch (error) {
     return { error };
   }
@@ -47,7 +46,6 @@ const getShopifyShopSettings = async ({ client }) => {
     const shopData = await client.get({
       path: 'shop',
     });
-    console.log(JSON.stringify(shopData.body, null, 2));
 
     return { result: shopData.body.shop };
   } catch (error) {

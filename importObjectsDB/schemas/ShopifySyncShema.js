@@ -10,7 +10,7 @@ const ShopifySyncSchema = new Schema({
   status: { type: String, default: 'pending' },
   authority: { type: String },
   locale: { type: String },
-  sinceId: { type: Number, default: 0 },
+  nextPageParam: { type: String, default: '' },
 }, { timestamps: false, versionKey: false });
 
 ShopifySyncSchema.index({ userName: 1, waivioHostName: 1 }, { unique: true });

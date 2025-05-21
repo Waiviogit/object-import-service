@@ -14,13 +14,25 @@ const SYNC_STATUS = {
   ON_HOLD: 'onHold',
 };
 
+const END_OF_LIST = 'END_OF_LIST';
+
 const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
   const shop = await ShopifySyncModel.findOneByUserNameHost({ userName, waivioHostName });
   if (!shop) return;
   const {
-    sinceId, status, authority, locale, hostName,
+    nextPageParam, status, authority, locale, hostName,
   } = shop;
   if (status !== SYNC_STATUS.ACTIVE) return;
+  if (nextPageParam === END_OF_LIST) {
+    await ShopifySyncModel.updateStatus({
+      userName,
+      waivioHostName,
+      status: SYNC_STATUS.PENDING,
+    });
+    await ShopifySyncModel.updateNextPageParam({ userName, waivioHostName, nextPageParam: '' });
+    return;
+  }
+
   const { result: client, error: clientError } = await getDecryptedClient({ userName, waivioHostName });
   if (clientError) {
     await ShopifySyncModel.updateStatus({
@@ -30,11 +42,12 @@ const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
     });
     return;
   }
-  const { result: products, error: fetchProductError } = await getShopifyProducts({
-    client, sinceId,
+  const { result: products, pageInfo, error: fetchProductError } = await getShopifyProducts({
+    client, nextPageParam, limit: 1,
   });
 
   const { result: shopSettings, error: settingsError } = await getShopifyShopSettings({ client });
+
   if (fetchProductError || settingsError) {
     await ShopifySyncModel.updateStatus({
       userName,
@@ -50,18 +63,18 @@ const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
       waivioHostName,
       status: SYNC_STATUS.PENDING,
     });
-    await ShopifySyncModel.updateSinceId({ userName, waivioHostName, sinceId: 0 });
+    await ShopifySyncModel.updateNextPageParam({ userName, waivioHostName, nextPageParam: '' });
     return;
   }
-
-  const lastId = products.at(-1).id;
 
   const mappedProducts = mapShopifyProducts({
     objects: products,
     host: hostName,
     currency: shopSettings.currency,
   });
-  await ShopifySyncModel.updateSinceId({ userName, waivioHostName, sinceId: lastId });
+
+  const newPageParam = pageInfo?.nextPage?.query?.page_info || END_OF_LIST;
+  await ShopifySyncModel.updateNextPageParam({ userName, waivioHostName, nextPageParam: newPageParam });
   // run new objects import
 
   await importObjects({
