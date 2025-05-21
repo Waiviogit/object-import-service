@@ -36,6 +36,7 @@ const getStatistic = async ({
       filter: { importId: resultElement.importId, user },
     });
     resultElement.objectsPosted = resultElement.objectsCount - counter;
+    if (!resultElement.objectType) resultElement.objectType = 'product';
   }
 
   return {
