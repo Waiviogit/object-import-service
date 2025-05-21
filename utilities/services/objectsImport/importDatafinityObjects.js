@@ -51,6 +51,11 @@ const saveObjects = async ({
     object.rating = getProductRating(object);
     object.fields = await parseFields(object);
 
+    // get status for long imports
+    const importTask = await ImportStatusModel.findOneByImportId(importId);
+    if (!importTask) return;
+    if (importTask.status === IMPORT_STATUS.DELETED) return;
+
     const result = await DatafinityObject.create(object);
     if (result?.error) continue;
 
