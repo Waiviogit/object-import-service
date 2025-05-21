@@ -43,7 +43,7 @@ const runShopifyObjectsImport = async ({ userName, waivioHostName }) => {
     return;
   }
   const { result: products, pageInfo, error: fetchProductError } = await getShopifyProducts({
-    client, nextPageParam, limit: 1,
+    client, nextPageParam, limit: 5,
   });
 
   const { result: shopSettings, error: settingsError } = await getShopifyShopSettings({ client });
