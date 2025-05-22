@@ -9,6 +9,15 @@ const updateOne = async ({ filter, update, options }) => {
   }
 };
 
+const deleteOne = async ({ filter, update, options }) => {
+  try {
+    const result = await ShopifyKeys.deleteOne(filter, update, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const findOne = async ({ filter, projection, options }) => {
   try {
     const result = await ShopifyKeys.findOne(filter, projection, options);
@@ -56,8 +65,13 @@ const createShopifyKeys = async ({
   options: { upsert: true },
 });
 
+const deleteOneByUserNameHost = async ({ userName, waivioHostName }) => deleteOne({
+  filter: { userName, waivioHostName },
+});
+
 module.exports = {
   createShopifyKeys,
   findOneByUserNameHost,
   findByUserNameHost,
+  deleteOneByUserNameHost,
 };

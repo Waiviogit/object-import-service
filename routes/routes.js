@@ -152,6 +152,7 @@ objects.route('/shopify/sync')
   .delete(shopifyController.stopSynchronization);
 objects.route('/shopify/credentials')
   .post(shopifyController.addCredentials)
-  .get(shopifyController.getCredentials);
+  .get(shopifyController.getCredentials)
+  .delete(shopifyController.deleteCredentialsController);
 
 module.exports = routes;

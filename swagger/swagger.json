@@ -261,6 +261,54 @@
             "description": "Validation error"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "delete credentials",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userName": {
+                  "type": "string"
+                },
+                "waivioHostName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
       }
     },
     "/import-objects-service/guest/authorize-import": {

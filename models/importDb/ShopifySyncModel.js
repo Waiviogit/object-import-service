@@ -9,6 +9,15 @@ const updateOne = async ({ filter, update, options }) => {
   }
 };
 
+const deleteOne = async ({ filter, update, options }) => {
+  try {
+    const result = await ShopifySync.deleteOne(filter, update, options);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
+};
+
 const findOneAndUpdate = async ({ filter, update, options }) => {
   try {
     const result = await ShopifySync.findOneAndUpdate(filter, update, options);
@@ -98,6 +107,10 @@ const findByUserName = async ({ userName }) => {
   return result;
 };
 
+const deleteOneByUserNameHost = async ({ userName, waivioHostName }) => deleteOne({
+  filter: { userName, waivioHostName },
+});
+
 module.exports = {
   createSyncDoc,
   findOneByUserNameHost,
@@ -106,4 +119,5 @@ module.exports = {
   stopSyncTask,
   findByUserName,
   updateNextPageParam,
+  deleteOneByUserNameHost,
 };

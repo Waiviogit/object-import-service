@@ -63,8 +63,18 @@ const getDecryptedClient = async ({ userName, waivioHostName }) => {
   return { result: client };
 };
 
+const deleteCredentials = async ({
+  userName, waivioHostName,
+}) => {
+  await ShopifyKeysModel.deleteOneByUserNameHost({ userName, waivioHostName });
+  await ShopifySyncModel.deleteOneByUserNameHost({ userName, waivioHostName });
+
+  return { result: true };
+};
+
 module.exports = {
   createShopifyKeys,
   getDecryptedClient,
   getShopifyCredentials,
+  deleteCredentials,
 };
