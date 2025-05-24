@@ -110,6 +110,63 @@ const productSchema = {
   required: ['name', 'waivio_options', 'fieldDescription', 'categories'],
 };
 
+const recipeSchema = {
+  type: Type.OBJECT,
+  required: ['name', 'fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients', 'fieldNutrition'],
+  properties: {
+    name: {
+      type: Type.STRING,
+      minLength: 1,
+      description: 'Name of the recipe',
+    },
+    fieldDescription: {
+      type: Type.STRING,
+      minLength: 1,
+      description: 'Description of the recipe, not the recipe itself',
+    },
+    categories: {
+      type: Type.ARRAY,
+      minItems: 5,
+      maxItems: 10,
+      items: {
+        type: Type.STRING,
+        minLength: 1,
+      },
+      description: 'List of categories (5-10 items) in plural form',
+    },
+    fieldCalories: {
+      type: Type.STRING,
+      pattern: '^(?:Approx\\.\\s*)?\\d+\\s*(?:Calories|cal|kcal)?(?:\\s*per\\s*serving)?$',
+      description: 'Total calories in recipe (e.g., "750", "Approx. 750 per serving", "750 Calories")',
+    },
+    fieldCookingTime: {
+      type: Type.STRING,
+      pattern: '^\\d+\\s*(mins|hours|min|hour)$',
+      description: 'Total cooking time in minutes or hours',
+    },
+    fieldBudget: {
+      type: Type.STRING,
+      enum: ['$', '$$', '$$$'],
+      description: 'Cost to prepare: $ under 10$, $$ under 100$, $$$ under 1000$',
+    },
+    fieldRecipeIngredients: {
+      type: Type.ARRAY,
+      minItems: 1,
+      items: {
+        type: Type.STRING,
+        pattern: '^[^\\s]\\s.+$',
+      },
+      description: 'List of recipe ingredients, each starting with an emoji',
+    },
+    fieldNutrition: {
+      type: Type.STRING,
+      pattern: '^Proteins:\\s*\\d+g,\\s*Fats:\\s*\\d+g,\\s*Carbohydrates:\\s*\\d+g$',
+      description: 'Proteins, fats and carbohydrates per serving',
+    },
+  },
+};
+
 module.exports = {
   productSchema,
+  recipeSchema,
 };
