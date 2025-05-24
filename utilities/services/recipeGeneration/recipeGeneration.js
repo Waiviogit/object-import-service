@@ -255,7 +255,7 @@ const recipeValidationSchema = Joi.object({
     .required(),
   fieldCalories: Joi.string()
     .required(),
-  fieldCookingTime: Joi.string().pattern(/^\d+\s*(mins|hours|min|hour)$/).required(),
+  fieldCookingTime: Joi.string().required(),
   fieldBudget: Joi.string().valid('$', '$$', '$$$').required(),
   fieldRecipeIngredients: Joi.array()
     .items(Joi.string())
@@ -273,7 +273,9 @@ const generateObjectByDescription = async ({ description = '' }) => {
       jsonSchema: recipeSchemaObject,
     });
 
-    if (error) continue;
+    if (error) {
+      continue;
+    }
 
     const { error: validationError, value } = recipeValidationSchema
       .validate(result, { stripUnknown: true });
