@@ -17,6 +17,8 @@ const { guestMana } = require('../utilities/guestUser');
 const { VOTE_COST } = require('../constants/voteAbility');
 const { generateObjectByDescription } = require('../utilities/services/recipeGeneration/recipeGeneration');
 const gemeniService = require('../utilities/services/gemeniService');
+const gptService = require('../utilities/services/gptService');
+const { productIdSchema } = require('../constants/jsonShemaForAi');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -316,6 +318,36 @@ const generateRecipeFromDescription = async (req, res, next) => {
   return res.status(200).json({ result });
 };
 
+const productIdFromUrl = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.productIdUrlSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { user, url } = value;
+
+  const { error: authError } = await authorise({
+    username: user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const productIdSchemaObject = {
+    name: 'product_id_schema',
+    schema: productIdSchema,
+  };
+
+  const { result, error } = await gptService.promptWithJsonSchema({
+    prompt: `Given a product URL, extract the minimal product ID that can be used to generate the shortest working URL leading directly to the product page: ${url}`,
+    jsonSchema: productIdSchemaObject,
+  });
+  if (error) return next(error);
+
+  return res.status(200).json(result);
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -335,4 +367,5 @@ module.exports = {
   generateRecipeFromDescription,
   videoAnalyze,
   imageProductAnalyze,
+  productIdFromUrl,
 };

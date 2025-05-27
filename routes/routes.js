@@ -54,6 +54,8 @@ objects.route('/guest/authorize-import')
   .get(importWobjectsController.authorizeGuestImportStatus);
 objects.route('/import-products/recipe-generation')
   .post(importWobjectsController.generateRecipeFromDescription);
+objects.route('/import-products/extract-id')
+  .post(importWobjectsController.productIdFromUrl);
 
 objects.route('/authority')
   .post(authorityController.claimAuthority)

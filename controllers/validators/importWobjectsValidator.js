@@ -74,3 +74,8 @@ exports.generateRecipeSchema = Joi.object().keys({
   user: Joi.string().required(),
   description: Joi.string().required(),
 });
+
+exports.productIdUrlSchema = Joi.object().keys({
+  user: Joi.string().required(),
+  url: Joi.string().required(),
+});

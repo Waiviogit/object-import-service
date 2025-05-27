@@ -166,7 +166,19 @@ const recipeSchema = {
   },
 };
 
+const productIdSchema = {
+  type: Type.OBJECT,
+  required: ['id'],
+  properties: {
+    id: {
+      type: Type.STRING,
+      description: 'The unique product identifier extracted from a product URL. This ID should allow you to reconstruct the shortest possible URL that still directly opens the corresponding product page.',
+    },
+  },
+};
+
 module.exports = {
   productSchema,
   recipeSchema,
+  productIdSchema,
 };
