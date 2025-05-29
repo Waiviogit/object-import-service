@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const parse5 = require('parse5');
+const BigNumber = require('bignumber.js');
 
 const getObjectTypeFromName = (name) => {
   const bookTypes = ['paperback', 'hardcover', 'kindle'];
@@ -89,7 +90,10 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         product_id: groupId,
         id: productId,
         price,
+        compare_at_price: compareAtPrice,
       } = variant;
+
+      const addComparePrice = BigNumber(compareAtPrice).gt(price);
 
       const avatar = _.find(object.images, (v) => v.id === imageId)?.src
           || mainImage;
@@ -131,6 +135,7 @@ const mapShopifyProducts = ({ objects = [], currency, host }) => {
         ...(fieldDescription && { fieldDescription }),
         useGPT: !!fieldDescription,
         imageURLs,
+        ...(addComparePrice && { fieldCompareAtPrice: `${currency}${compareAtPrice}` }),
       });
     }
   }
