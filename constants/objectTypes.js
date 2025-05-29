@@ -1,3 +1,5 @@
+const { FIELDS_NAMES } = require('@waivio/objects-processor');
+
 const IMPORT_OBJECT_TYPES = {
   RESTAURANT: 'restaurant',
   BUSINESS: 'business',
@@ -45,52 +47,7 @@ const AUTHORITY_FIELD_OPTIONS = {
   OWNERSHIP: 'ownership',
 };
 
-const OBJECT_FIELDS = {
-  PRODUCT_ID: 'productId',
-  AUTHORITY: 'authority',
-  NAME: 'name',
-  AGE_RANGE: 'ageRange',
-  OPTIONS: 'options',
-  PUBLICATION_DATE: 'publicationDate',
-  DIMENSIONS: 'dimensions',
-  WEIGHT: 'productWeight',
-  LANGUAGE: 'language',
-  PRINT_LENGTH: 'printLength',
-  AUTHORS: 'authors',
-  PUBLISHER: 'publisher',
-  AVATAR: 'avatar',
-  MAP: 'map',
-  ADDRESS: 'address',
-  EMAIL: 'email',
-  TAG_CATEGORY: 'tagCategory',
-  CATEGORY_ITEM: 'categoryItem',
-  WORK_TIME: 'workTime',
-  WEBSITE: 'website',
-  COMPANY_ID: 'companyId',
-  MERCHANT: 'merchant',
-  MANUFACTURER: 'manufacturer',
-  BRAND: 'brand',
-  FEATURES: 'features',
-  DEPARTMENTS: 'departments',
-  GALLERY_ALBUM: 'galleryAlbum',
-  GALLERY_ITEM: 'galleryItem',
-  PRICE: 'price',
-  DESCRIPTION: 'description',
-  GROUP_ID: 'groupId',
-  RATING: 'rating',
-  MENU_ITEM: 'menuItem',
-  TITLE: 'title',
-  LINK: 'link',
-  PHONE: 'phone',
-  URL: 'url',
-  CALORIES: 'calories',
-  BUDGET: 'budget',
-  COOKING_TIME: 'cookingTime',
-  COST: 'cost',
-  RECIPE_INGREDIENTS: 'recipeIngredients',
-  LIST_ITEM: 'listItem',
-  NUTRITION: 'nutrition',
-};
+const OBJECT_FIELDS = FIELDS_NAMES;
 
 const VIRTUAL_FIELDS = {
   ADD_TO_LIST: 'addToList',
@@ -163,6 +120,7 @@ const FIELDS_BY_OBJECT_TYPE = {
     OBJECT_FIELDS.PRICE,
     OBJECT_FIELDS.DESCRIPTION,
     OBJECT_FIELDS.TAG_CATEGORY,
+    OBJECT_FIELDS.COMPARE_AT_PRICE,
 
     VIRTUAL_FIELDS.ADD_TO_LIST,
   ],
@@ -183,6 +141,7 @@ const FIELDS_BY_OBJECT_TYPE = {
     OBJECT_FIELDS.PRICE,
     OBJECT_FIELDS.DESCRIPTION,
     OBJECT_FIELDS.TAG_CATEGORY,
+    OBJECT_FIELDS.COMPARE_AT_PRICE,
 
     VIRTUAL_FIELDS.ADD_TO_LIST,
   ],
