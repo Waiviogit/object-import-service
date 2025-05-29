@@ -1,3 +1,7 @@
+const { CURRENCY_PREFIX } = require('./objectTypes');
+
+const mostRecentPriceCurrencyEnum = Object.keys(CURRENCY_PREFIX).slice(0, -1);
+
 const Type = {
   OBJECT: 'object',
   ARRAY: 'array',
@@ -31,7 +35,7 @@ const productSchema = {
     },
     mostRecentPriceCurrency: {
       type: Type.STRING,
-      enum: ['AUD', 'USD', 'CAD', 'JPY', 'NZD', 'EUR', 'GBP', 'SGD', 'HKD', 'MXN', 'RUB', 'CNY', 'UAH', 'CHF'],
+      enum: mostRecentPriceCurrencyEnum,
       description: 'Currency code for price (e.g., "USD", "EUR")',
     },
     weight: {
