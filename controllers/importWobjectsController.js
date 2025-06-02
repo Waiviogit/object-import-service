@@ -18,7 +18,8 @@ const { VOTE_COST } = require('../constants/voteAbility');
 const { generateObjectByDescription } = require('../utilities/services/recipeGeneration/recipeGeneration');
 const gemeniService = require('../utilities/services/gemeniService');
 const gptService = require('../utilities/services/gptService');
-const { productIdSchema } = require('../constants/jsonShemaForAi');
+const { productIdSchema, productGallerySchema } = require('../constants/jsonShemaForAi');
+const { promptGallerySchema } = require('../constants/promptsForAi');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -348,6 +349,36 @@ const productIdFromUrl = async (req, res, next) => {
   return res.status(200).json(result);
 };
 
+const extractAvatar = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.extractAvatarSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { user, imageData, galleryLength } = value;
+
+  const { error: authError } = await authorise({
+    username: user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const productGallerySchemaObject = {
+    name: 'product_gallery_schema',
+    schema: productGallerySchema,
+  };
+
+  const { result, error } = await gptService.promptWithJsonSchema({
+    prompt: promptGallerySchema(imageData, galleryLength),
+    jsonSchema: productGallerySchemaObject,
+  });
+  if (error) return next(error);
+
+  return res.status(200).json(result);
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -368,4 +399,5 @@ module.exports = {
   videoAnalyze,
   imageProductAnalyze,
   productIdFromUrl,
+  extractAvatar,
 };

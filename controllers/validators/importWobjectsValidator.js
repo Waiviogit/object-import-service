@@ -79,3 +79,9 @@ exports.productIdUrlSchema = Joi.object().keys({
   user: Joi.string().required(),
   url: Joi.string().required(),
 });
+
+exports.extractAvatarSchema = Joi.object().keys({
+  user: Joi.string().required(),
+  imageData: Joi.string().required(),
+  galleryLength: Joi.number().min(1).required(),
+});

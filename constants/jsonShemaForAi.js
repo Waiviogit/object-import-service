@@ -17,6 +17,10 @@ const productSchema = {
       type: Type.STRING,
       description: 'Product name (e.g., "iPhone 15 Pro Max")',
     },
+    galleryLength: {
+      type: Type.Number,
+      description: 'Count of images in gallery',
+    },
     brand: {
       type: Type.STRING,
       description: 'Brand or manufacturer name (e.g., "Apple")',
@@ -111,7 +115,7 @@ const productSchema = {
     },
   },
 
-  required: ['name', 'waivio_options', 'fieldDescription', 'categories'],
+  required: ['name', 'waivio_options', 'fieldDescription', 'categories', 'galleryLength'],
 };
 
 const recipeSchema = {
@@ -181,8 +185,28 @@ const productIdSchema = {
   },
 };
 
+const productGallerySchema = {
+  type: Type.OBJECT,
+  required: ['avatar', 'gallery'],
+  properties: {
+    avatar: {
+      type: 'string',
+      description: 'The URL of the main image to use as the avatar (profile or main product image).',
+    },
+    gallery: {
+      type: 'array',
+      description: 'An array of image URLs suitable for use in a gallery (secondary or supporting product images).',
+      items: {
+        type: 'string',
+        description: 'The URL of a gallery image.',
+      },
+    },
+  },
+};
+
 module.exports = {
   productSchema,
   recipeSchema,
   productIdSchema,
+  productGallerySchema,
 };

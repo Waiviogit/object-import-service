@@ -56,6 +56,8 @@ objects.route('/import-products/recipe-generation')
   .post(importWobjectsController.generateRecipeFromDescription);
 objects.route('/import-products/extract-id')
   .post(importWobjectsController.productIdFromUrl);
+objects.route('/import-products/extract-avatar')
+  .post(importWobjectsController.extractAvatar);
 
 objects.route('/authority')
   .post(authorityController.claimAuthority)
