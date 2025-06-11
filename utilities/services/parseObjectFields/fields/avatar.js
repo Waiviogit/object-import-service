@@ -24,7 +24,21 @@ const checkForDuplicates = async (urls = []) => {
   }
 };
 
+const mapProtocolRelativeUrls = (link = '') => {
+  if (link.startsWith('//')) return `https:${link}`;
+  return link;
+};
+
 const avatar = async (object) => {
+  // check protocol-relative URLs
+  if (object?.primaryImageURLs?.length) {
+    object.primaryImageURLs = object.primaryImageURLs.map(mapProtocolRelativeUrls);
+  }
+
+  if (object?.imageURLs?.length) {
+    object.imageURLs = object.imageURLs.map(mapProtocolRelativeUrls);
+  }
+
   const fields = [];
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {
@@ -144,5 +158,63 @@ const avatar = async (object) => {
 
   return fields;
 };
+
+(async () => {
+  await avatar({
+    categories: [
+      'Shop',
+      'Water Bottle',
+    ],
+    fieldDescription: '',
+    galleryLength: 3,
+    name: 'GOALS STAINLESS STEEL HALF GALLON WATER BOTTLE WITH STRAW',
+    waivio_options: [
+      {
+        category: 'Color',
+        value: 'Black',
+      },
+    ],
+    brand: 'ZULU',
+    compareAtPriceAmount: '',
+    dimension: '',
+    features: [
+      {
+        key: 'STAYS COLD',
+        value: '',
+      },
+      {
+        key: 'LEAK PROOF',
+        value: '',
+      },
+      {
+        key: 'BUILT IN CARRY LOOP',
+        value: '',
+      },
+    ],
+    fieldRating: '4',
+    manufacturer: '',
+    merchants: [],
+    mostRecentPriceAmount: '39.99',
+    mostRecentPriceCurrency: 'USD',
+    weight: '',
+    primaryImageURLs: [
+      '//www.zuluathletic.com/cdn/shop/files/ZuluGoals64ozSSJug_Straw_Hero_Keytography_Black_1800x1800.jpg',
+    ],
+    imageURLs: [
+      '//www.zuluathletic.com/cdn/shop/files/ZuluGoals64ozSSJug_Straw_AngleLidOpen_Keytography_Black_1800x1800.jpg',
+      '//www.zuluathletic.com/cdn/shop/files/ZuluGoalsSS_Straw_Artboard_Black_CarryHandle_1800x1800.jpg',
+    ],
+    waivio_product_ids: [
+      {
+        key: 'zuluathletic.com',
+        value: 'goals-64oz-stainless-steel-water-bottle',
+      },
+    ],
+    websites: [
+      'https://www.zuluathletic.com/collections/best-sellers/products/goals-64oz-stainless-steel-water-bottle',
+    ],
+  });
+  console.log();
+})();
 
 module.exports = avatar;
