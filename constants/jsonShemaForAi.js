@@ -37,6 +37,10 @@ const productSchema = {
       type: Type.STRING,
       description: 'Latest price as a string (e.g., "199.99")',
     },
+    compareAtPriceAmount: {
+      type: Type.STRING,
+      description: 'Initial price of the product before any sale/discount, the original price if the product is on sale on the site (e.g., "250")',
+    },
     mostRecentPriceCurrency: {
       type: Type.STRING,
       enum: mostRecentPriceCurrencyEnum,
