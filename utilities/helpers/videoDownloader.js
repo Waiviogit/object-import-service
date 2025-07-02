@@ -9,6 +9,8 @@ const MAX_FILE_SIZE_MB = MAX_FILE_SIZE / (1024 * 1024);
 
 const TEMP_DIR = path.join(process.cwd(), 'temp');
 
+const { PROXY_URL } = process.env;
+
 const ensureTempDir = async () => {
   try {
     await fsp.access(TEMP_DIR);
@@ -60,6 +62,7 @@ const downloadVideoAsBase64 = async (url) => {
         noCheckCertificates: true,
         noWarnings: true,
         preferFreeFormats: true,
+        ...(PROXY_URL && { proxy: PROXY_URL }),
       },
     );
 
