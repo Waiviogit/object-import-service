@@ -1,6 +1,5 @@
 const { GoogleGenAI } = require('@google/genai');
 const AWS = require('@aws-sdk/client-s3');
-const { downloadVideoAsBase64 } = require('../helpers/videoDownloader');
 const { productSchema } = require('../../constants/jsonShemaForAi');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
@@ -138,17 +137,18 @@ const promptWithVideoUrl = async ({ prompt, url }) => {
   }
 };
 
-const analyzeVideo = async ({ prompt, url }) => {
+const analyzeVideo = async ({ prompt, url, videoBase64 }) => {
   if (/youtube\.com/.test(url)) {
     const { result, error } = await promptWithVideoUrl({ prompt, url });
     if (error) return { error: { status: 500, message: `AI processing error: ${error.message}` } };
     return { result };
   }
 
-  const { result: videoBase64, mime, error } = await downloadVideoAsBase64(url);
-  if (error) return { error: { status: 500, message: `Video processing error: ${error.message}` } };
+  if (!videoBase64) {
+    return { error: { status: 500, message: 'Video processing error' } };
+  }
 
-  const { result, error: promptError } = await promptWithVideoBase64({ prompt, videoBase64, mime });
+  const { result, error: promptError } = await promptWithVideoBase64({ prompt, videoBase64 });
   if (promptError) return { error: { status: 500, message: `AI processing error: ${promptError.message}` } };
   return { result };
 };

@@ -233,6 +233,27 @@ const videoAnalyze = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
+const videoAnalyzeBlob = async (req, res, next) => {
+  if (!req.file) return next({ status: 422, message: 'No file uploaded' });
+
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.videoAnalyzeSchema,
+    next,
+  );
+  if (!value) return;
+
+  // Convert buffer to base64
+  const videoBase64 = req.file.buffer.toString('base64');
+
+  const { result, error } = await gemeniService.analyzeVideo({
+    ...value,
+    videoBase64,
+  });
+  if (error) return next(error);
+  res.status(200).json({ result });
+};
+
 const imageProductAnalyze = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -400,4 +421,5 @@ module.exports = {
   imageProductAnalyze,
   productIdFromUrl,
   extractAvatar,
+  videoAnalyzeBlob,
 };

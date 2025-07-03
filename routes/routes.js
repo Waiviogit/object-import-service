@@ -10,7 +10,7 @@ const {
   postImportController,
   shopifyController,
 } = require('../controllers');
-const { upload, textOrJsonUpload } = require('../validators/fileValidator');
+const { upload, textOrJsonUpload, blobUpload } = require('../validators/fileValidator');
 
 const routes = express.Router();
 const objects = express.Router();
@@ -45,6 +45,8 @@ objects.route('/gpt-query')
   .post(importWobjectsController.gptQuery);
 objects.route('/video-analyses')
   .post(importWobjectsController.videoAnalyze);
+objects.route('/video-analyses/blob')
+  .post(blobUpload.single('file'), importWobjectsController.videoAnalyzeBlob);
 objects.route('/product-image-analyses')
   .post(importWobjectsController.imageProductAnalyze);
 
