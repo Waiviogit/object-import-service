@@ -102,7 +102,7 @@ const promptWithVideoBase64 = async ({ prompt, videoBase64, mime }) => {
 
     const response = await Promise.race([
       ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: [prompt, video],
       }),
       timeout(),
@@ -125,7 +125,7 @@ const promptWithVideoUrl = async ({ prompt, url }) => {
 
     const response = await Promise.race([
       ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: [prompt, video],
       }),
       timeout(),
