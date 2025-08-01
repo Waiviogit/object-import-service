@@ -244,7 +244,11 @@ const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
   }
 };
 
-const gptImage1Generate = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
+const gptImage1Generate = async ({
+  prompt = '',
+  n = 1,
+  size = '1024x1024',
+}) => {
   try {
     const response = await openaiBot.images.generate(
       {
@@ -256,18 +260,18 @@ const gptImage1Generate = async ({ prompt = '', n = 1, size = '1024x1024' }) => 
         quality: 'medium',
       },
       {
-        timeout: 60000,
+        timeout: 60000 * 2,
       },
     );
-    const result = _.get(response, 'data', []);
+    const result = _.get(response, 'data[0].b64_json');
 
-    const yo = await loadBase64Image(result);
-    return { result };
+    const { result: link } = await loadBase64Image(result);
+
+    return { result: link };
   } catch (error) {
     return { error };
   }
 };
-
 
 module.exports = {
   makeDescription,

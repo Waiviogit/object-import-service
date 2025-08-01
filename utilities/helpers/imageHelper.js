@@ -1,5 +1,4 @@
 const Jimp = require('jimp');
-const { promisify } = require('util');
 const sizeOf = require('image-size');
 const _ = require('lodash');
 const axios = require('axios');
@@ -92,7 +91,13 @@ const loadBase64Image = async (base64, size) => {
   try {
     const bodyFormData = new FormData();
 
-    bodyFormData.append('file', base64);
+    // Convert base64 to buffer and create a proper file
+    const buffer = Buffer.from(base64, 'base64');
+
+    bodyFormData.append('file', buffer, {
+      filename: 'image.webp',
+      contentType: 'image/webp',
+    });
     if (size) {
       bodyFormData.append('size', size);
     }
@@ -101,7 +106,7 @@ const loadBase64Image = async (base64, size) => {
       bodyFormData,
       {
         headers: bodyFormData.getHeaders(),
-        timeout: 15000,
+        timeout: 60000,
       },
     );
     const result = _.get(resp, 'data.image');
