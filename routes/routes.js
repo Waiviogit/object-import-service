@@ -8,8 +8,9 @@ const {
   addTagsController,
   threadsController,
   postImportController,
+  shopifyController,
 } = require('../controllers');
-const { upload, textOrJsonUpload } = require('../validators/fileValidator');
+const { upload, textOrJsonUpload, blobUpload } = require('../validators/fileValidator');
 
 const routes = express.Router();
 const objects = express.Router();
@@ -44,6 +45,10 @@ objects.route('/gpt-query')
   .post(importWobjectsController.gptQuery);
 objects.route('/video-analyses')
   .post(importWobjectsController.videoAnalyze);
+objects.route('/video-analyses/blob')
+  .post(blobUpload.single('file'), importWobjectsController.videoAnalyzeBlob);
+objects.route('/product-image-analyses')
+  .post(importWobjectsController.imageProductAnalyze);
 
 objects.route('/guest/authorize-import')
   .post(importWobjectsController.authorizeGuestImport);
@@ -51,6 +56,10 @@ objects.route('/guest/authorize-import')
   .get(importWobjectsController.authorizeGuestImportStatus);
 objects.route('/import-products/recipe-generation')
   .post(importWobjectsController.generateRecipeFromDescription);
+objects.route('/import-products/extract-id')
+  .post(importWobjectsController.productIdFromUrl);
+objects.route('/import-products/extract-avatar')
+  .post(importWobjectsController.extractAvatar);
 
 objects.route('/authority')
   .post(authorityController.claimAuthority)
@@ -141,5 +150,15 @@ objects.route('/post-import/host')
   .put(postImportController.setHost);
 objects.route('/post-import/history')
   .get(postImportController.getImportHistory);
+
+objects.route('/shopify/sync')
+  .get(shopifyController.getApps)
+  .post(shopifyController.createTask)
+  .put(shopifyController.resumeSynchronization)
+  .delete(shopifyController.stopSynchronization);
+objects.route('/shopify/credentials')
+  .post(shopifyController.addCredentials)
+  .get(shopifyController.getCredentials)
+  .delete(shopifyController.deleteCredentialsController);
 
 module.exports = routes;

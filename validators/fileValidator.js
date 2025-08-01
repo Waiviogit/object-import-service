@@ -28,6 +28,10 @@ const textOrJsonFileFilter = (reg, file, cb) => {
   return cb(null, true);
 };
 
+const memoryStorage = multer.memoryStorage();
+
+exports.blobUpload = multer({ storage: memoryStorage });
+
 exports.upload = multer({ storage, fileFilter });
 
 exports.textOrJsonUpload = multer({ fieldname: 'file', fileFilter: textOrJsonFileFilter });

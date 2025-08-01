@@ -18,7 +18,7 @@ const findTopLvlCategory = async (object) => {
 
 module.exports = async (object, allFields) => {
   const fields = [];
-  if (!object.categories) return;
+  if (!object?.categories?.length) return;
 
   const topLvlCategory = await findTopLvlCategory(object);
 

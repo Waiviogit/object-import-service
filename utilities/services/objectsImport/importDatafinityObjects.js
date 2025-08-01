@@ -10,7 +10,7 @@ const {
 const { addWobject, addField } = require('../importObjectsService');
 const { parseJson } = require('../../helpers/jsonHelper');
 const {
-  IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS, IMPORT_TYPES,
+  IMPORT_STATUS, IMPORT_REDIS_KEYS, AMAZON_ASINS, IMPORT_TYPES, REDIS_CHANNEL,
 } = require('../../../constants/appData');
 const { formField } = require('../../helpers/formFieldHelper');
 const {
@@ -43,13 +43,18 @@ const saveObjects = async ({
   for (const object of objects) {
     object.importId = importId;
     object.user = user;
-    object.object_type = objectType;
+    object.object_type = object?.object_type || objectType;
     object.locale = locale;
     object.translate = translate;
     if (authority) object.authority = authority;
     object.useGPT = useGPT;
     object.rating = getProductRating(object);
     object.fields = await parseFields(object);
+
+    // get status for long imports
+    const importTask = await ImportStatusModel.findOneByImportId(importId);
+    if (!importTask) return;
+    if (importTask.status === IMPORT_STATUS.DELETED) return;
 
     const result = await DatafinityObject.create(object);
     if (result?.error) continue;
@@ -92,12 +97,21 @@ const emitStart = ({
 };
 
 const finishImport = async ({ importId, user }) => {
+  const { result } = await ImportStatusModel.findOne({ filter: { importId, user } });
+  if (!result) return;
+
   await ImportStatusModel.updateOne({
     filter: { importId, user },
     update: {
       status: IMPORT_STATUS.FINISHED,
       finishedAt: new Date(),
     },
+  });
+
+  if (!result.onFinish) return;
+  await redisSetter.publish({
+    message: result.onFinish,
+    channel: REDIS_CHANNEL.FINISH_IMPORT_EVENT,
   });
 };
 

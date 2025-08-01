@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "API for import objects",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "title": "Waivio import service",
     "termsOfService": "https://hive.blog/@waivio"
   },
@@ -39,6 +39,10 @@
     {
       "name": "post-import",
       "description": "post-import"
+    },
+    {
+      "name": "shopify",
+      "description": "shopify"
     }
   ],
   "schemes": [
@@ -46,6 +50,267 @@
     "http"
   ],
   "paths": {
+    "/import-objects-service/shopify/sync": {
+      "post": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "sync task",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shopify-sync-task-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-sync-task-result"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "get apps list",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "userName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/shopify-sync-task-result"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "resume sync task",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shopify-stop-sync-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-sync-task-result"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "stop sync task",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shopify-stop-sync-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-sync-task-result"
+            }
+          }
+        }
+      }
+    },
+    "/import-objects-service/shopify/credentials": {
+      "post": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "add credentials",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shopify-credentials-params"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-sync-task-result"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "get credentials",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "userName",
+            "in": "query",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "waivioHostName",
+            "in": "query",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/shopify-credentials-params"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "shopify"
+        ],
+        "summary": "delete credentials",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "params",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userName": {
+                  "type": "string"
+                },
+                "waivioHostName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
     "/import-objects-service/guest/authorize-import": {
       "post": {
         "tags": [
@@ -2654,6 +2919,74 @@
     }
   },
   "definitions": {
+    "shopify-sync-task-result": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "hostName": {
+          "type": "string"
+        } ,
+        "waivioHostName": {
+          "type": "string"
+        }
+      }
+    },
+    "shopify-sync-task-params": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "waivioHostName": {
+          "type": "string"
+        },
+        "authority": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        }
+      }
+    },
+    "shopify-credentials-params": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "hostName": {
+          "type": "string"
+        },
+        "waivioHostName": {
+          "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "apiSecretKey": {
+          "type": "string"
+        }
+      }
+    },
+    "shopify-stop-sync-params":  {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "waivioHostName": {
+          "type": "string"
+        }
+      }
+    },
     "PostCreateBody": {
       "type": "object",
       "properties": {
@@ -3141,7 +3474,10 @@
           "type": "string"
         },
         "lists": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "objectsCount": {
           "type": "number"

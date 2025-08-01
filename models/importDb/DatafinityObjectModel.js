@@ -32,7 +32,7 @@ const updateOne = async (filter, update) => {
 
 const removeOne = async (id) => {
   try {
-    await DatafinityObject.remove({ _id: id });
+    await DatafinityObject.deleteOne({ _id: id });
   } catch (error) {
     return { error };
   }

@@ -36,4 +36,5 @@ module.exports = {
   recipeIngredients: require('./fields/recipeIngredients'),
   addToList: require('./fields/addToList'),
   nutrition: require('./fields/nutrition'),
+  compareAtPrice: require('./fields/compareAtPrice'),
 };

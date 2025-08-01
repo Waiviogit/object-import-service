@@ -6,7 +6,7 @@ const URI = process.env.MONGO_URI_WAIVIO
   ? process.env.MONGO_URI_WAIVIO
   : `mongodb://${config.db.host}:${config.db.port}/${config.db.database}`;
 
-mongoose.connect(URI, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
+mongoose.connect(URI)
   .then(() => console.log('MongoDB connection successful!'))
   .catch((error) => console.error(error));
 
@@ -31,5 +31,6 @@ module.exports = {
     GuestMana: require('./schemas/GuestManaSchema'),
     ServiceBot: require('./schemas/ServiceBotSchema'),
     App: require('./schemas/AppSchema'),
+    ShopifyKeys: require('./schemas/ShopifyKeysSchema'),
   },
 };

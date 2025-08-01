@@ -17,6 +17,9 @@ const { guestMana } = require('../utilities/guestUser');
 const { VOTE_COST } = require('../constants/voteAbility');
 const { generateObjectByDescription } = require('../utilities/services/recipeGeneration/recipeGeneration');
 const gemeniService = require('../utilities/services/gemeniService');
+const gptService = require('../utilities/services/gptService');
+const { productIdSchema, productGallerySchema } = require('../constants/jsonShemaForAi');
+const { promptGallerySchema } = require('../constants/promptsForAi');
 
 const importWobjects = async (req, res, next) => {
   const data = {
@@ -230,6 +233,46 @@ const videoAnalyze = async (req, res, next) => {
   res.status(200).json({ result });
 };
 
+const videoAnalyzeBlob = async (req, res, next) => {
+  if (!req.file) return next({ status: 422, message: 'No file uploaded' });
+
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.videoAnalyzeSchema,
+    next,
+  );
+  if (!value) return;
+
+  // Convert buffer to base64
+  const videoBase64 = req.file.buffer.toString('base64');
+
+  const { result, error } = await gemeniService.analyzeVideo({
+    ...value,
+    videoBase64,
+  });
+  if (error) return next(error);
+  res.status(200).json({ result });
+};
+
+const imageProductAnalyze = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.imageProductAnalyzeSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { error: authError } = await authorise({
+    username: value.user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const { result, error } = await gemeniService.getObjectForImportFromImage(value);
+  if (error) return next(error);
+  res.status(200).json(result);
+};
+
 const authorizeGuestImport = async (req, res, next) => {
   const value = validators.validate(
     req.body,
@@ -297,6 +340,66 @@ const generateRecipeFromDescription = async (req, res, next) => {
   return res.status(200).json({ result });
 };
 
+const productIdFromUrl = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.productIdUrlSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { user, url } = value;
+
+  const { error: authError } = await authorise({
+    username: user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const productIdSchemaObject = {
+    name: 'product_id_schema',
+    schema: productIdSchema,
+  };
+
+  const { result, error } = await gptService.promptWithJsonSchema({
+    prompt: `Given a product URL, extract the minimal product ID that can be used to generate the shortest working URL leading directly to the product page: ${url}`,
+    jsonSchema: productIdSchemaObject,
+  });
+  if (error) return next(error);
+
+  return res.status(200).json(result);
+};
+
+const extractAvatar = async (req, res, next) => {
+  const value = validators.validate(
+    req.body,
+    validators.importWobjects.extractAvatarSchema,
+    next,
+  );
+  if (!value) return;
+
+  const { user, imageData, galleryLength } = value;
+
+  const { error: authError } = await authorise({
+    username: user,
+    ...getAccessTokensFromReq(req),
+  });
+  if (authError) return next(authError);
+
+  const productGallerySchemaObject = {
+    name: 'product_gallery_schema',
+    schema: productGallerySchema,
+  };
+
+  const { result, error } = await gptService.promptWithJsonSchema({
+    prompt: promptGallerySchema(imageData, galleryLength),
+    jsonSchema: productGallerySchemaObject,
+  });
+  if (error) return next(error);
+
+  return res.status(200).json(result);
+};
+
 module.exports = {
   importWobjects,
   importTags,
@@ -315,4 +418,8 @@ module.exports = {
   validateUserImport,
   generateRecipeFromDescription,
   videoAnalyze,
+  imageProductAnalyze,
+  productIdFromUrl,
+  extractAvatar,
+  videoAnalyzeBlob,
 };

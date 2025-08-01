@@ -41,11 +41,6 @@ const addDatafinityDataToProducts = async (products) => {
   }
 };
 
-(async () => {
-  await addDatafinityDataToProduct({ asins: 'B016RYODRS' });
-  console.log();
-})();
-
 module.exports = {
   addDatafinityDataToProducts,
 };

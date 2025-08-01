@@ -24,7 +24,21 @@ const checkForDuplicates = async (urls = []) => {
   }
 };
 
+const mapProtocolRelativeUrls = (link = '') => {
+  if (link.startsWith('//')) return `https:${link}`;
+  return link;
+};
+
 const avatar = async (object) => {
+  // check protocol-relative URLs
+  if (object?.primaryImageURLs?.length) {
+    object.primaryImageURLs = object.primaryImageURLs.map(mapProtocolRelativeUrls);
+  }
+
+  if (object?.imageURLs?.length) {
+    object.imageURLs = object.imageURLs.map(mapProtocolRelativeUrls);
+  }
+
   const fields = [];
   let loadAvatar = true;
   if (object.primaryImageURLs && object.primaryImageURLs.length === 1) {

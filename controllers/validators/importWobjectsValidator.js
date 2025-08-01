@@ -56,6 +56,11 @@ exports.videoAnalyzeSchema = Joi.object().keys({
   url: Joi.string().uri().required(),
 });
 
+exports.imageProductAnalyzeSchema = Joi.object().keys({
+  url: Joi.string().uri().required(),
+  user: Joi.string().required(),
+});
+
 exports.authorizeGuestUser = Joi.object().keys({
   account: Joi.string().required(),
   importAuthorization: Joi.boolean().required(),
@@ -68,4 +73,15 @@ exports.authorizeGuestUserStatus = Joi.object().keys({
 exports.generateRecipeSchema = Joi.object().keys({
   user: Joi.string().required(),
   description: Joi.string().required(),
+});
+
+exports.productIdUrlSchema = Joi.object().keys({
+  user: Joi.string().required(),
+  url: Joi.string().required(),
+});
+
+exports.extractAvatarSchema = Joi.object().keys({
+  user: Joi.string().required(),
+  imageData: Joi.string().required(),
+  galleryLength: Joi.number().min(1).required(),
 });

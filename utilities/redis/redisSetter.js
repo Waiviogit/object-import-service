@@ -1,4 +1,4 @@
-const { importWobjectsDataClient, botsData } = require('./redis');
+const { importWobjectsDataClient, botsData, lastBlockCLient } = require('./redis');
 
 const setImportWobjData = async (key, data) => {
   if (key && data) {
@@ -38,6 +38,10 @@ const setEx = async ({
   }
 };
 
+const publish = async ({ message, channel, client = lastBlockCLient }) => {
+  await client.publishAsync(channel, message);
+};
+
 module.exports = {
   setImportWobjData,
   delImportWobjData,
@@ -46,4 +50,5 @@ module.exports = {
   expire,
   incr,
   setEx,
+  publish,
 };

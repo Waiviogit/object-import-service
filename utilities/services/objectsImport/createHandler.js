@@ -28,6 +28,8 @@ const importObjects = async ({
   useGPT,
   addDatafinityData,
   objects,
+  onFinish = '',
+  onStop = '',
 }) => {
   const importId = createUUID();
   if (addDatafinityData) await addDatafinityDataToProducts(objects);
@@ -42,6 +44,8 @@ const importObjects = async ({
     locale,
     translate,
     useGPT,
+    onFinish,
+    onStop,
   });
   await redisSetter.set({
     key: `${IMPORT_REDIS_KEYS.PENDING}:${importId}`,

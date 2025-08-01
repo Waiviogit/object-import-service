@@ -1,5 +1,6 @@
 const _ = require('lodash');
-const { gptSystemUserPrompt, gptCreateImage } = require('../gptService');
+const Joi = require('joi');
+const { gptSystemUserPrompt, gptCreateImage, promptWithJsonSchema } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
 const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
 const { saveObjects } = require('../objectsImport/importDatafinityObjects');
@@ -7,6 +8,12 @@ const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
 const { IMAGE_SIZE } = require('../../../constants/fileFormats');
 const { loadImageByUrl } = require('../../helpers/imageHelper');
+const { recipeSchema } = require('../../../constants/jsonShemaForAi');
+
+const recipeSchemaObject = {
+  name: 'recipe_schema',
+  schema: recipeSchema,
+};
 
 const systemPrompt = (language) => `you are prompted to generate a recipe from the given name. 
 The response format should be a json object according to the following scheme: 
@@ -130,7 +137,7 @@ const updateErrorCount = async (recipeDoc) => {
 
 const getProductId = (name = '') => ([{
   key: 'instacart',
-  value: name.replace(/[.,%?+*|{}[\]()<>“”^'"\\\-_=!&$:]/g, '')
+  value: name.replace(/[.,%?+*|{}[\]()<>""^'"\\\-_=!&$:]/g, '')
     .replace(/ +/g, '-').trim().toLocaleLowerCase(),
 }]);
 
@@ -198,7 +205,12 @@ const generateRecipeAndImage = async ({ importId }) => {
   const docsToImport = await RecipeGeneratedModel.getCompleted(importId);
 
   if (!docsToImport?.length) {
+    // finish import 0 objects
     await deleteRecipePreprocessedData(importId);
+    await ImportStatusModel.updateOne({
+      filter: { importId },
+      update: { status: IMPORT_STATUS.FINISHED },
+    });
     return;
   }
 
@@ -236,17 +248,57 @@ const createRecipeObjectsForImport = async ({
   generateRecipeAndImage({ importId });
 };
 
-const generateObjectByDescription = async ({ description = '' }) => {
-  const { result, error } = await gptSystemUserPrompt({
-    systemPrompt: systemPromptDescription(),
-    userPrompt: description,
-  });
-  if (error) return null;
-  const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
-  if (!formatedResponse) return null;
+const recipeValidationSchema = Joi.object({
+  name: Joi.string().min(1).required(),
+  fieldDescription: Joi.string().min(1).required(),
+  categories: Joi.array().items(Joi.string().min(1)).min(5).max(10)
+    .required(),
+  fieldCalories: Joi.string()
+    .required(),
+  fieldCookingTime: Joi.string().required(),
+  fieldBudget: Joi.string().valid('$', '$$', '$$$').required(),
+  fieldRecipeIngredients: Joi.array()
+    .items(Joi.string())
+    .min(1)
+    .required(),
+  fieldNutrition: Joi.string().required(),
+});
 
-  return formatedResponse;
+const generateObjectByDescription = async ({ description = '' }) => {
+  const prompt = `generate recipe json object from following text: ${description}`;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const { result, error } = await promptWithJsonSchema({
+      prompt,
+      jsonSchema: recipeSchemaObject,
+    });
+
+    if (error) {
+      continue;
+    }
+
+    const { error: validationError, value } = recipeValidationSchema
+      .validate(result, { stripUnknown: true });
+
+    if (!validationError) {
+      return value;
+    }
+  }
+
+  return null;
 };
+
+// const generateObjectByDescription = async ({ description = '' }) => {
+//   const { result, error } = await gptSystemUserPrompt({
+//     systemPrompt: systemPromptDescription(),
+//     userPrompt: description,
+//   });
+//   if (error) return null;
+//   const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
+//   if (!formatedResponse) return null;
+//
+//   return formatedResponse;
+// };
 
 module.exports = {
   generateRecipeImage,
