@@ -217,6 +217,7 @@ const generateRecipeAndImage = async ({ importId }) => {
       });
       if (editedImage) {
         await RecipeGeneratedModel.updateImage(recipeDoc._id, editedImage);
+        continue;
       }
     }
 
