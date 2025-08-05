@@ -21,6 +21,7 @@ const RecipeGeneratedSchema = new Schema({
   fieldNutrition: { type: String },
   fieldBudget: { type: String },
   fieldCookingTime: { type: String },
+  recipeUrl: { type: String },
   fieldRecipeIngredients: { type: [String] },
   primaryImageURLs: { type: [String] },
   listAssociations: { type: [String] },
