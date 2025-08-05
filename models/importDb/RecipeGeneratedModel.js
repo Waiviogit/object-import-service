@@ -122,6 +122,7 @@ const getCompleted = async (importId) => {
       waivio_product_ids: 1,
       listAssociations: 1,
       waivio_tags: 1,
+      recipeUrl: 1,
     },
   });
 

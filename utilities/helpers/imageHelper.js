@@ -1,5 +1,4 @@
 const Jimp = require('jimp');
-const { promisify } = require('util');
 const sizeOf = require('image-size');
 const _ = require('lodash');
 const axios = require('axios');
@@ -88,7 +87,39 @@ const loadImageByUrl = async (url, size) => {
   }
 };
 
+const loadBase64Image = async (base64, size) => {
+  try {
+    const bodyFormData = new FormData();
+
+    // Convert base64 to buffer and create a proper file
+    const buffer = Buffer.from(base64, 'base64');
+
+    bodyFormData.append('file', buffer, {
+      filename: 'image.webp',
+      contentType: 'image/webp',
+    });
+    if (size) {
+      bodyFormData.append('size', size);
+    }
+    const resp = await axios.post(
+      process.env.SAVE_IMAGE_URL,
+      bodyFormData,
+      {
+        headers: bodyFormData.getHeaders(),
+        timeout: 60000,
+      },
+    );
+    const result = _.get(resp, 'data.image');
+    if (!result) return { error: new Error('Internal server error') };
+    return { result };
+  } catch (error) {
+    console.error(error.message);
+    return { error };
+  }
+};
+
 module.exports = {
   isProperResolution,
   loadImageByUrl,
+  loadBase64Image,
 };

@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const _ = require('lodash');
 const { QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
+const { loadBase64Image } = require('../helpers/imageHelper');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -243,6 +244,101 @@ const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
   }
 };
 
+const gptImage1Generate = async ({
+  prompt = '',
+  n = 1,
+  size = '1024x1024',
+}) => {
+  try {
+    const response = await openaiBot.images.generate(
+      {
+        prompt,
+        n,
+        size,
+        model: 'gpt-image-1',
+        output_format: 'webp',
+        quality: 'medium',
+      },
+      {
+        timeout: 60000 * 2,
+      },
+    );
+    const result = _.get(response, 'data[0].b64_json');
+
+    const { result: link } = await loadBase64Image(result);
+
+    return { result: link };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const getFileExtension = (contentType) => {
+  const typeMap = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+
+  return typeMap[contentType] || 'jpg';
+};
+
+const getImageFileFromUrl = async (imageUrl) => {
+  try {
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+    }
+
+    const originalContentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+    const allowedTypes = ['image/png', 'image/webp', 'image/jpeg'];
+    const contentType = allowedTypes.includes(originalContentType) ? originalContentType : 'image/jpeg';
+
+    const extension = getFileExtension(contentType);
+    const fileName = `image.${extension}`;
+
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const imageFile = new File([imageBuffer], fileName, { type: contentType });
+
+    return { result: imageFile };
+  } catch (error) {
+    return { error };
+  }
+};
+
+const editImageFromUrl = async ({
+  imageFile,
+  prompt,
+  n = 1,
+  size = '1024x1024',
+}) => {
+  try {
+    const response = await openaiBot.images.edit(
+      {
+        image: imageFile, // Pass the actual image data
+        prompt,
+        n,
+        size,
+        model: 'gpt-image-1',
+        output_format: 'webp',
+        quality: 'medium',
+      },
+      {
+        timeout: 60000 * 2,
+      },
+    );
+    const result = _.get(response, 'data[0].b64_json');
+
+    const { result: link } = await loadBase64Image(result);
+
+    return { result: link };
+  } catch (error) {
+    console.error('Error editing image:', error);
+    return { error };
+  }
+};
+
 const promptWithJsonSchema = async ({ prompt, jsonSchema }) => {
   try {
     const response = await openai.chat.completions.create({
@@ -280,4 +376,6 @@ module.exports = {
   makeLinkDescription,
   gptSystemUserPrompt,
   promptWithJsonSchema,
+  editImageFromUrl,
+  getImageFileFromUrl,
 };
