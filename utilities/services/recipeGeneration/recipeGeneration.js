@@ -138,7 +138,10 @@ const getImageFromUrl = async (url) => {
 
 const editImage = async ({ prompt, recipeUrl }) => {
   const imageUrl = await getImageFromUrl(recipeUrl);
-  if (!imageUrl) return '';
+  if (!imageUrl) {
+    console.log('Invalid url', recipeUrl);
+    return '';
+  }
 
   const { result: file } = await getImageFileFromUrl(imageUrl);
 
@@ -146,7 +149,7 @@ const editImage = async ({ prompt, recipeUrl }) => {
     imageFile: file,
     prompt,
   });
-
+  console.log('editImage RESULT', `${result}`);
   return result;
 };
 
