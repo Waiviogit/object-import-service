@@ -97,53 +97,8 @@ const generateRecipeImage = async ({ name }) => {
   return image;
 };
 
-const extractInstagramVideoId = (url) => {
-  const match = url.match(/instagram\.com\/(?:[\w-]+\/)?(p|reel)\/([\w-]+)/);
-  return match ? match[2] : '';
-};
-
-const getImageFromUrl = async (url) => {
-  if (url.includes('youtube.com')) {
-    const regex = /(?:watch\?v=|\/shorts\/)([^&/]+)/;
-    const match = url.match(regex);
-    if (!match && !match[1]) return '';
-    const imageUrl = `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
-    return imageUrl;
-  }
-
-  if (url.includes('instagram.com')) {
-    // Instagram doesn't provide direct image URLs, but we can extract the post ID
-    const id = extractInstagramVideoId(url);
-    if (id) {
-      // Instagram oEmbed endpoint can be used to get preview data
-      // For now, return a placeholder or you could implement oEmbed call
-      return `https://www.instagram.com/p/${id}/media/?size=l`;
-    }
-  }
-
-  if (url.includes('tiktok.com')) {
-    try {
-      const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
-      const response = await fetch(oembedUrl);
-      const data = await response.json();
-      return data.thumbnail_url || '';
-    } catch (error) {
-      console.error('Error fetching TikTok thumbnail:', error);
-      return '';
-    }
-  }
-
-  return '';
-};
-
 const editImage = async ({ prompt, recipeUrl }) => {
-  const imageUrl = await getImageFromUrl(recipeUrl);
-  if (!imageUrl) {
-    console.log('Invalid url', recipeUrl);
-    return '';
-  }
-
-  const { result: file, error: fileError } = await getImageFileFromUrl(imageUrl);
+  const { result: file, error: fileError } = await getImageFileFromUrl(recipeUrl);
   if (!file || fileError) {
     console.log(fileError?.message || 'Failed to fetch a file');
     return '';
