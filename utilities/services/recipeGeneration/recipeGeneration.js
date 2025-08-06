@@ -143,7 +143,11 @@ const editImage = async ({ prompt, recipeUrl }) => {
     return '';
   }
 
-  const { result: file } = await getImageFileFromUrl(imageUrl);
+  const { result: file, error: fileError } = await getImageFileFromUrl(imageUrl);
+  if (!file || fileError) {
+    console.log(fileError?.message || 'Failed to fetch a file');
+    return '';
+  }
 
   const { result } = await editImageFromUrl({
     imageFile: file,
