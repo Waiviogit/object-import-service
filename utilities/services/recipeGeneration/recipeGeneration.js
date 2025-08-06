@@ -97,6 +97,11 @@ const generateRecipeImage = async ({ name }) => {
   return image;
 };
 
+const extractInstagramVideoId = (url) => {
+  const match = url.match(/instagram\.com\/(?:[\w-]+\/)?(p|reel)\/([\w-]+)/);
+  return match ? match[2] : '';
+};
+
 const getImageFromUrl = async (url) => {
   if (url.includes('youtube.com')) {
     const regex = /(?:watch\?v=|\/shorts\/)([^&/]+)/;
@@ -108,12 +113,11 @@ const getImageFromUrl = async (url) => {
 
   if (url.includes('instagram.com')) {
     // Instagram doesn't provide direct image URLs, but we can extract the post ID
-    const regex = /instagram\.com\/p\/([^/?]+)/;
-    const match = url.match(regex);
-    if (match && match[1]) {
+    const id = extractInstagramVideoId(url);
+    if (id) {
       // Instagram oEmbed endpoint can be used to get preview data
       // For now, return a placeholder or you could implement oEmbed call
-      return `https://www.instagram.com/p/${match[1]}/media/?size=l`;
+      return `https://www.instagram.com/p/${id}/media/?size=l`;
     }
   }
 
