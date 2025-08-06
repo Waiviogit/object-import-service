@@ -1,5 +1,6 @@
 const OpenAI = require('openai');
 const _ = require('lodash');
+const sharp = require('sharp');
 const { QUESTION_PROMPT, BASIC_PROMPT } = require('../../constants/openai');
 const { loadBase64Image } = require('../helpers/imageHelper');
 
@@ -273,33 +274,16 @@ const gptImage1Generate = async ({
   }
 };
 
-const getFileExtension = (contentType) => {
-  const typeMap = {
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-  };
-
-  return typeMap[contentType] || 'jpg';
-};
-
 const getImageFileFromUrl = async (imageUrl) => {
   try {
     const imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) {
       throw new Error(`Failed to download image: ${imageResponse.statusText}`);
     }
-
-    const originalContentType = imageResponse.headers.get('content-type') || 'image/jpeg';
-
-    const allowedTypes = ['image/png', 'image/webp', 'image/jpeg'];
-    const contentType = allowedTypes.includes(originalContentType) ? originalContentType : 'image/jpeg';
-
-    const extension = getFileExtension(contentType);
-    const fileName = `image.${extension}`;
-
     const imageBuffer = await imageResponse.arrayBuffer();
-    const imageFile = new File([imageBuffer], fileName, { type: contentType });
+
+    const imageSharpBuffer = await sharp(imageBuffer).toFormat('webp').toBuffer();
+    const imageFile = new File([imageSharpBuffer], 'image.webp', { type: 'image/webp' });
 
     return { result: imageFile };
   } catch (error) {
