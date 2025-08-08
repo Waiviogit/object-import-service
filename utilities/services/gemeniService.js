@@ -74,7 +74,7 @@ const getObjectForImportFromImage = async ({ url }) => {
 
     const response = await Promise.race([
       ai.models.generateContent({
-        model: 'gemini-2.5-flash-preview-04-17',
+        model: 'gemini-2.5-flash',
         contents: [prompt, pictureData],
         config,
       }),
