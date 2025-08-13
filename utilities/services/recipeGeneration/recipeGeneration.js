@@ -1,15 +1,17 @@
 const _ = require('lodash');
 const Joi = require('joi');
 const {
-  gptSystemUserPrompt, gptCreateImage, promptWithJsonSchema, editImageFromUrl, getImageFileFromUrl,
+  gptSystemUserPrompt,
+  promptWithJsonSchema,
+  editImageFromUrl,
+  getImageFileFromUrl,
+  gptImage1Generate,
 } = require('../gptService');
 const jsonHelper = require('../../helpers/jsonHelper');
 const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
 const { saveObjects } = require('../objectsImport/importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
 const { IMPORT_STATUS } = require('../../../constants/appData');
-const { IMAGE_SIZE } = require('../../../constants/fileFormats');
-const { loadImageByUrl } = require('../../helpers/imageHelper');
 const { recipeSchema } = require('../../../constants/jsonShemaForAi');
 
 const recipeSchemaObject = {
@@ -83,18 +85,12 @@ const generateRecipe = async (name, locale) => {
 const generateRecipeImage = async ({ name }) => {
   const prompt = imagePrompt({ name });
 
-  const { result, error } = await gptCreateImage({
+  const { result, error } = await gptImage1Generate({
     prompt,
   });
   if (error) return '';
 
-  const images = result.map((image) => image?.url);
-  // load to our cdn because ttl link
-  const { result: image } = await loadImageByUrl(
-    images[0],
-    IMAGE_SIZE.CONTAIN,
-  );
-  return image;
+  return result;
 };
 
 const editImage = async ({ prompt, recipeUrl }) => {
@@ -280,18 +276,6 @@ const generateObjectByDescription = async ({ description = '' }) => {
 
   return null;
 };
-
-// const generateObjectByDescription = async ({ description = '' }) => {
-//   const { result, error } = await gptSystemUserPrompt({
-//     systemPrompt: systemPromptDescription(),
-//     userPrompt: description,
-//   });
-//   if (error) return null;
-//   const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
-//   if (!formatedResponse) return null;
-//
-//   return formatedResponse;
-// };
 
 module.exports = {
   generateRecipeImage,

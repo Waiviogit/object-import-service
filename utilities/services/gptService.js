@@ -362,4 +362,5 @@ module.exports = {
   promptWithJsonSchema,
   editImageFromUrl,
   getImageFileFromUrl,
+  gptImage1Generate,
 };
