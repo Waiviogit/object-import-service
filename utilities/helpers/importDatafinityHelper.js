@@ -259,16 +259,18 @@ const validateSameFieldAuthority = ({ fieldData, foundedFields }) => !!foundedFi
   .find((field) => _.isEqual(_.pick(field, SET_UNIQ_FIELDS_AUTHORITY), _.pick(fieldData, SET_UNIQ_FIELDS_AUTHORITY)));
 
 const validateSameFields = ({ fieldData, wobject }) => {
-  const fieldNamesSet = new Set(wobject.fields.map((f) => f.name));
-  const fieldExistsInSet = (fieldName) => fieldNamesSet.has(fieldName);
+  const fieldNamesPositiveWeight = new Set(
+    wobject.fields.filter((f) => f.weight > 0).map((f) => f.name),
+  );
+  const fieldExistsInPositiveWeightSet = (fieldName) => fieldNamesPositiveWeight.has(fieldName);
 
   const validation = {
     /** ------------------Validate fields exist ------------------------------------------*/
-    [OBJECT_FIELDS.AVATAR]: () => fieldExistsInSet(OBJECT_FIELDS.AVATAR),
-    [OBJECT_FIELDS.RECIPE_INGREDIENTS]: () => fieldExistsInSet(OBJECT_FIELDS.RECIPE_INGREDIENTS),
-    [OBJECT_FIELDS.CALORIES]: () => fieldExistsInSet(OBJECT_FIELDS.CALORIES),
-    [OBJECT_FIELDS.BUDGET]: () => fieldExistsInSet(OBJECT_FIELDS.BUDGET),
-    [OBJECT_FIELDS.COOKING_TIME]: () => fieldExistsInSet(OBJECT_FIELDS.COOKING_TIME),
+    [OBJECT_FIELDS.AVATAR]: () => fieldExistsInPositiveWeightSet(OBJECT_FIELDS.AVATAR),
+    [OBJECT_FIELDS.RECIPE_INGREDIENTS]: () => fieldExistsInPositiveWeightSet(OBJECT_FIELDS.RECIPE_INGREDIENTS),
+    [OBJECT_FIELDS.CALORIES]: () => fieldExistsInPositiveWeightSet(OBJECT_FIELDS.CALORIES),
+    [OBJECT_FIELDS.BUDGET]: () => fieldExistsInPositiveWeightSet(OBJECT_FIELDS.BUDGET),
+    [OBJECT_FIELDS.COOKING_TIME]: () => fieldExistsInPositiveWeightSet(OBJECT_FIELDS.COOKING_TIME),
     /**---------------------------------------------------------------------------------*/
     [OBJECT_FIELDS.PRODUCT_ID]: validateSameFieldsProductId,
     [OBJECT_FIELDS.COMPANY_ID]: validateSameFieldsProductId,
