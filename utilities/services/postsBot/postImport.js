@@ -26,9 +26,10 @@ const validateLastPostingTime = async ({ user }) => {
   const key = `${IMPORT_REDIS_KEYS.LAST_POSTING_TIME}:${user}`;
   const now = Date.now();
   const value = await redisGetter.get({ key });
-  if (!value) return true;
-  const diffInSec = Math.round((now - parseInt(value, 10)) / 1000);
-  return diffInSec > CONTINUE_TTL_SEC;
+  if (!value) return 0;
+  const elapsedSec = Math.round((now - parseInt(value, 10)) / 1000);
+  if (elapsedSec >= CONTINUE_TTL_SEC) return 0;
+  return Math.max(CONTINUE_TTL_SEC - elapsedSec, 0);
 };
 
 const publishPost = async ({
@@ -115,10 +116,10 @@ const importPost = async ({ importId, user }) => {
     return;
   }
 
-  const validTime = await validateLastPostingTime({ user });
-  if (!validTime) {
+  const waitTime = await validateLastPostingTime({ user });
+  if (waitTime > 0) {
     await setContinueTtl({
-      user, importId, type: IMPORT_TYPES.POST_IMPORT, ttl: CONTINUE_TTL_SEC,
+      user, importId, type: IMPORT_TYPES.POST_IMPORT, ttl: waitTime,
     });
     return;
   }
@@ -161,7 +162,6 @@ const importPost = async ({ importId, user }) => {
     },
   });
   await sendUpdateImportForUser({ account: user });
-
   await setLastPostingTime({ user });
   importPost({ importId, user });
 };
