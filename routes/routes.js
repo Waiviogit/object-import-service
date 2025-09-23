@@ -11,6 +11,7 @@ const {
   shopifyController,
 } = require('../controllers');
 const { upload, textOrJsonUpload, blobUpload } = require('../validators/fileValidator');
+const { singleRequestThrottle } = require('../utilities/middleware/throttleMiddleware');
 
 const routes = express.Router();
 const objects = express.Router();
@@ -46,7 +47,7 @@ objects.route('/gpt-query')
 objects.route('/video-analyses')
   .post(importWobjectsController.videoAnalyze);
 objects.route('/video-analyses/blob')
-  .post(blobUpload.single('file'), importWobjectsController.videoAnalyzeBlob);
+  .post(singleRequestThrottle, blobUpload.single('file'), importWobjectsController.videoAnalyzeBlob);
 objects.route('/product-image-analyses')
   .post(importWobjectsController.imageProductAnalyze);
 

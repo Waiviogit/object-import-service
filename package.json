@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "node --max-old-space-size=500 ./bin/service.js",
+    "start": "node --max-old-space-size=1000 ./bin/service.js",
     "getQueueAttributes": "node ./utilities/redis/rsmq/getQueueAttributes.js",
     "deleteQueueMessage": "node ./utilities/redis/rsmq/deleteQueueMessage.js",
     "setQueueVT": "node ./utilities/redis/rsmq/setQueueVT.js",
