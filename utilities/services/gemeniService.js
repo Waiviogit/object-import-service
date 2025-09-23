@@ -38,7 +38,7 @@ const deleteFromS3 = async (key) => {
 
 const extractHash = (url) => url.split('/').pop();
 
-const timeout = (ms = 60 * 1000) => new Promise((_, reject) => {
+const timeout = (ms = 60 * 2000) => new Promise((_, reject) => {
   setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
 });
 
@@ -107,7 +107,6 @@ const promptWithVideoBase64 = async ({ prompt, videoBase64, mime }) => {
       }),
       timeout(),
     ]);
-
     return { result: response.text };
   } catch (error) {
     return { error };
