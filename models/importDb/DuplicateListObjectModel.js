@@ -12,7 +12,7 @@ const insertMany = async (docs) => {
 
 const count = async ({ filter, options }) => {
   try {
-    const result = await DuplicateListObject.count(filter, options);
+    const result = await DuplicateListObject.countDocuments(filter, options);
 
     return { count: result };
   } catch (error) {
@@ -29,7 +29,6 @@ const findOne = async ({ filter, projection, options }) => {
     return { error };
   }
 };
-
 
 const find = async ({ filter, projection, options }) => {
   try {

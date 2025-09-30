@@ -44,7 +44,9 @@ const getNextObject = async ({ user, importId }) => {
   return result;
 };
 
-const updateToClaimedObject = async ({ user, importId, authorPermlink, department }) => {
+const updateToClaimedObject = async ({
+  user, importId, authorPermlink, department,
+}) => {
   const { result } = await updateOne({
     filter: {
       user, importId, authorPermlink, department,
@@ -66,7 +68,7 @@ const deleteMany = async ({ filter, options }) => {
 
 const count = async ({ filter, options }) => {
   try {
-    const result = await DepartmentsObject.count(filter, options);
+    const result = await DepartmentsObject.countDocuments(filter, options);
     return { result };
   } catch (error) {
     return { error };

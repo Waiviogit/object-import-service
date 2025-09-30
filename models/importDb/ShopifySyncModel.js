@@ -11,7 +11,7 @@ const updateOne = async ({ filter, update, options }) => {
 
 const deleteOne = async ({ filter, update, options }) => {
   try {
-    const result = await ShopifySync.deleteOne(filter, update, options);
+    const result = await ShopifySync.deleteOne(filter, options);
     return { result };
   } catch (error) {
     return { error };

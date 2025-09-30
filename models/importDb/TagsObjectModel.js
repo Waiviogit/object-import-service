@@ -12,7 +12,7 @@ const insertMany = async (docs) => {
 
 const count = async ({ filter, options }) => {
   try {
-    const result = await TagsObject.count(filter, options);
+    const result = await TagsObject.countDocuments(filter, options);
 
     return { count: result };
   } catch (error) {
