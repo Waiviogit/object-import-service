@@ -172,15 +172,18 @@ const generateRecipeAndImage = async ({ importId }) => {
       continue;
     }
 
-    if (recipeDoc?.recipeUrl) {
+    if (recipeDoc?.recipeUrl && recipeDoc.errorCount < 3) {
       const editedImage = await editImage({
         recipeUrl: recipeDoc?.recipeUrl,
         prompt: getEditImagePrompt(recipeDoc.name),
       });
-      if (editedImage) {
-        await RecipeGeneratedModel.updateImage(recipeDoc._id, editedImage);
+      if (!editedImage) {
+        await updateErrorCount(recipeDoc);
         continue;
       }
+
+      await RecipeGeneratedModel.updateImage(recipeDoc._id, editedImage);
+      continue;
     }
 
     const image = await generateRecipeImage({ name: recipeDoc.name });
