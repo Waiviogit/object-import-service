@@ -56,7 +56,7 @@ value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
 `;
 
-const getEditImagePrompt = (recipeName) => `create a square photo of the dish (${recipeName}) on white background, make it look similar to the one in the screenshot from the video, entire dish should be in the photo in an appropriate container/plate. no text, no words, no letters, no watermark`;
+const getEditImagePrompt = (recipeName) => `edit a square photo of the dish (${recipeName}) on white background, make it look similar to given image, entire dish should be in the photo in an appropriate container/plate. no text, no words, no letters, no watermark`;
 
 const imagePrompt = ({ name }) => `use your knowledge of the following dish and create a product photo of "${name}" In a dish appropriate for this food on a solid white background. no text, no words, no letters, no watermark`;
 
