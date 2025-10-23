@@ -1,13 +1,11 @@
 const _ = require('lodash');
 const Joi = require('joi');
 const {
-  gptSystemUserPrompt,
   promptWithJsonSchema,
   editImageFromUrl,
   getImageFileFromUrl,
   gptImage1Generate,
 } = require('../gptService');
-const jsonHelper = require('../../helpers/jsonHelper');
 const { RecipeGeneratedModel, RecipeGenerationStatusModel, ImportStatusModel } = require('../../../models');
 const { saveObjects } = require('../objectsImport/importDatafinityObjects');
 const { LANGUAGES_SET } = require('../../../constants/wobjectsData');
@@ -71,15 +69,17 @@ const formatResponseToValidJson = (string = '') => string
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
 
-  const { result, error } = await gptSystemUserPrompt({
-    systemPrompt: systemPrompt(language),
-    userPrompt: name,
+  const { result, error } = await promptWithJsonSchema({
+    prompt: `${systemPrompt(language)} name: ${name}`,
+    jsonSchema: recipeSchemaObject,
   });
-  if (error) return null;
-  const formatedResponse = jsonHelper.parseJson(formatResponseToValidJson(result), null);
-  if (!formatedResponse) return null;
 
-  return formatedResponse;
+  if (error) {
+    console.log(`gptSystemUserPrompt Error: ${error.message}`);
+    return null;
+  }
+
+  return result;
 };
 
 const generateRecipeImage = async ({ name }) => {
