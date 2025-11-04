@@ -187,7 +187,7 @@ const prepareFields = async ({
       continue;
     }
     if (field.name === 'listItem') {
-      const list = originalProcessed[field.name]
+      const list = (originalProcessed?.[field.name] || [])
         .find((f) => f.author === field.author && f.permlink === field.permlink);
       if (list) {
         const { result: listDb } = await DuplicateListObjectModel.findOne({
