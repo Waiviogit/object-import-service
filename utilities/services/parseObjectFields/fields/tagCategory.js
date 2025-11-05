@@ -228,7 +228,7 @@ const tagsForRecipe = async (object, allFields) => {
       fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
       locale: object.locale,
       user: object.user,
-      body: tag,
+      body: tag.replace('#', ''),
       tagCategory: 'Pros',
       id: prosCategory.id,
     }));
@@ -239,7 +239,7 @@ const tagsForRecipe = async (object, allFields) => {
       fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
       locale: object.locale,
       user: object.user,
-      body: tag,
+      body: tag.replace('#', ''),
       tagCategory: 'Cuisine',
       id: cuisineCategory.id,
     }));
