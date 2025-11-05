@@ -217,7 +217,7 @@ const tagsForRecipe = async (object, allFields) => {
   }
 
   const { result = {}, error } = await promptWithJsonSchema({
-    prompt: `create tags for following recipe, description: ${description}; ${ingredients ? `ingredients: ${ingredients}` : ''}`,
+    prompt: `create tags for following recipe ${object.name}, description: ${description}; ${ingredients ? `ingredients: ${ingredients}` : ''}`,
     jsonSchema: recipeTagsSchemaObject,
   });
   if (error) return addDefaultTags(object, allFields);
@@ -256,7 +256,7 @@ const addDefaultTags = async (object, allFields) => {
 };
 
 module.exports = async (object, allFields) => {
-  if (object.waivio_tags) return createWaivioTags(object, allFields);
+  if (object?.waivio_tags?.length) return createWaivioTags(object, allFields);
   if (object.object_type === OBJECT_TYPES.RESTAURANT) return tagsForRestaurant(object, allFields);
   if (object.object_type === OBJECT_TYPES.RECIPE) return tagsForRecipe(object, allFields);
 
