@@ -3,8 +3,9 @@ const { formField } = require('../../../helpers/formFieldHelper');
 const { OBJECT_FIELDS, OBJECT_TYPES } = require('../../../../constants/objectTypes');
 const supposedUpdatesTranslate = require('../../../../translations/supposedUpdates');
 const { translate } = require('../../../helpers/translateHelper');
-const { gptTagsFromDescription } = require('../../gptService');
+const { gptTagsFromDescription, promptWithJsonSchema } = require('../../gptService');
 const { createUUID } = require('../../../helpers/cryptoHelper');
+const { recipeTagsSchemaObject } = require('../../../../constants/jsonShemaForAi');
 
 const getTagsFromDescription = async (object, allFields) => {
   if (!object.useGPT) return;
@@ -173,6 +174,80 @@ const createWaivioTags = async (object, allFields) => {
   return fields;
 };
 
+const tagsForRecipe = async (object, allFields) => {
+  const description = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.DESCRIPTION,
+  )?.body;
+  if (!description) return;
+
+  const ingredients = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.RECIPE_INGREDIENTS,
+  )?.body;
+
+  const fields = [];
+  let cuisineCategory = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === 'Cuisine',
+  );
+  let prosCategory = _.find(
+    allFields,
+    (f) => f.name === OBJECT_FIELDS.TAG_CATEGORY && f.body === 'Pros',
+  );
+  if (!cuisineCategory) {
+    cuisineCategory = formField({
+      fieldName: OBJECT_FIELDS.TAG_CATEGORY,
+      locale: object.locale,
+      user: object.user,
+      body: 'Cuisine',
+      id: createUUID(),
+    });
+    fields.push(cuisineCategory);
+  }
+  if (!prosCategory) {
+    prosCategory = formField({
+      fieldName: OBJECT_FIELDS.TAG_CATEGORY,
+      locale: object.locale,
+      user: object.user,
+      body: 'Pros',
+      id: createUUID(),
+    });
+    fields.push(prosCategory);
+  }
+
+  const { result = {}, error } = await promptWithJsonSchema({
+    prompt: `create tags for following recipe, description: ${description}; ${ingredients ? `ingredients: ${ingredients}` : ''}`,
+    jsonSchema: recipeTagsSchemaObject,
+  });
+  if (error) return addDefaultTags(object, allFields);
+  const { tags = [], cuisineTags = [] } = result;
+
+  for (const tag of tags) {
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
+      locale: object.locale,
+      user: object.user,
+      body: tag,
+      tagCategory: 'Pros',
+      id: prosCategory.id,
+    }));
+  }
+
+  for (const tag of cuisineTags) {
+    fields.push(formField({
+      fieldName: OBJECT_FIELDS.CATEGORY_ITEM,
+      locale: object.locale,
+      user: object.user,
+      body: tag,
+      tagCategory: 'Cuisine',
+      id: cuisineCategory.id,
+    }));
+  }
+
+  return fields;
+};
+
 const addDefaultTags = async (object, allFields) => {
   const gptFields = await getTagsFromDescription(object, allFields);
   if (gptFields) {
@@ -183,6 +258,7 @@ const addDefaultTags = async (object, allFields) => {
 module.exports = async (object, allFields) => {
   if (object.waivio_tags) return createWaivioTags(object, allFields);
   if (object.object_type === OBJECT_TYPES.RESTAURANT) return tagsForRestaurant(object, allFields);
+  if (object.object_type === OBJECT_TYPES.RECIPE) return tagsForRecipe(object, allFields);
 
   return addDefaultTags(object, allFields);
 };

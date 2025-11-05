@@ -208,9 +208,118 @@ const productGallerySchema = {
   },
 };
 
+const recipeTagsSchema = {
+  type: Type.OBJECT,
+  required: ['tags', 'cuisineTags'],
+  properties: {
+    tags: {
+      type: 'array',
+      description: `An array of tags add one from each category:
+      COOKING METHOD (no combinations)
+#air-fryer
+#no-cook
+#one-pot-one-pan
+#Oven
+#pressure-cooker
+#slow-cooker
+#stovetop
+
+CALORIE RANGE (per serving)
+#low-calorie (less than 400kcal)
+#moderate-calorie – (400–650 kcal)
+#high-calorie – (over 650 kcal)
+
+MACRONUTRIENT FOCUS
+#high-protein (≥30 g protein)
+#Moderate-protein (15–29 g protein)
+#low-protein (Less than 15 g of protein)
+#low-fat (≤10 g fat)
+#moderate-fat (between 10 and 30 g of fat)
+#high-fat ( ≥30 g fat)
+#high-carb – ≥50 g carbs
+#moderate-Carb - between 20 and 50 g carbs
+#low-carb – ≤20 g carbs
+#keto (< 10 g Net carbs)
+
+DIETARY PREFERENCE
+#vegetarian – no meat, poultry, or fish
+#vegan – no animal products (including dairy, eggs, honey)
+#pescatarian – includes fish/seafood only
+#gluten-free – no gluten ingredients
+#dairy-free – no milk-derived ingredients
+#nut-free – no tree nuts or peanuts
+#soy-free – no soy ingredients
+#paleo – no grains, dairy, legumes, or refined sugar
+#high-fiber - ≥ 10 g dietary fiber per serving
+#moderate-fiber - 5-9 g per serving.
+#low-fiber - < 5 g per serving.
+#seafood - contains any seafood
+#spicy
+
+PREP & COOK TIME
+#under-30-minutes – total ≤30 min
+#30–60-minutes – total between 30 and 60 min
+#over-60-minutes – total >60 min
+      `,
+
+      items: {
+        type: 'string',
+      },
+    },
+    cuisineTags: {
+      type: 'array',
+      description: `An array of cuisine tags, add 3 items for geo, area, country:  
+#african
+#northafrican (#algerian, #egyptian, #libyan, #moroccan, #sudanese, #tunisian, #westernsaharan)
+#hornofafrica (#djiboutian, #eritrean, #ethiopian, #somali)
+#eastaafrican (#burundian, #comorian, #kenyan, #malagasy, #mauritian, #rwandan, #seychellois, #southsudanese, #tanzanian, #ugandan)
+#centralafrican (#angolan, #cameroonian, #centralafrican, #chadian, #congolese, #drcongolese, #equatoguinean, #gabonese, #santomense)
+#westafrican (#beninese, #burkinabe, #capeverdean, #ivorian, #gambian, #ghanaian, #guinean, #guineabissauan, #liberian, #malian, #mauritanian, #nigerien, #nigerian, #senegalese, #sierraleonean, #togolese)
+#southernafrican (#botswanan, #eswatinian, #lesotho, #malawian, #mozambican, #namibian, #southafrican, #zambian, #zimbabwean)
+#northamerican
+#american (#classicamerican, #southern, #cajuncreole, #texmex, #midwesterncomfort, #pacificnorthwestern, #hawaiian)
+#canadian
+#greenlandic
+#latinamerican
+#caribbean (#antiguanbarbudan, #bahamian, #barbadian, #cuban, #dominican (dominica), #dominicanrepublic, #grenadian, #haitian, #jamaican, #kittitiannevisian, #saintlucian, #vincentian, #trinidadian, #puertorican, #guadeloupean, #martinican, #aruban, #curacaoan, #sintmaartener)
+#latinmainland (#belizean, #costarican, #guatemalan, #honduran, #nicaraguan, #panamanian, #salvadoran, #mexican, #argentinian, #bolivian, #brazilian, #chilean, #colombian, #ecuadorian, #guyanese, #paraguayan, #peruvian, #surinamese, #uruguayan, #venezuelan, #frenchguianese)
+#european
+#westerneuropean (#austrian, #belgian, #french, #german, #irish, #liechtensteiner, #luxembourgish, #monegasque, #dutch, #swiss, #british)
+#southerneuropean (#albanian, #andorran, #bosnian, #croatian, #greek, #italian, #maltese, #montenegrin, #northmacedonian, #portuguese, #sanmarinese, #serbian, #slovenian, #spanish, #kosovar, #vatican)
+#easterneuropean (#belarusian, #bulgarian, #czech, #hungarian, #moldovan, #polish, #romanian, #russian, #slovak, #ukrainian)
+#baltic (#estonian, #latvian, #lithuanian)
+#nordic (#danish, #faroese, #finnish, #icelandic, #norwegian, #swedish)
+#asian
+#eastasian (#chinese, #japanese, #korean, #mongolian, #taiwanese, #macanese)
+#southeastasian (#bruneian, #cambodian, #indonesian, #laotian, #malaysian, #myanma (or #burmese), #filipino, #singaporean, #thai, #vietnamese, #timorese)
+#southasian (#afghan, #bangladeshi, #bhutanese, #indian, #maldivian, #nepali, #pakistani, #srilankan)
+#centralasian (#kazakh, #kyrgyz, #tajik, #turkmen, #uzbek)
+#middleeastern (#armenian, #azerbaijani, #bahraini, #cypriot, #georgian, #iranian (#persian), #iraqi, #israeli, #jordanian, #kuwaiti, #lebanese, #omani, #palestinian, #qatari, #saudi, #syrian, #turkish, #yemeni, #emirati)
+#oceanian
+#australasian (#australian, #newzealander)
+#melanesian (#fijian, #papuanewguinean, #solomonislander, #ni-vanuatu, #newcaledonian)
+#micronesian (#kiribatian, #marshallese, #micronesian, #nauruan, #palauan, #federatedstatesofmicronesia)
+#polynesian (#samoan, #tongan, #tuvaluan, #cookislander, #niuean, #tokelauan, #frenchpolynesian, #tahitian, #american samoan)
+#global (#fusion)
+      `,
+
+      items: {
+        type: 'string',
+      },
+    },
+  },
+};
+
+const recipeTagsSchemaObject = {
+  name: 'recipe_tags_schema',
+  schema: recipeTagsSchema,
+};
+
 module.exports = {
   productSchema,
   recipeSchema,
   productIdSchema,
   productGallerySchema,
+  recipeTagsSchema,
+  recipeTagsSchemaObject,
 };

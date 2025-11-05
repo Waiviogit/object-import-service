@@ -58,14 +58,6 @@ const getEditImagePrompt = (recipeName) => `edit a square photo of the dish (${r
 
 const imagePrompt = ({ name }) => `use your knowledge of the following dish and create a product photo of "${name}" In a dish appropriate for this food on a solid white background. no text, no words, no letters, no watermark`;
 
-const formatResponseToValidJson = (string = '') => string
-  .replace(/```/gm, '')
-  .replace('json', '')
-  .replace(/^"|"$/g, '') // Remove the outermost quotes
-  .replace(/\\"/g, '"') // Replace escaped quotes with actual quotes
-  .replace(/\\n/g, '\n') // Convert escaped newlines into actual newlines
-  .replace(/\\\\/g, '\\');// Replace double backslashes with single backslashes
-
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
 

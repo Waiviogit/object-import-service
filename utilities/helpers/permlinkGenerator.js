@@ -19,7 +19,7 @@ exports.genRandomString = (stringLength) => {
   return randomString;
 };
 
-exports.permlinkGenerator = (string) => {
+exports.permlinkGenerator = (string = '') => {
   const permlink = `${this.genRandomString(3)}-${unidecode(string)}`
     .toLowerCase()
     .replace(/[ _]/g, '-')
