@@ -54,9 +54,46 @@ value of each field of an object should be in ${language} language
 return it like a string don't use code snippet symbols 
 `;
 
-const getEditImagePrompt = (recipeName) => `edit a square photo of the dish (${recipeName}) on white background, make it look similar to given image, entire dish should be in the photo in an appropriate container/plate. no text, no words, no letters, no watermark`;
+const getEditImagePrompt = (recipeName) => `
+Create a new square photo of the dish (“${recipeName}”) on a pure white background.
 
-const imagePrompt = ({ name }) => `use your knowledge of the following dish and create a product photo of "${name}" In a dish appropriate for this food on a solid white background. no text, no words, no letters, no watermark`;
+Use the reference image ONLY to understand the dish's ingredients, colors, and shape.
+Ignore the reference image's blur, camera angle, lighting, sharpness, and visual quality.
+
+The entire dish must be fully visible in the frame.
+Show the whole plate or bowl without cropping or cutting off any edges.
+
+Reconstruct the dish with full clarity and realistic sharp detail.
+Do NOT copy the blur, low-resolution texture, color cast, or lighting defects from the reference.
+Do not preserve any imperfections from the reference photo; replace them with clean, sharp, photorealistic detail.
+
+Render high-frequency detail and maximum micro-contrast.
+Ensure the dish appears in a realistic plate or bowl.
+No text, no letters, no watermark.
+
+Commercial food photography.
+Tack-sharp focus, crisp micro-details, strong local contrast.
+Shot with a 50mm lens, f/8, ISO 100, 1/250s, pro studio lighting.
+8K clarity. No blur of any kind (no DOF blur, no motion blur, no glow, no smoothing).
+`;
+
+const imagePrompt = ({ name }) => `
+High-end commercial food photograph of the dish: “${name}”.
+Square image on a pure white background.
+
+The entire dish is fully visible in the frame.
+Show the whole plate or bowl completely, no cropping.
+
+Ultra-sharp focus, crisp micro-details on the food, strong local contrast.
+Clean and realistic textures, no noise, no grain.
+
+Commercial food photography, shot on a professional full-frame DSLR
+with a 50mm lens, f/8, ISO 100, 1/250s, studio lighting.
+
+No blur of any kind: no motion blur, no depth-of-field blur,
+no soft focus, no haze, no glow, no smoothing.
+No text, no letters, no watermark.
+`;
 
 const generateRecipe = async (name, locale) => {
   const language = LANGUAGES_SET[locale] || LANGUAGES_SET['en-US'];
