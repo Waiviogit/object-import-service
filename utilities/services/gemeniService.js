@@ -1,6 +1,7 @@
 const { GoogleGenAI } = require('@google/genai');
 const AWS = require('@aws-sdk/client-s3');
-const { productSchema } = require('../../constants/jsonShemaForAi');
+const { OBJECT_TYPES } = require('@waivio/objects-processor');
+const { productSchema, businessSchema, personSchema } = require('../../constants/jsonShemaForAi');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
 
@@ -53,7 +54,22 @@ const getPictureBase64ByUrl = async (url) => {
   }
 };
 
-const getObjectForImportFromImage = async ({ url }) => {
+const objectForImportFromImageData = {
+  [OBJECT_TYPES.PRODUCT]: {
+    prompt: 'Analyze this product image and generate a detailed JSON object containing: product name, description, category, price range, key features, materials, dimensions, and any visible brand information. Format the response according to the provided schema.',
+    schema: productSchema,
+  },
+  [OBJECT_TYPES.BUSINESS]: {
+    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema.',
+    schema: businessSchema,
+  },
+  [OBJECT_TYPES.PERSON]: {
+    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema.',
+    schema: personSchema,
+  },
+};
+
+const getObjectForImportFromImage = async ({ url, objectType }) => {
   try {
     const picture = await getPictureBase64ByUrl(url);
     if (!picture) {
@@ -65,11 +81,13 @@ const getObjectForImportFromImage = async ({ url }) => {
         mimeType: 'image/webp',
       },
     };
-    const prompt = 'Analyze this product image and generate a detailed JSON object containing: product name, description, category, price range, key features, materials, dimensions, and any visible brand information. Format the response according to the provided schema.';
+
+    const { prompt, schema } = objectForImportFromImageData[objectType]
+    || objectForImportFromImageData[OBJECT_TYPES.PRODUCT];
 
     const config = {
       responseMimeType: 'application/json',
-      responseSchema: productSchema,
+      responseSchema: schema,
     };
 
     const response = await Promise.race([

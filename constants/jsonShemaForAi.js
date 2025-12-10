@@ -122,6 +122,96 @@ const productSchema = {
   required: ['name', 'waivio_options', 'fieldDescription', 'categories', 'galleryLength'],
 };
 
+const personSchema = {
+  type: Type.OBJECT,
+  properties: {
+    name: {
+      type: Type.STRING,
+      description: 'Person name e.g. Jimi Hendrix',
+    },
+    galleryLength: {
+      type: Type.Number,
+      description: 'Count of images in gallery',
+    },
+    fieldDescription: {
+      type: Type.STRING,
+      description: 'Person description or bio; empty string if not found',
+    },
+    address: {
+      type: Type.STRING,
+      description: 'Person address',
+    },
+    emails: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.STRING,
+        description: 'Person contact email',
+      },
+    },
+    workingHours: {
+      type: Type.STRING,
+      description: 'Person working hours',
+    },
+    websites: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.STRING,
+        description: 'link to website',
+      },
+    },
+    phone: {
+      type: Type.STRING,
+      description: 'Person contact phone',
+    },
+  },
+  required: ['name', 'fieldDescription', 'galleryLength'],
+};
+
+const businessSchema = {
+  type: Type.OBJECT,
+  properties: {
+    name: {
+      type: Type.STRING,
+      description: 'Business name e.g. KFC',
+    },
+    galleryLength: {
+      type: Type.Number,
+      description: 'Count of images in gallery',
+    },
+    fieldDescription: {
+      type: Type.STRING,
+      description: 'Business description or bio; empty string if not found',
+    },
+    address: {
+      type: Type.STRING,
+      description: 'Business address',
+    },
+    emails: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.STRING,
+        description: 'Business contact email',
+      },
+    },
+    workingHours: {
+      type: Type.STRING,
+      description: 'Business working hours',
+    },
+    websites: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.STRING,
+        description: 'link to website',
+      },
+    },
+    phone: {
+      type: Type.STRING,
+      description: 'Business contact phone',
+    },
+  },
+  required: ['name', 'fieldDescription', 'galleryLength'],
+};
+
 const recipeSchema = {
   type: Type.OBJECT,
   required: ['name', 'fieldDescription', 'categories', 'fieldCalories', 'fieldCookingTime', 'fieldBudget', 'fieldRecipeIngredients', 'fieldNutrition'],
@@ -322,4 +412,6 @@ module.exports = {
   productGallerySchema,
   recipeTagsSchema,
   recipeTagsSchemaObject,
+  personSchema,
+  businessSchema,
 };
