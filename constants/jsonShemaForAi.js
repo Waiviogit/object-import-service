@@ -163,6 +163,15 @@ const personSchema = {
       type: Type.STRING,
       description: 'Person contact phone',
     },
+    mostRecentPriceAmount: {
+      type: Type.STRING,
+      description: 'Latest price as a string (e.g., "199.99")',
+    },
+    mostRecentPriceCurrency: {
+      type: Type.STRING,
+      enum: mostRecentPriceCurrencyEnum,
+      description: 'Currency code for price (e.g., "USD", "EUR")',
+    },
   },
   required: ['name', 'fieldDescription', 'galleryLength'],
 };
@@ -207,6 +216,15 @@ const businessSchema = {
     phone: {
       type: Type.STRING,
       description: 'Business contact phone',
+    },
+    mostRecentPriceAmount: {
+      type: Type.STRING,
+      description: 'Latest price as a string (e.g., "199.99")',
+    },
+    mostRecentPriceCurrency: {
+      type: Type.STRING,
+      enum: mostRecentPriceCurrencyEnum,
+      description: 'Currency code for price (e.g., "USD", "EUR")',
     },
   },
   required: ['name', 'fieldDescription', 'galleryLength'],
