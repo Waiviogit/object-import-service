@@ -11,13 +11,14 @@ You are given a JSON array of all images on a product page, each with all their 
 - Ignore icons, logos, banners, or decorative/non-product images.
 - Base your selection on clues from the class, alt text, filename, image dimensions, and any other attribute.
 
+- For each URL, return the version with all query parameters removed, so that only the base file path remains. The goal is to retrieve the highest quality original image.
+    If the URL contains a question mark (?), remove the question mark and everything that follows.
+    Return only the cleaned URLs.
+(skip this step for instagram facebook and tiktok)
+
 Here is the array of images:
 ${images}
 `;
-
-// - For each URL, return the version with all query parameters removed, so that only the base file path remains. The goal is to retrieve the highest quality original image.
-//     If the URL contains a question mark (?), remove the question mark and everything that follows.
-//     Return only the cleaned URLs.
 
 module.exports = {
   promptGallerySchema,
