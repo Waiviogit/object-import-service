@@ -60,11 +60,11 @@ const objectForImportFromImageData = {
     schema: productSchema,
   },
   [OBJECT_TYPES.BUSINESS]: {
-    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema.',
+    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema. If you aware of any additional info about business (social links, description e.t.c.) use it',
     schema: businessSchema,
   },
   [OBJECT_TYPES.PERSON]: {
-    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema.',
+    prompt: 'Analyze this image and generate a detailed JSON object. Format the response according to the provided schema. If you aware of any additional info about person (social links, description e.t.c.) use it',
     schema: personSchema,
   },
 };
@@ -92,7 +92,7 @@ const getObjectForImportFromImage = async ({ url, objectType }) => {
 
     const response = await Promise.race([
       ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: [prompt, pictureData],
         config,
       }),
