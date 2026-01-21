@@ -225,26 +225,6 @@ const makeDescriptionBasedOnReviews = async ({ reviews, name }) => {
 
 const restGptQuery = async ({ query }) => gptCreateCompletionBot({ content: query });
 
-const gptCreateImage = async ({ prompt = '', n = 1, size = '1024x1024' }) => {
-  try {
-    const response = await openaiBot.images.generate(
-      {
-        prompt,
-        n,
-        size,
-        model: 'dall-e-3',
-      },
-      {
-        timeout: 60000,
-      },
-    );
-    const result = _.get(response, 'data', []);
-    return { result };
-  } catch (error) {
-    return { error };
-  }
-};
-
 const gptImage1Generate = async ({
   prompt = '',
   n = 1,
@@ -352,7 +332,6 @@ module.exports = {
   gptCreateCompletion,
   gptCreateCompletionBot,
   restGptQuery,
-  gptCreateImage,
   makeBusinessDescription,
   makeDescriptionBasedOnReviews,
   gptCreateCompletion4,

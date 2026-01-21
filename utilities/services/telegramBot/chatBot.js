@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { gptCreateCompletionBot, gptCreateImage } = require('../gptService');
+const { gptCreateCompletionBot, gptImage1Generate } = require('../gptService');
 const { TelegramImportUsageModel } = require('../../../models');
 
 const token = process.env.CHAT_BOT_TOKEN;
@@ -56,16 +56,15 @@ const sendPicture = async (msg) => {
       .addTelegramRequest({ telegramId, type: COMMAND_TYPES.IMAGE });
   }
 
-  const { result, error } = await gptCreateImage({
+  const { result, error } = await gptImage1Generate({
     prompt: text,
   });
+
   if (error) return sendMessage({ chatId, message: error.message });
 
-  const images = result.map((image) => image?.url);
-  if (!images.length) return sendMessage({ chatId, message: 'No images found' });
-  for (const image of images) {
-    await bot.sendPhoto(chatId, image);
-  }
+  if (!result) return sendMessage({ chatId, message: 'No images found' });
+
+  await bot.sendPhoto(chatId, result);
 };
 
 bot.on('message', handleMessage);
