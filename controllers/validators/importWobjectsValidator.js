@@ -60,6 +60,7 @@ exports.imageProductAnalyzeSchema = Joi.object().keys({
   url: Joi.string().uri().required(),
   user: Joi.string().required(),
   objectType: Joi.string().default('product'),
+  textInfo: Joi.string().allow(''),
 });
 
 exports.authorizeGuestUser = Joi.object().keys({

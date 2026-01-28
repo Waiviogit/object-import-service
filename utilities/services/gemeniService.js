@@ -69,7 +69,7 @@ const objectForImportFromImageData = {
   },
 };
 
-const getObjectForImportFromImage = async ({ url, objectType }) => {
+const getObjectForImportFromImage = async ({ url, objectType, textInfo }) => {
   try {
     const picture = await getPictureBase64ByUrl(url);
     if (!picture) {
@@ -82,13 +82,18 @@ const getObjectForImportFromImage = async ({ url, objectType }) => {
       },
     };
 
-    const { prompt, schema } = objectForImportFromImageData[objectType]
+    // eslint-disable-next-line prefer-const
+    let { prompt, schema } = objectForImportFromImageData[objectType]
     || objectForImportFromImageData[OBJECT_TYPES.PRODUCT];
 
     const config = {
       responseMimeType: 'application/json',
       responseSchema: schema,
     };
+
+    if (textInfo) {
+      prompt += `. Additional text info from page: ${textInfo}`;
+    }
 
     const response = await Promise.race([
       ai.models.generateContent({
