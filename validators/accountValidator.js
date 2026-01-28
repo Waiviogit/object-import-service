@@ -359,4 +359,5 @@ module.exports = {
   setContinueTtl,
   checkPostingAuthorities,
   isGuestAccount,
+  votePowerValidation,
 };

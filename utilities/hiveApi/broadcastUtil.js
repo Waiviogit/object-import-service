@@ -74,3 +74,21 @@ exports.postWithOptions = async ({ comment, options, key }) => {
     return { error };
   }
 };
+
+exports.vote = async ({
+  key, voter, author, permlink, weight,
+}) => {
+  try {
+    const client = await getClient('test:hive:post');
+    const result = await client.broadcast.vote(
+      {
+        voter, author, permlink, weight,
+      },
+      PrivateKey.fromString(key),
+    );
+    return { result };
+  } catch (error) {
+    console.log('VOTE ERROR', JSON.stringify(error));
+    return { error };
+  }
+};
