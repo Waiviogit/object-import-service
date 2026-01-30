@@ -16,25 +16,6 @@ const VOTE_RETRY_DELAY_MS = 60000 * 10;
 const FIELDS_RETRY_COUNT = 3;
 const FIELDS_RETRY_DELAY_MS = 60000 * 10;
 
-const getWeightToReject = async ({
-  userName, author, permlink, authorPermlink,
-}) => {
-  try {
-    const result = await axios.post(
-      'https://www.waivio.com/api/users/min-reject',
-      {
-        userName, author, permlink, authorPermlink,
-      },
-      {
-        timeout: 5000,
-      },
-    );
-    return _.get(result, 'data.result', 9999);
-  } catch (error) {
-    return 9999;
-  }
-};
-
 const rejectRecipeTags = async () => {
   try {
     while (true) {
@@ -43,6 +24,7 @@ const rejectRecipeTags = async () => {
           object_type: 'recipe',
           createdAt: { $lte: new Date('2025-11-05') },
           'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
+          fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
           processed: false,
         },
         {
@@ -53,7 +35,7 @@ const rejectRecipeTags = async () => {
       if (!objects.length) break;
 
       for (const object of objects) {
-        const rejectFields = _.filter(object.fields, (f) => f.name === 'categoryItem' && f.weight > 0);
+        const rejectFields = _.filter(object.fields, (f) => f.name === 'categoryItem' && f.weight > 0 && !f?.active_votes?.length);
         if (!rejectFields?.length) {
           await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
         }
@@ -71,13 +53,6 @@ const rejectRecipeTags = async () => {
           }
         }
         for (const field of rejectFields) {
-          const weight = await getWeightToReject({
-            userName: VOTING_ACCOUNT,
-            author: field.author,
-            permlink: field.permlink,
-            authorPermlink: object.author_permlink,
-          });
-
           let voteError;
           for (let attempt = 0; attempt <= VOTE_RETRY_COUNT; attempt += 1) {
             const { error } = await vote({
@@ -85,26 +60,27 @@ const rejectRecipeTags = async () => {
               voter: VOTING_ACCOUNT,
               author: field.author,
               permlink: field.permlink,
-              weight,
+              weight: 1,
             });
             voteError = error;
             if (!voteError) {
               console.log('Vote success', {
+                authorPermlink: object.author_permlink,
                 author: field.author,
                 permlink: field.permlink,
-                weight,
+                weight: 1,
               });
               break;
             }
 
-            console.log(`Vote error for field ${field.permlink}, attempt ${attempt + 1}/${VOTE_RETRY_COUNT + 1}`, voteError?.message || voteError);
+            console.log(`Vote error  ${object.author_permlink} for field ${field.permlink}, attempt ${attempt + 1}/${VOTE_RETRY_COUNT + 1}`, voteError?.message || voteError);
             if (attempt < VOTE_RETRY_COUNT) {
               await setTimeout(VOTE_RETRY_DELAY_MS);
             }
           }
           if (voteError) {
-            console.log(`Skip field ${field.permlink} after retries due to vote error`);
-            continue;
+            console.log(`EXIT field object ${object.author_permlink} ${field.permlink} after retries due to vote error`);
+            process.exit(1);
           }
 
           await setTimeout(3000);
@@ -126,6 +102,7 @@ const addRecipeTags = async () => {
           object_type: 'recipe',
           createdAt: { $lte: new Date('2025-11-05') },
           'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
+          fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
           processed: false,
         },
         {
@@ -161,9 +138,9 @@ const addRecipeTags = async () => {
             if (fields.length) break;
           }
           if (!fields.length) {
-            console.log(`Skip object ${object.author_permlink} due to empty fields after retries`);
+            console.log(`EXIT object ${object.author_permlink} due to empty fields after retries`);
             await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
-            continue;
+            process.exit(1);
           }
         }
 
