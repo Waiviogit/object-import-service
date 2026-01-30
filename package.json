@@ -15,7 +15,9 @@
     "setQueueVT": "node ./utilities/redis/rsmq/setQueueVT.js",
     "addCompanyId": "node utilities/tasks/addCompanyId/run.js",
     "addWhiteList": "node utilities/tasks/addWhiteList/run.js",
-    "addNegativeRatingLinks": "node utilities/tasks/addNegativeRatingLinks/run.js"
+    "addNegativeRatingLinks": "node utilities/tasks/addNegativeRatingLinks/run.js",
+    "runRejectRecipeTags": "node utilities/tasks/runAddRecipeTags/runRejectRecipeTags.js",
+    "runAddRecipeTags": "node utilities/tasks/runAddRecipeTags/runAddRecipeTags.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.808.0",
