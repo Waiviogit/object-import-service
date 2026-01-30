@@ -1,6 +1,5 @@
 const { WObject } = require('../../../database').models;
 const _ = require('lodash');
-const axios = require('axios');
 const { setTimeout } = require('timers/promises');
 const { vote } = require('../../hiveApi/broadcastUtil');
 const getCategoryItemsFields = require('../../services/parseObjectFields/fields/tagCategory');
@@ -16,17 +15,23 @@ const VOTE_RETRY_DELAY_MS = 60000 * 10;
 const FIELDS_RETRY_COUNT = 3;
 const FIELDS_RETRY_DELAY_MS = 60000 * 10;
 
+const RECIPE_FILTER = {
+  object_type: 'recipe',
+  createdAt: { $lte: new Date('2025-11-05') },
+  'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
+  fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
+  processed: false,
+};
+
 const rejectRecipeTags = async () => {
   try {
+    let totalUpdated = 0;
+    const totalObjects = await WObject.countDocuments(RECIPE_FILTER);
     while (true) {
+      console.log(`rejectRecipeTags: ${totalUpdated} / ${totalObjects} (updated / total objects)`);
+
       const objects = await WObject.find(
-        {
-          object_type: 'recipe',
-          createdAt: { $lte: new Date('2025-11-05') },
-          'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
-          fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
-          processed: false,
-        },
+        RECIPE_FILTER,
         {
           author_permlink: 1, fields: 1, default_name: 1,
         },
@@ -38,6 +43,8 @@ const rejectRecipeTags = async () => {
         const rejectFields = _.filter(object.fields, (f) => f.name === 'categoryItem' && f.weight > 0 && !f?.active_votes?.length);
         if (!rejectFields?.length) {
           await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
+          totalUpdated += 1;
+          continue;
         }
         let validPower = await votePowerValidation({ account: VOTING_ACCOUNT, type: 'objects' });
         if (!validPower) {
@@ -48,8 +55,7 @@ const rejectRecipeTags = async () => {
             if (validPower) break;
           }
           if (!validPower) {
-            console.log(`Skip object ${object.author_permlink} due to insufficient voting power after retries`);
-            continue;
+            throw new Error(`EXIT ${object.author_permlink} due to insufficient voting power after retries`);
           }
         }
         for (const field of rejectFields) {
@@ -79,32 +85,31 @@ const rejectRecipeTags = async () => {
             }
           }
           if (voteError) {
-            console.log(`EXIT field object ${object.author_permlink} ${field.permlink} after retries due to vote error`);
-            process.exit(1);
+            throw new Error(`EXIT field object ${object.author_permlink} ${field.permlink} after retries due to vote error`);
           }
 
           await setTimeout(3000);
         }
         await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
+        totalUpdated += 1;
       }
     }
     console.log('Task Finished');
   } catch (error) {
     console.log(error.message);
+    process.exit(1);
   }
 };
 
 const addRecipeTags = async () => {
   try {
+    let totalUpdated = 0;
+    const totalObjects = await WObject.countDocuments(RECIPE_FILTER);
     while (true) {
+      console.log(`addRecipeTags: ${totalUpdated} / ${totalObjects} (updated / total objects)`);
+
       const objects = await WObject.find(
-        {
-          object_type: 'recipe',
-          createdAt: { $lte: new Date('2025-11-05') },
-          'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
-          fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
-          processed: false,
-        },
+        RECIPE_FILTER,
         {
           author_permlink: 1, fields: 1, default_name: 1,
         },
@@ -138,9 +143,7 @@ const addRecipeTags = async () => {
             if (fields.length) break;
           }
           if (!fields.length) {
-            console.log(`EXIT object ${object.author_permlink} due to empty fields after retries`);
-            await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
-            process.exit(1);
+            throw new Error(`EXIT object ${object.author_permlink} due to empty fields after retries`);
           }
         }
 
@@ -154,11 +157,13 @@ const addRecipeTags = async () => {
         }
         await setTimeout(3000);
         await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
+        totalUpdated += 1;
       }
     }
     console.log('Task Finished');
   } catch (error) {
     console.log(error.message);
+    process.exit(1);
   }
 };
 
