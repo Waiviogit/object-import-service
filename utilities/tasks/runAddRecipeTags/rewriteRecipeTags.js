@@ -23,6 +23,13 @@ const RECIPE_FILTER = {
   processed: false,
 };
 
+const RECIPE_FILTER_ADD = {
+  object_type: 'recipe',
+  createdAt: { $lte: new Date('2025-11-05') },
+  'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
+  processed: false,
+};
+
 const rejectRecipeTags = async () => {
   try {
     let totalUpdated = 0;
@@ -104,12 +111,12 @@ const rejectRecipeTags = async () => {
 const addRecipeTags = async () => {
   try {
     let totalUpdated = 0;
-    const totalObjects = await WObject.countDocuments(RECIPE_FILTER);
+    const totalObjects = await WObject.countDocuments(RECIPE_FILTER_ADD);
     while (true) {
       console.log(`addRecipeTags: ${totalUpdated} / ${totalObjects} (updated / total objects)`);
 
       const objects = await WObject.find(
-        RECIPE_FILTER,
+        RECIPE_FILTER_ADD,
         {
           author_permlink: 1, fields: 1, default_name: 1,
         },
