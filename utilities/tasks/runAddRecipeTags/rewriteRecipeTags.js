@@ -251,7 +251,7 @@ const addRecipeTags = async () => {
         }
         await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
         totalUpdated += 1;
-        await setTimeout(5000 * fields.length);
+        await setTimeout(5000 * (fields.length || 1));
       }
     }
     console.log('Task Finished');
