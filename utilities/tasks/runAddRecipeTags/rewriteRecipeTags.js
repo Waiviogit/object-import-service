@@ -111,9 +111,10 @@ const rejectRecipeTags = async () => {
 const addRecipeTags = async () => {
   try {
     let totalUpdated = 0;
+    let totalFieldsAdded = 0;
     const totalObjects = await WObject.countDocuments(RECIPE_FILTER_ADD);
     while (true) {
-      console.log(`addRecipeTags: ${totalUpdated} / ${totalObjects} (updated / total objects)`);
+      console.log(`addRecipeTags: ${totalUpdated} / ${totalObjects} (updated / total objects), fields added: ${totalFieldsAdded}`);
 
       const objects = await WObject.find(
         RECIPE_FILTER_ADD,
@@ -161,6 +162,8 @@ const addRecipeTags = async () => {
             importingAccount: VOTING_ACCOUNT,
             existWobj: object,
           });
+          totalFieldsAdded += 1;
+          console.log(`Field added: ${field.name}, object: ${object.author_permlink}`);
         }
         await setTimeout(3000);
         await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
