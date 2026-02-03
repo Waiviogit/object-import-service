@@ -9,6 +9,7 @@ const redisQueue = require('../redis/rsmq/redisQueue');
 const { ObjectType, Wobj } = require('../../models');
 
 const IMPORT_WOBJECTS_QNAME = 'import_wobjects';
+const IMPORT_APPEND_QNAME = 'import_append_task';
 
 const REDIS_WOBJ_DATA_ADDITIONAL_FIELDS = 'restaurant_id,dateUpdated'.split(',');
 const { appendObject, createObjectType } = require('../objectBotApi');
@@ -106,6 +107,48 @@ const runImportWobjectsQueue = async () => {
         await redisQueue.deleteMessage({
           client: importRsmqClient,
           qname: IMPORT_WOBJECTS_QNAME,
+          id: messageId,
+        });
+      }
+    }
+  }
+};
+
+const runImportAppendQueue = async () => {
+  console.log('start runImportAppendQueue');
+  const { result, error: createError } = await redisQueue.createQueue({
+    client: importRsmqClient,
+    qname: IMPORT_APPEND_QNAME,
+  });
+
+  if (createError) {
+    console.error(createError);
+  } else if (result) {
+    while (true) {
+      const { message, id: messageId, error: receiveError } = await redisQueue.receiveMessage({
+        client: importRsmqClient,
+        qname: IMPORT_APPEND_QNAME,
+      });
+
+      if (receiveError) {
+        if (receiveError.message === 'No messages') {
+          await new Promise((r) => setTimeout(r, 1000));
+          continue;
+        } else {
+          console.error(receiveError);
+          continue;
+        }
+      }
+      if (message) {
+        const redisData = await redisGetter.getHashAll(message, importWobjectsDataClient);
+
+        if (redisData) {
+          await messageCreateAppendWobj({ redisData, messageId });
+          await redisSetter.delImportWobjData(message);
+        }
+        await redisQueue.deleteMessage({
+          client: importRsmqClient,
+          qname: IMPORT_APPEND_QNAME,
           id: messageId,
         });
       }
@@ -244,7 +287,7 @@ const addWobject = async ({ wobject, existObjType, addData = true }) => {
 };
 
 const addField = async ({
-  field, wobject, immediately, existWobj, importingAccount, importId,
+  field, wobject, immediately, existWobj, importingAccount, importId, queueName,
 }) => {
   const { field: existField } = await Wobj.getField({
     permlink: field.permlink,
@@ -273,9 +316,10 @@ const addField = async ({
   } else {
     console.log(`add field "${field.name}" Redis: ${field.creator}`);
     await redisSetter.setImportWobjData(`append:${wobject.author_permlink}_${field.permlink}`, data);
+    const targetQueue = queueName || IMPORT_WOBJECTS_QNAME;
     const { error: sendMessError } = await redisQueue.sendMessage({
       client: importRsmqClient,
-      qname: IMPORT_WOBJECTS_QNAME,
+      qname: targetQueue,
       message: `append:${wobject.author_permlink}_${field.permlink}`,
     });
 
@@ -288,6 +332,8 @@ const addField = async ({
 module.exports = {
   addWobjectsToQueue,
   runImportWobjectsQueue,
+  runImportAppendQueue,
   addWobject,
   addField,
+  IMPORT_APPEND_QNAME,
 };

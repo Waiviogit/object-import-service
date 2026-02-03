@@ -3,7 +3,7 @@ const _ = require('lodash');
 const { setTimeout } = require('timers/promises');
 const { vote } = require('../../hiveApi/broadcastUtil');
 const { OBJECT_TYPES, OBJECT_FIELDS } = require('../../../constants/objectTypes');
-const { addField } = require('../../services/importObjectsService');
+const { addField, IMPORT_APPEND_QNAME } = require('../../services/importObjectsService');
 const { votePowerValidation } = require('../../../validators/accountValidator');
 const { formField } = require('../../helpers/formFieldHelper');
 const { createUUID } = require('../../helpers/cryptoHelper');
@@ -196,7 +196,7 @@ const addRecipeTags = async () => {
       const objects = await WObject.find(
         RECIPE_FILTER_ADD,
         {
-          author_permlink: 1, fields: 1, default_name: 1,
+          author_permlink: 1, fields: 1, default_name: 1, author: 1,
         },
         { limit: 10 },
       ).lean();
@@ -245,6 +245,7 @@ const addRecipeTags = async () => {
             wobject: object,
             importingAccount: VOTING_ACCOUNT,
             existWobj: object,
+            queueName: IMPORT_APPEND_QNAME,
           });
           totalFieldsAdded += 1;
           console.log(`Field added: ${field.name}, object: ${object.author_permlink}`);

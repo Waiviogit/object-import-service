@@ -6,5 +6,6 @@ const startupImportHelper = require('./startupImportHelper');
 exports.init = async () => {
   subscribeObjectsExpired(subscribeVoteRenew);
   importObjectsService.runImportWobjectsQueue();
+  importObjectsService.runImportAppendQueue();
   startupImportHelper();
 };
