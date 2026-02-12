@@ -22,7 +22,7 @@ const RECIPE_FILTER = {
   object_type: 'recipe',
   createdAt: { $lte: new Date('2025-11-05') },
   'authority.administrative': { $nin: ['mealprephive', 'dailydining'] },
-  fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: false } } },
+  fields: { $elemMatch: { name: 'categoryItem', 'active_votes.0': { $exists: true } } },
   processed: false,
 };
 
@@ -108,6 +108,20 @@ const tagsForRecipe = async (object, allFields) => {
 };
 
 const rejectRecipeTags = async () => {
+  const processedPermlinks = new Set();
+
+  const logProcessed = () => {
+    if (processedPermlinks.size) {
+      console.log('Processed author_permlinks:', JSON.stringify([...processedPermlinks]));
+    }
+  };
+
+  process.on('exit', logProcessed);
+  process.on('SIGINT', () => { logProcessed(); process.exit(1); });
+  process.on('SIGTERM', () => { logProcessed(); process.exit(1); });
+  process.on('uncaughtException', (err) => { console.error('Uncaught exception:', err); logProcessed(); process.exit(1); });
+  process.on('unhandledRejection', (reason) => { console.error('Unhandled rejection:', reason); logProcessed(); process.exit(1); });
+
   try {
     let totalUpdated = 0;
     const totalObjects = await WObject.countDocuments(RECIPE_FILTER);
@@ -124,7 +138,7 @@ const rejectRecipeTags = async () => {
       if (!objects.length) break;
 
       for (const object of objects) {
-        const rejectFields = _.filter(object.fields, (f) => f.name === 'categoryItem' && f.weight > 0 && !f?.active_votes?.length);
+        const rejectFields = _.filter(object.fields, (f) => f.name === 'categoryItem' && f.weight > 0 && f.creator !== VOTING_ACCOUNT);
         if (!rejectFields?.length) {
           await WObject.updateOne({ author_permlink: object.author_permlink }, { processed: true });
           totalUpdated += 1;
@@ -143,23 +157,30 @@ const rejectRecipeTags = async () => {
           }
         }
         for (const field of rejectFields) {
+          const alreadyVoted = _.find(field.active_votes, (v) => v.voter === VOTING_ACCOUNT);
+          if (alreadyVoted) {
+            continue;
+          }
           let voteError;
+
+          const maxVoteWeight = _.maxBy(field.active_votes, 'percent')?.percent || 2;
+          const voteWeight = Math.min(
+            (maxVoteWeight + 1) % 2 === 0 ? maxVoteWeight + 2 : maxVoteWeight + 1,
+            9999,
+          );
+
           for (let attempt = 0; attempt <= VOTE_RETRY_COUNT; attempt += 1) {
             const { error } = await vote({
               key: process.env.FIELD_VOTES_BOT_KEY,
               voter: VOTING_ACCOUNT,
               author: field.author,
               permlink: field.permlink,
-              weight: 1,
+              weight: voteWeight,
             });
             voteError = error;
             if (!voteError) {
-              console.log('Vote success', {
-                authorPermlink: object.author_permlink,
-                author: field.author,
-                permlink: field.permlink,
-                weight: 1,
-              });
+              processedPermlinks.add(object.author_permlink);
+              console.log('Vote success', { authorPermlink: object.author_permlink, weight: voteWeight });
               break;
             }
 
@@ -179,8 +200,10 @@ const rejectRecipeTags = async () => {
       }
     }
     console.log('Task Finished');
+    logProcessed();
   } catch (error) {
     console.log(error.message);
+    logProcessed();
     process.exit(1);
   }
 };
